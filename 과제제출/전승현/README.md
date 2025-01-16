@@ -203,6 +203,8 @@ SDP를 서로 교환한 후, 각 피어는 서로의 주소값을 알기 위해 
 
 # 요구사항 정의서 작성 완료 
 
+https://docs.google.com/spreadsheets/d/15NjezMcbgLvDOQ7qchuUE91fVVffiyigm53yokB_3qw/edit?gid=1371555230#gid=1371555230
+
 <br>
 
 ---
