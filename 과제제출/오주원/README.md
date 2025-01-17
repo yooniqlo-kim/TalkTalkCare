@@ -258,3 +258,53 @@ n마리 중 m마리 이상 잡았을 경우
 
 ### 피그마 
 치매 진단 테스트 화면 기획
+
+
+
+### 2025.01.17
+
+### ERD 설계 ###
+*ABOUT GAME
+
+- [ ]  게임 카테고리별 점수 ( 카테고리별 총점을 무슨 기준으로 내야할까 )
+- [ ]  유저 게임 총점 ( 랭킹을 위한)
+- [ ]  유저의 게임 평균 월별 기록
+- [ ]  평균을 위한 유저 해당 월의 일별 기록
+
+*ABOUT USER
+
+- [ ]  개인 정보 리스트 (보안적인 요소 : 이메일, 비밀번호, 폰번호)
+- [ ]  유저 친구 리스트 (친구 신청한 상대인지, 신청 받은 상태인지, 친구인지에 따른 세가지 형태로 분류)
+- [ ]  치매 진단 테스트 결과
+
+- 
+- 게임 카테고리별 테이블
+    - uid pk fk
+    - average (double)
+    - category (enum)
+- 게임 기록 일 별 테이블(해당 월 -30/31일)  → 배치
+    - id pk
+    - uid fk
+    - game_category (enum, ?)
+    - score (int)
+    - played_at (datetime)
+- 게임 결과테이블(1월 - 30점, 2월 - 40점)  → 배치
+    - **한 달이 지날 때마다 게임 기록 일 별 테이블을 가져와 해당 월의 평균을 갖고 와서 계산 후 삽입**
+    - id pk
+    - uid fk
+    - date(%Y-%M)
+    - score(double)
+- 말동무테이블
+    - uid pk,fk
+    - last_conversation_summary (textarea)
+- 사용자 치매진단테이블
+    - uid pk,fk
+    - user_answer_smcq - json {1 : 1, 2: 1 , ,,,, 14: 0}
+    - user_prev_smcq -  json {1 : 1, 2: 1 , ,,,, 14: 0}
+    - protector_answer_sdq - json{1 : 1, 2: 0 , ,,,,  32: 1}
+    - user_date
+    - protector_date
+
+
+### 톡톡케어 로고 제작 ###
+
