@@ -200,3 +200,106 @@
 
 ### 피그마 작업
 : 메인 페이지, 화상통화 페이지, 게임 목록 페이지 등 전체적인 페이지 구상과 목표 설정
+-----
+# 1월 17일
+
+### 피그마 의견 취합 후 마무리
+
+### ERD 초안 설계
+
+아래는 제공된 ERD 리스트를 마크다운 표로 정리한 것입니다:
+
+## 유저 관련 테이블
+
+### 유저 테이블 (user)
+
+| 컬럼명 | 데이터 타입 | 설명 |
+|--------|-------------|------|
+| uid | BIGINT | 기본키, 자동 증가 |
+| id | VARCHAR(255) | 유니크, 아이디 또는 카카오 이메일 |
+| password | VARCHAR(255) | 비밀번호 |
+| name | VARCHAR(255) | 이름 |
+| birth | YEAR | 출생연도 |
+| phone | VARCHAR(15) | 전화번호 |
+| login_type | ENUM('general', 'social') | 로그인 유형 |
+| created_at | TIMESTAMP | 생성 시각 |
+| updated_at | TIMESTAMP | 수정 시각 |
+
+### 소셜 로그인 테이블 (social_login)
+
+| 컬럼명 | 데이터 타입 | 설명 |
+|--------|-------------|------|
+| id | BIGINT | 기본키, 자동 증가 |
+| user_id | BIGINT | 외래키 (user.uid 참조) |
+| provider | ENUM('kakao', 'google', 'facebook') | 소셜 로그인 제공자 |
+| oauth_id | VARCHAR(255) | 소셜 제공자의 사용자 고유 ID |
+| access_token | TEXT | Access Token |
+| refresh_token | TEXT | Refresh Token |
+| token_expiry | DATETIME | Access Token 만료 시각 |
+| created_at | TIMESTAMP | 생성 시각 |
+| updated_at | TIMESTAMP | 수정 시각 |
+
+### 보안 테이블
+
+| 컬럼명 | 데이터 타입 | 설명 |
+|--------|-------------|------|
+| uid | BIGINT | 기본키, 외래키 (user.uid 참조) |
+| random_salt | VARCHAR(255) | 랜덤 솔트 (물리적으로 다른 곳에 저장) |
+
+### 친구 테이블
+
+| 컬럼명 | 데이터 타입 | 설명 |
+|--------|-------------|------|
+| id | BIGINT | 기본키 |
+| uid | BIGINT | 외래키 (user.uid 참조) |
+| fid | BIGINT | 외래키 (user.uid 참조, 친구 ID) |
+| status | ENUM | 친구 상태 |
+
+## 게임 관련 테이블
+
+### 게임 카테고리별 테이블
+
+| 컬럼명 | 데이터 타입 | 설명 |
+|--------|-------------|------|
+| uid | BIGINT | 기본키, 외래키 (user.uid 참조) |
+| average | DOUBLE | 평균 점수 |
+| category | ENUM | 게임 카테고리 |
+
+### 게임 기록 일별 테이블
+
+| 컬럼명 | 데이터 타입 | 설명 |
+|--------|-------------|------|
+| id | BIGINT | 기본키 |
+| uid | BIGINT | 외래키 (user.uid 참조) |
+| game_category | ENUM | 게임 카테고리 |
+| score | INT | 점수 |
+| played_at | DATETIME | 플레이 시간 |
+
+### 게임 결과 테이블
+
+| 컬럼명 | 데이터 타입 | 설명 |
+|--------|-------------|------|
+| id | BIGINT | 기본키 |
+| uid | BIGINT | 외래키 (user.uid 참조) |
+| date | VARCHAR(7) | 년월 (%Y-%M) |
+| score | DOUBLE | 월별 평균 점수 |
+
+## 기타 테이블
+
+### 말동무 테이블
+
+| 컬럼명 | 데이터 타입 | 설명 |
+|--------|-------------|------|
+| uid | BIGINT | 기본키, 외래키 (user.uid 참조) |
+| last_conversation_summary | TEXT | 마지막 대화 요약 |
+
+### 사용자 치매진단 테이블
+
+| 컬럼명 | 데이터 타입 | 설명 |
+|--------|-------------|------|
+| uid | BIGINT | 기본키, 외래키 (user.uid 참조) |
+| user_answer_smcq | JSON | 사용자 SMCQ 답변 |
+| user_prev_smcq | JSON | 사용자 이전 SMCQ 답변 |
+| protector_answer_sdq | JSON | 보호자 SDQ 답변 |
+| user_date | DATE | 사용자 진단 날짜 |
+| protector_date | DATE | 보호자 진단 날짜 |
