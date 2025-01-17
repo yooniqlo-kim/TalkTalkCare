@@ -205,3 +205,58 @@ N:M 연결에 적합.
 ## 피그마 기획 작성
 
 ![figma](./image/figma.png)
+
+# DAY 5
+## ERD 설계
+
+```html
+- 유저 테이블
+    - uid → pk
+    - id → 아이디 or 카카오 이메일
+    - password
+    - name
+    - birth
+    - phone
+    - logined_at
+- 카카오 유저 테이블
+    - id → autoIncre pk
+    - uid fk
+    - oauth_id
+    - access_token
+    - refresh_token
+    - 외래키 cascade
+- 보안 테이블
+    - uid pk,fk
+    - random salt
+- 친구 테이블
+    - id pk
+    - uid (본인) fk
+    - fid (친구)  fk
+    - status (enum)
+- 게임 카테고리별 테이블
+    - uid pk fk
+    - average (double)
+    - category (enum)
+- 게임 기록 일 별 테이블(해당 월 -30/31일)  → 배치
+    - id pk
+    - uid fk
+    - game_category (enum, ?)
+    - score (int)
+    - played_at (datetime)
+- 게임 결과테이블(1월 - 30점, 2월 - 40점)  → 배치
+    - **한 달이 지날 때마다 게임 기록 일 별 테이블을 가져와 해당 월의 평균을 갖고 와서 계산 후 삽입**
+    - id pk
+    - uid fk
+    - date(%Y-%M)
+    - score(double)
+- 말동무테이블
+    - uid pk,fk
+    - last_conversation_summary (textarea)
+- 사용자 치매진단테이블
+    - uid pk,fk
+    - user_answer_smcq - json {1 : 1, 2: 1 , ,,,, 14: 0}
+    - user_prev_smcq -  json {1 : 1, 2: 1 , ,,,, 14: 0}
+    - protector_answer_sdq - json{1 : 1, 2: 0 , ,,,,  32: 1}
+    - user_date
+    - protector_date
+```
