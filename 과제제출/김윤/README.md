@@ -1,3 +1,59 @@
+## 📌1월 17일 금요일
+
+- ERD 설계
+
+```bash
+- 유저 테이블
+    - uid → pk
+    - id → 아이디 or 카카오 이메일
+    - password
+    - name
+    - birth
+    - phone
+    - logined_at
+- 카카오 유저 테이블
+    - id → autoIncre pk
+    - uid fk
+    - oauth_id
+    - access_token
+    - refresh_token
+    - 외래키 cascade
+- 보안 테이블
+    - uid pk,fk
+    - random salt 
+- 친구 테이블
+    - id pk
+    - uid (본인) fk
+    - fid (친구)  fk
+    - status (enum)
+- 게임 카테고리별 테이블
+    - uid pk fk
+    - average (double)
+    - category (enum)
+- 게임 기록 일 별 테이블(해당 월 -30/31일)  → 배치
+    - id pk
+    - uid fk
+    - game_category (enum, ?)
+    - score (int)
+    - played_at (datetime)
+- 게임 결과테이블(1월 - 30점, 2월 - 40점)  → 배치
+    - **한 달이 지날 때마다 게임 기록 일 별 테이블을 가져와 해당 월의 평균을 갖고 와서 계산 후 삽입**
+    - id pk
+    - uid fk
+    - date(%Y-%M)
+    - score(double)
+- 말동무테이블
+    - uid pk,fk
+    - last_conversation_summary (textarea)
+- 사용자 치매진단테이블
+    - uid pk,fk
+    - user_answer_smcq - json {1 : 1, 2: 1 , ,,,, 14: 0}
+    - user_prev_smcq -  json {1 : 1, 2: 1 , ,,,, 14: 0}
+    - protector_answer_sdq - json{1 : 1, 2: 0 , ,,,,  32: 1}
+    - user_date
+    - protector_date
+```
+
 ## 📌1월 16일 목요일
 
 ### Kurento
@@ -14,11 +70,13 @@
 ### 오늘 한 일
 
 <aside>
-💡치매진단테스트 기능의 요구사항 분석 및 정의서 작성
+💡
+
+치매진단테스트 기능의 요구사항 분석 및 정의서 작성
 
 </aside>
 
-| 요구사항ID | 요구사항명 | 요구사항 설명 | 상세 기능 |
+| 요구사항ID | 요구사항명 | 요구사항 설명 | 상세 기 |
 | --- | --- | --- | --- |
 | REQ-501 | 비로그인 사용자 SMCQ 테스트 수행 | 비로그인 사용자가 치매진단테스트(SMCQ)를 수행 | -비로그인 사용자가 테스트페이지 접근 시 본인이 수행하는 치매진단테스트(SMCQ)만 선택 가능하도록 설정-14개 질문에 대한 선택형 입력 제공-점수를 계산하여 결과 화면에 표시-메인페이지 + 치매진단 파업 |
 | REQ-502 | 비로그인 사용자 테스트 결과 임시 저장  | 비로그인 사용자의 치매진단테스트 결과를 임시 저장 | -비로그인 사용자가 SMCQ를 수행하면 결과 데이터를 브라우저(로컬 스토리지 등)에 저장-저장 데이터는 사용자가 체크한 항목, 점수, 테스트 시간 등을 포함-만료시간을 설정하여 1시간 후 데이터 삭제 |
