@@ -260,3 +260,7 @@ N:M 연결에 적합.
     - user_date
     - protector_date
 ```
+# DAY 6
+## ERD 작성
+
+![erd](./image/erd.png)
