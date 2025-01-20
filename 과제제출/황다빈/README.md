@@ -303,3 +303,7 @@
 | protector_answer_sdq | JSON | 보호자 SDQ 답변 |
 | user_date | DATE | 사용자 진단 날짜 |
 | protector_date | DATE | 보호자 진단 날짜 |
+
+-----
+
+# 1월 20일
