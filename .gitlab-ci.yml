@@ -4,15 +4,14 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375
+  DOCKER_HOST: tcp://docker:2375  # Docker-in-Docker 서비스와 연결
   DOCKER_TLS_CERTDIR: ""  # TLS 비활성화
   COMPOSE_HTTP_TIMEOUT: 200
 
 services:
   - name: docker:dind
     alias: docker
-    command: ["--host=tcp://0.0.0.0:2375", "--tls=false"]  # DinD 서비스 명령 수정
-    privileged: true  # --privileged 플래그 추가
+    command: ["--host=tcp://0.0.0.0:2375", "--tls=false"]  # TLS 비활성화 명령 추가
 
 before_script:
   - sleep 10  # Docker 서비스가 완전히 시작될 때까지 대기
