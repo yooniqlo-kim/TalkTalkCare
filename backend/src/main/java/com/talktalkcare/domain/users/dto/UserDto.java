@@ -12,12 +12,21 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
+
     private String loginId;
+
     private String password;
+
     private String token;
+
     private String name;
+
     private String birth;
+
     private String phone;
+
     private Date loginedAt;
+
     private String s3Filename;
+
 }
