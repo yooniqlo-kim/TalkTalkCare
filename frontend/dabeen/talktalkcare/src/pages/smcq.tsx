@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './SMCQ.css';
+import './smcq.css';
 
 // 문항 데이터 배열 정의
 const questions = [

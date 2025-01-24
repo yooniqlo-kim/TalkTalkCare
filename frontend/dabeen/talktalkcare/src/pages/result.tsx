@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import './Result.css';
+import './result.css';
 
 // 상태 타입 정의
 interface LocationState {
