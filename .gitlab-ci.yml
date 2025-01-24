@@ -7,19 +7,17 @@ stages:
 variables:
   FF_NETWORK_PER_BUILD: 1  # 네트워크 격리 활성화
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375  # Docker-in-Docker 서비스와 연결
+  DOCKER_HOST: "tcp://localhost:2375"  # docker -> localhost로 변경
   DOCKER_TLS_CERTDIR: ""  # TLS 비활성화
   COMPOSE_HTTP_TIMEOUT: 200
 
 services:
   - name: docker:dind
     alias: docker
-    command: ["--host=tcp://0.0.0.0:2375", "--tls=false"]  # TLS 비활성화 명령 추가
+    command: ["--tls=false"]  # TLS 비활성화 명령 추가
 
 before_script:
   - apk add --no-cache docker-compose
-  - sleep 20  # Docker 서비스 시작 대기
-  - docker info
 
 build-backend:
   stage: build
