@@ -1,0 +1,51 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375/
+  COMPOSE_HTTP_TIMEOUT: 200
+
+services:
+  - docker:20.10.24-dind
+
+before_script:
+  - apk add --no-cache docker-compose-cli
+  - docker info
+
+build-backend:
+  stage: build
+  script:
+    - docker-compose -f docker-compose.yml build backend
+  rules:
+    - changes:
+        - backend/** # backend 디렉토리 내 변경 사항 감지 시 실행
+    - when: always
+
+deploy-backend:
+  stage: deploy
+  script:
+    - docker-compose -f docker-compose.yml up -d backend
+  rules:
+    - changes:
+        - backend/** # backend 디렉토리 내 변경 사항 감지 시 실행
+    - when: always
+
+build-frontend:
+  stage: build
+  script:
+    - docker-compose -f docker-compose.yml build frontend
+  rules:
+    - changes:
+        - frontend/** # frontend 디렉토리 내 변경 사항 감지 시 실행
+    - when: always
+
+deploy-frontend:
+  stage: deploy
+  script:
+    - docker-compose -f docker-compose.yml up -d frontend
+  rules:
+    - changes:
+        - frontend/** # frontend 디렉토리 내 변경 사항 감지 시 실행
+    - when: always

@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: talktalkcare
+      MYSQL_USER: ssafy
+      MYSQL_PASSWORD: 1234
+    volumes:
+      - ./mysql_data:/var/lib/mysql # MySQL 데이터 저장소
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # 초기화 스크립트
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+#    environment:
+#      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+#      SPRING_DATASOURCE_URL: ${DB_URL}
+#      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+#      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+#      LOG_LEVEL_SQL: ${LOG_LEVEL_SQL}
+#      LOG_LEVEL_TYPE: ${LOG_LEVEL_TYPE}
+#      JPA_SHOW_SQL: ${JPA_SHOW_SQL}
+#      JPA_DDL_AUTO: ${JPA_DDL_AUTO}
+#      JPA_FORMAT_SQL: ${JPA_FORMAT_SQL}
+#      JPA_DIALECT: ${JPA_DIALECT}
+    depends_on:
+      - mysql
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

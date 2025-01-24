@@ -1,0 +1,5 @@
+# MySQL data directory
+mysql_data/
+
+# IDE files (이미 .idea/.gitignore에 있지만 프로젝트 레벨에서도 추가)
+.idea/ 

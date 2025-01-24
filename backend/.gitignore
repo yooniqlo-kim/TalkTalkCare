@@ -246,6 +246,6 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/java,intellij,windows,redis,react,visualstudiocode
 
 # Environment Variables
-.env
+../.env
 .env.local
 .env.*.local
