@@ -10,4 +10,12 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    public boolean checkId(String userLoginId) {
+        if(userRepository.existsByLoginId(userLoginId)) {
+
+        }
+
+        return true;
+    }
+
 }
