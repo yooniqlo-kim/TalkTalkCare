@@ -1,20 +1,18 @@
-image: docker:latest  # alpine 대신 docker 이미지 사용
+image: docker:latest
 
 stages:
   - build
   - deploy
 
 variables:
-  FF_NETWORK_PER_BUILD: 1  # 네트워크 격리 활성화
+  FF_NETWORK_PER_BUILD: 1
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: "tcp://localhost:2375"  # docker -> localhost로 변경
-  DOCKER_TLS_CERTDIR: ""  # TLS 비활성화
-  COMPOSE_HTTP_TIMEOUT: 200
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: "tcp://localhost:2375"
 
 services:
   - name: docker:dind
-    alias: docker
-    command: ["--tls=false"]  # TLS 비활성화 명령 추가
+    command: ["--tls=false"]
 
 before_script:
   - apk add --no-cache docker-compose
@@ -25,7 +23,7 @@ build-backend:
     - docker-compose -f docker-compose.yml build backend
   rules:
     - changes:
-        - backend/** # backend 디렉토리 내 변경 사항 감지 시 실행
+        - backend/**
     - when: always
 
 deploy-backend:
@@ -34,7 +32,7 @@ deploy-backend:
     - docker-compose -f docker-compose.yml up -d backend
   rules:
     - changes:
-        - backend/** # backend 디렉토리 내 변경 사항 감지 시 실행
+        - backend/**
     - when: always
 
 build-frontend:
@@ -43,7 +41,7 @@ build-frontend:
     - docker-compose -f docker-compose.yml build frontend
   rules:
     - changes:
-        - frontend/** # frontend 디렉토리 내 변경 사항 감지 시 실행
+        - frontend/**
     - when: always
 
 deploy-frontend:
@@ -52,5 +50,5 @@ deploy-frontend:
     - docker-compose -f docker-compose.yml up -d frontend
   rules:
     - changes:
-        - frontend/** # frontend 디렉토리 내 변경 사항 감지 시 실행
+        - frontend/**
     - when: always
