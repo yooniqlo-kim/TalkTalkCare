@@ -17,21 +17,13 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: backend
     ports:
       - "8080:8080"
-    env_file:
-      - .env
-#    environment:
-#      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
-#      SPRING_DATASOURCE_URL: ${DB_URL}
-#      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
-#      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-#      LOG_LEVEL_SQL: ${LOG_LEVEL_SQL}
-#      LOG_LEVEL_TYPE: ${LOG_LEVEL_TYPE}
-#      JPA_SHOW_SQL: ${JPA_SHOW_SQL}
-#      JPA_DDL_AUTO: ${JPA_DDL_AUTO}
-#      JPA_FORMAT_SQL: ${JPA_FORMAT_SQL}
-#      JPA_DIALECT: ${JPA_DIALECT}
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/talktalkcare?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ssafy
+      SPRING_DATASOURCE_PASSWORD: 1234
     depends_on:
       - mysql
 
@@ -39,6 +31,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: frontend
     ports:
       - "3000:80"
     depends_on:
