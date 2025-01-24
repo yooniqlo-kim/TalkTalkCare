@@ -5,60 +5,62 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375/
-  DOCKER_TLS_CERTDIR: ""  # TLS 비활성화
+  DOCKER_TLS_CERTDIR: ""
   COMPOSE_HTTP_TIMEOUT: 200
 
 services:
   - name: docker:dind
     alias: docker
-    command: ["--host=tcp://0.0.0.0:2375", "--tls=false"]  # DinD 서비스에 대한 명령 수정
-    privileged: true  # privileged 모드 추가
+    entrypoint: ["dockerd-entrypoint.sh"]
+    command: 
+      - "--host=tcp://0.0.0.0:2375"
+      - "--tls=false"
 
 before_script:
-  - sleep 20  # 대기 시간 증가
+  - sleep 20
   - apk add --no-cache docker-compose
   - docker info
 
 build-backend:
   stage: build
   tags:
-    - docker  # 태그 추가
+    - docker
   script:
     - docker-compose -f docker-compose.yml build backend
   rules:
     - changes:
-        - backend/** # backend 디렉토리 내 변경 사항 감지 시 실행
+        - backend/**
     - when: always
 
 deploy-backend:
   stage: deploy
   tags:
-    - docker  # 태그 추가
+    - docker
   script:
     - docker-compose -f docker-compose.yml up -d backend
   rules:
     - changes:
-        - backend/** # backend 디렉토리 내 변경 사항 감지 시 실행
+        - backend/**
     - when: always
 
 build-frontend:
   stage: build
   tags:
-    - docker  # 태그 추가
+    - docker
   script:
     - docker-compose -f docker-compose.yml build frontend
   rules:
     - changes:
-        - frontend/** # frontend 디렉토리 내 변경 사항 감지 시 실행
+        - frontend/**
     - when: always
 
 deploy-frontend:
   stage: deploy
   tags:
-    - docker  # 태그 추가
+    - docker
   script:
     - docker-compose -f docker-compose.yml up -d frontend
   rules:
     - changes:
-        - frontend/** # frontend 디렉토리 내 변경 사항 감지 시 실행
+        - frontend/**
     - when: always
