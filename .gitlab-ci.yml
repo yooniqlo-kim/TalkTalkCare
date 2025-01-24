@@ -5,10 +5,11 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375/
-  COMPOSE_HTTP_TIMEOUT: 200
+  DOCKER_TLS_CERTDIR: ""  # TLS 비활성화로 Docker 연결 문제 해결
 
 services:
-  - docker:20.10.24-dind
+  - name: docker:dind
+    alias: docker
 
 before_script:
   - apk add --no-cache docker-compose
