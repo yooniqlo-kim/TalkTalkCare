@@ -1,8 +1,11 @@
+image: docker:latest  # alpine 대신 docker 이미지 사용
+
 stages:
   - build
   - deploy
 
 variables:
+  FF_NETWORK_PER_BUILD: 1  # 네트워크 격리 활성화
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375  # Docker-in-Docker 서비스와 연결
   DOCKER_TLS_CERTDIR: ""  # TLS 비활성화
@@ -14,8 +17,8 @@ services:
     command: ["--host=tcp://0.0.0.0:2375", "--tls=false"]  # TLS 비활성화 명령 추가
 
 before_script:
-  - sleep 10  # Docker 서비스가 완전히 시작될 때까지 대기
   - apk add --no-cache docker-compose
+  - sleep 20  # Docker 서비스 시작 대기
   - docker info
 
 build-backend:
