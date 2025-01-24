@@ -7,18 +7,19 @@ stages:
 variables:
   FF_NETWORK_PER_BUILD: "true"
   DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: unix:///var/run/docker.sock
 
 services:
   - name: docker:dind
     alias: docker
     command:
       - "--tls=false"
-      - "--host=tcp://0.0.0.0:2375"
+      - "--host=unix:///var/run/docker.sock"
 
 before_script:
   - apk add --no-cache docker-compose
-  - docker info
+  - until docker info; do echo "Waiting for docker to start..."; sleep 1; done
 
 build-backend:
   stage: build
