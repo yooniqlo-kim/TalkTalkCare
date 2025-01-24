@@ -12,14 +12,17 @@ services:
   - name: docker:dind
     alias: docker
     command: ["--host=tcp://0.0.0.0:2375", "--tls=false"]  # DinD 서비스에 대한 명령 수정
+    privileged: true  # privileged 모드 추가
 
 before_script:
-  - sleep 10  # Docker 서비스가 완전히 시작될 때까지 대기
+  - sleep 20  # 대기 시간 증가
   - apk add --no-cache docker-compose
   - docker info
 
 build-backend:
   stage: build
+  tags:
+    - docker  # 태그 추가
   script:
     - docker-compose -f docker-compose.yml build backend
   rules:
@@ -29,6 +32,8 @@ build-backend:
 
 deploy-backend:
   stage: deploy
+  tags:
+    - docker  # 태그 추가
   script:
     - docker-compose -f docker-compose.yml up -d backend
   rules:
@@ -38,6 +43,8 @@ deploy-backend:
 
 build-frontend:
   stage: build
+  tags:
+    - docker  # 태그 추가
   script:
     - docker-compose -f docker-compose.yml build frontend
   rules:
@@ -47,6 +54,8 @@ build-frontend:
 
 deploy-frontend:
   stage: deploy
+  tags:
+    - docker  # 태그 추가
   script:
     - docker-compose -f docker-compose.yml up -d frontend
   rules:
