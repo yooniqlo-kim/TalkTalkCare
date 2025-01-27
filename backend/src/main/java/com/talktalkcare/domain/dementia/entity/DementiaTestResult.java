@@ -1,38 +1,37 @@
 package com.talktalkcare.domain.dementia.entity;
 
 import jakarta.persistence.*;
-import org.antlr.v4.runtime.misc.NotNull;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.Date;
+import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
-@Table(name="users")
+@Table(name = "users_dementia_test_result")
 public class DementiaTestResult {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int userId;
-
-    @NotNull
-    private String loginId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "result_id", nullable = false)
+    private Integer id;
 
     @NotNull
-    private String password;
-
-    private String token;
-
-    @NotNull
-    private String name;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
     @NotNull
-    private Date birth;
+    @Column(name = "test_id", nullable = false)
+    private Integer testId;
 
     @NotNull
-    private String phone;
-
-    private Date loginedAt;
+    @Lob
+    @Column(name = "test_result", nullable = false)
+    private String testResult;
 
     @NotNull
-    @Column(name="s3_filename")
-    private String s3FileName;
+    @Column(name = "test_date", nullable = false)
+    private Instant testDate;
 
 }
