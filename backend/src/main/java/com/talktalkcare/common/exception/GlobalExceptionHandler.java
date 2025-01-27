@@ -16,13 +16,21 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(value = ApplicationException.class)
+    public ResponseEntity<Api<Void>> handleApplicationException(ApplicationException exception) {
+        log.error("ApplicationException occurred: {} - {}", exception.getErrorCode().getErrorCode(), exception.getMessage());
+
+        return ResponseEntity
+                .status(exception.getHttpStatusCode())
+                .body(Api.ERROR(exception.getMessage(), exception.getErrorCode().getErrorCode()));
+    }
+
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Api<Void>> handleGeneralException(Exception exception) {
         log.error("GeneralException error occurred: {}", exception.getMessage(), exception);
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Api.ERROR(ErrorCode.SERVER_ERROR.getMessage()));
+                .body(Api.ERROR(ErrorCode.SERVER_ERROR.getMessage(), ErrorCode.SERVER_ERROR.getErrorCode()));
     }
-
 }
