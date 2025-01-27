@@ -12,11 +12,12 @@ public class DementiaAiController {
 
     @Autowired
     public DementiaAiController(DementiaAiService dementiaAiService) {
+
+        System.out.println("analyze실행");
         this.dementiaAiService = dementiaAiService;
     }
-
-    @PostMapping
-    public String analyzeText(@RequestBody String inputText) {
+    @GetMapping
+    public String analyzeText(@RequestParam String inputText) {
         // 로그 추가: 텍스트 입력이 도달했는지 확인
         System.out.println("입력된 텍스트: " + inputText);
 

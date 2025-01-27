@@ -14,7 +14,7 @@ import java.util.Map;
 public class DementiaAiService {
 
     private final RestTemplate restTemplate; // 초기화 필요
-    @Value("${deepseek.api.base-url}")
+    @Value("https://api.deepseek.com/chat/completions")
     private String baseUrl;
     @Value("${deepseek.api.api-key}")
     private String apiKey;
