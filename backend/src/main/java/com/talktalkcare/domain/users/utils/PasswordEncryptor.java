@@ -1,6 +1,7 @@
 package com.talktalkcare.domain.users.utils;
 
-import com.talktalkcare.domain.users.exception.HashAlgorithmNotFoundException;
+import com.talktalkcare.domain.users.error.UserErrorCode;
+import com.talktalkcare.domain.users.exception.UserException;
 import lombok.NoArgsConstructor;
 
 import java.security.MessageDigest;
@@ -20,7 +21,7 @@ public final class PasswordEncryptor {
         try {
             return generateHash(rawPassword, salt);
         } catch (Exception e) {
-            throw new HashAlgorithmNotFoundException(e.getMessage());
+            throw new UserException(UserErrorCode.HASH_ALGORITHM_NOT_FOUND);
         }
     }
 

@@ -1,10 +1,20 @@
 package com.talktalkcare.domain.users.service;
 
+import com.talktalkcare.domain.users.converter.UserConverter;
+import com.talktalkcare.domain.users.converter.UserSecurityConverter;
 import com.talktalkcare.domain.users.dto.LoginDto;
+import com.talktalkcare.domain.users.dto.UserDto;
+import com.talktalkcare.domain.users.entity.User;
+import com.talktalkcare.domain.users.entity.UserSecurity;
+import com.talktalkcare.domain.users.error.UserErrorCode;
+import com.talktalkcare.domain.users.exception.UserException;
 import com.talktalkcare.domain.users.repository.UserRepository;
+import com.talktalkcare.domain.users.repository.UserSecurityRepository;
+import com.talktalkcare.domain.users.utils.PasswordEncryptor;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +25,30 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserSecurityRepository userSecurityRepository;
+
+    public void checkUserId(String userLoginId) {
+        if(userRepository.existsByLoginId(userLoginId)) {
+            throw new UserException(UserErrorCode.USER_ALREADY_EXISTS);
+        }
+    }
+
+    @Transactional
+    public void signUp(UserDto userDto) {
+        String randomSalt = generateSalt();
+        String rawPassword = userDto.getPassword();
+        String encryptedPassword = PasswordEncryptor.encryptPassword(rawPassword,randomSalt);
+
+        User user = UserConverter.dtoToEntity(userDto, encryptedPassword);
+        UserSecurity userSecurity = UserSecurityConverter.toEntity(user, randomSalt);
+
+        userRepository.save(user);
+        userSecurityRepository.save(userSecurity);
+    }
+
+    private String generateSalt() {
+        return UUID.randomUUID().toString();
+    }
 
     public void login(LoginDto request, HttpSession session, HttpServletResponse response) {
         // 인증 로직
