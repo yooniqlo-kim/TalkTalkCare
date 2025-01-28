@@ -67,22 +67,37 @@ deploy-backend:
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
-    - scp .env $SSH_USER@$SSH_HOST:~/
     - |
       ssh $SSH_USER@$SSH_HOST "
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
-        docker network create cicd_network || true && \
         
-        # 기존 MySQL을 cicd_network에 연결
-        docker network connect cicd_network mysql || true && \
+        # 기존 네트워크 정리
+        docker network rm cicd_network || true && \
+        
+        # docker-compose 네트워크 사용
+        docker network create ubuntu_cicd_network || true && \
+        
+        # MySQL이 없으면 생성
+        if ! docker ps | grep mysql; then
+          docker run -d \
+            --name mysql \
+            --network ubuntu_cicd_network \
+            -e MYSQL_ROOT_PASSWORD=1234 \
+            -e MYSQL_DATABASE=talktalkcare \
+            -e MYSQL_USER=ssafy \
+            -e MYSQL_PASSWORD=1234 \
+            mysql:8.0
+          
+          echo 'Waiting for MySQL to start...'
+          sleep 30
+        fi
         
         # 백엔드 배포
         docker stop backend || true && \
         docker rm backend || true && \
         docker run -d \
           --name backend \
-          --network cicd_network \
+          --network ubuntu_cicd_network \
           -p 8080:8080 \
           -e SPRING_APPLICATION_NAME=talktalkcare \
           -e SPRING_DATASOURCE_URL='jdbc:mysql://mysql:3306/talktalkcare?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true' \
