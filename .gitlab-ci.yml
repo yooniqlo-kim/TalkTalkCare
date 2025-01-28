@@ -8,6 +8,7 @@ variables:
   FF_NETWORK_PER_BUILD: "true"
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: "tcp://docker:2375"
+  CI_DEBUG_TRACE: "true"  # 디버그 로그 활성화
 
 services:
   - name: docker:dind
@@ -19,9 +20,10 @@ services:
       - "--insecure-registry=0.0.0.0:2375"
 
 before_script:
+  - sleep 10  # Docker daemon이 완전히 시작될 때까지 대기
   - apk add --no-cache docker-compose
+  - docker info || exit 1  # Docker 연결 확인, 실패시 즉시 종료
   - docker network create cicd_network || true
-  - timeout 20s sh -c 'until docker info; do sleep 1; done'
 
 build-backend:
   stage: build
