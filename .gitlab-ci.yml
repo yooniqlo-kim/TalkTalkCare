@@ -1,68 +1,60 @@
 image: docker:latest
 
 stages:
-  - build-backend
-  - build-frontend
-  - deploy-backend
-  - deploy-frontend
+  - build
+  - deploy
 
 variables:
   FF_NETWORK_PER_BUILD: "true"
   DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: tcp://docker:2375
-  CI_DEBUG_TRACE: "true"
-  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: "tcp://docker:2375"
 
 services:
   - name: docker:dind
     alias: docker
-    command: ["--tls=false"]
+    entrypoint: ["dockerd-entrypoint.sh"]
+    command: 
+      - "--tls=false"
+      - "--host=tcp://0.0.0.0:2375"
+      - "--insecure-registry=0.0.0.0:2375"
 
 before_script:
   - apk add --no-cache docker-compose
-  - docker info
+  - docker network create cicd_network || true
+  - timeout 20s sh -c 'until docker info; do sleep 1; done'
 
 build-backend:
-  stage: build-backend
-  tags:
-    - docker
+  stage: build
   script:
-    - docker-compose build backend
+    - docker network connect cicd_network backend || true
+    - docker-compose -f docker-compose.yml build backend
   rules:
     - changes:
         - backend/**
     - when: always
 
 build-frontend:
-  stage: build-frontend
-  tags:
-    - docker
+  stage: build
   script:
-    - docker-compose build frontend
+    - docker-compose -f docker-compose.yml build frontend
   rules:
     - changes:
         - frontend/**
     - when: always
 
 deploy-backend:
-  stage: deploy-backend
-  tags:
-    - docker
+  stage: deploy
   script:
-    - docker-compose up -d mysql
-    - sleep 30  # MySQL 시작 대기
-    - docker-compose up -d backend
+    - docker-compose -f docker-compose.yml up -d backend
   rules:
     - changes:
         - backend/**
     - when: always
 
 deploy-frontend:
-  stage: deploy-frontend
-  tags:
-    - docker
+  stage: deploy
   script:
-    - docker-compose up -d frontend
+    - docker-compose -f docker-compose.yml up -d frontend
   rules:
     - changes:
         - frontend/**
