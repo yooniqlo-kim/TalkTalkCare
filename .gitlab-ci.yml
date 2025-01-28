@@ -67,10 +67,8 @@ deploy-backend:
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    # EC2로 필요한 파일들 복사
     - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
     - scp .env $SSH_USER@$SSH_HOST:~/
-    # EC2에서 도커 컴포즈 실행
     - |
       ssh $SSH_USER@$SSH_HOST "export MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD && \
       export MYSQL_DATABASE=$MYSQL_DATABASE && \
@@ -79,6 +77,8 @@ deploy-backend:
       export SPRING_DATASOURCE_URL='$SPRING_DATASOURCE_URL' && \
       export SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME && \
       export SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD && \
+      export LOG_LEVEL_SQL=DEBUG && \
+      export LOG_LEVEL_TYPE=DEBUG && \
       docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
       docker-compose pull && \
       docker-compose up -d"
