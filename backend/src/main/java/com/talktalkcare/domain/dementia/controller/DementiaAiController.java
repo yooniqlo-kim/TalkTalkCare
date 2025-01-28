@@ -1,5 +1,5 @@
 package com.talktalkcare.domain.dementia.controller;
-
+import com.talktalkcare.common.response.Api;
 import com.talktalkcare.domain.dementia.service.DementiaAiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,19 +13,14 @@ public class DementiaAiController {
     @Autowired
     public DementiaAiController(DementiaAiService dementiaAiService) {
 
-        System.out.println("analyze실행");
         this.dementiaAiService = dementiaAiService;
     }
     @GetMapping
-    public String analyzeText(@RequestParam String inputText) {
-        // 로그 추가: 텍스트 입력이 도달했는지 확인
-        System.out.println("입력된 텍스트: " + inputText);
+    public Api<String> analyzeText(@RequestParam String inputText)  {
+        dementiaAiService.analyzeText(inputText);
 
         String result = dementiaAiService.analyzeText(inputText);
 
-        // 결과 로그
-        System.out.println("AI 분석 결과: " + result);
-
-        return result;
+        return Api.OK(result);
     }
 }
