@@ -34,9 +34,6 @@ public class DementiaController {
         // DementiaService에서 요청에 따른 testResult 리스트를 가져옴
         List<DementiaTestResult> testResults = dementiaService.handleRequest(requestType, userId);
 
-        // 최신과 이전을 구분해야 할 경우, test_date 기준으로 내림차순 정렬
-        // testResults.sort(Comparator.comparing(DementiaTestResult::getTestDate).reversed());
-
         StringBuilder analysisInputText = new StringBuilder();
         String analysisResponse = ""; // analysisResponse 변수를 메서드의 범위에서 선언
 
@@ -65,7 +62,8 @@ public class DementiaController {
         } else if ("1-2".equals(requestType)) {
             // "1-2"일 경우 두 개의 결과를 하나의 입력 텍스트로 합침
             for (DementiaTestResult testResult : testResults) {
-                analysisInputText.append("Test Result: ").append(testResult.getTestResult())
+                analysisInputText.append("Test ID: ").append(testResult.getTestId())
+                        .append("\n").append("Test Result: ").append(testResult.getTestResult())
                         .append("\n\n");
             }
 
