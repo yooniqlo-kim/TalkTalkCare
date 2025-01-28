@@ -16,16 +16,11 @@ variables:
 services:
   - name: docker:dind
     alias: docker
-    entrypoint: ["dockerd-entrypoint.sh"]
-    command:
-      - "--tls=false"
-      - "--host=tcp://0.0.0.0:2375"
-      - "--insecure-registry=0.0.0.0:2375"
-      - "--storage-driver=overlay2"
+    command: ["--tls=false"]
 
 before_script:
   - apk add --no-cache docker-compose
-  - timeout 20s sh -c 'until docker info; do sleep 1; done'
+  - docker info
 
 build-backend:
   stage: build-backend
@@ -48,6 +43,8 @@ build-frontend:
 deploy-backend:
   stage: deploy-backend
   script:
+    - docker-compose up -d mysql
+    - sleep 30  # MySQL 시작 대기
     - docker-compose up -d backend
   rules:
     - changes:
