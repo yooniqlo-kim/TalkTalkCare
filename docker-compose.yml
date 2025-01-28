@@ -44,6 +44,8 @@ services:
     networks:
       - cicd_network
     restart: always
+    volumes:
+      - /tmp:/tmp
 
   frontend:
     image: eoslovy/talktalkcare-frontend:latest
