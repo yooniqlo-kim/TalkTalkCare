@@ -4,27 +4,21 @@ stages:
   - build
   - deploy
 
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
 services:
   - name: docker:dind
     alias: docker
-    command: 
-      - "--tls=false"
-      - "--host=tcp://0.0.0.0:2375"
+    command: ["--tls=false"]
 
 before_script:
   - apk add --no-cache docker-compose
   - |
-    timeout=30
-    until docker info >/dev/null 2>&1 || [ $timeout -eq 0 ]; do
-      echo "Waiting for docker to start... ($timeout seconds left)"
-      sleep 1
-      timeout=$((timeout - 1))
-    done
-    if [ $timeout -eq 0 ]; then
-      echo "Docker daemon did not start in time"
-      exit 1
-    fi
-  - docker network create cicd_network || true
+    echo "Configuring docker..."
+    docker info || true
+    docker network create cicd_network || true
 
 build-backend:
   stage: build
