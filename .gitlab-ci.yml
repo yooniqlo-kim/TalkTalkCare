@@ -79,6 +79,7 @@ deploy-backend:
           --name backend \
           --network cicd_network \
           -p 8080:8080 \
+          -e SPRING_APPLICATION_NAME=talktalkcare \
           -e SPRING_DATASOURCE_URL='$SPRING_DATASOURCE_URL' \
           -e SPRING_DATASOURCE_USERNAME='$SPRING_DATASOURCE_USERNAME' \
           -e SPRING_DATASOURCE_PASSWORD='$SPRING_DATASOURCE_PASSWORD' \
