@@ -25,6 +25,7 @@ services:
 
 before_script:
   - apk add --no-cache docker-compose
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   - |
     echo "Configuring docker..."
     until docker info; do
@@ -36,6 +37,7 @@ build-backend:
   stage: build
   script:
     - docker-compose -f docker-compose.yml build backend
+    - docker-compose -f docker-compose.yml push backend
   rules:
     - changes:
         - backend/**
@@ -47,6 +49,7 @@ build-frontend:
   stage: build
   script:
     - docker-compose -f docker-compose.yml build frontend
+    - docker-compose -f docker-compose.yml push frontend
   rules:
     - changes:
         - frontend/**
@@ -68,9 +71,17 @@ deploy-backend:
     - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
     - scp .env $SSH_USER@$SSH_HOST:~/
     # EC2에서 도커 컴포즈 실행
-    - ssh $SSH_USER@$SSH_HOST "docker-compose down || true"
-    - ssh $SSH_USER@$SSH_HOST "docker-compose pull"
-    - ssh $SSH_USER@$SSH_HOST "docker-compose up -d"
+    - |
+      ssh $SSH_USER@$SSH_HOST "export MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD && \
+      export MYSQL_DATABASE=$MYSQL_DATABASE && \
+      export MYSQL_USER=$MYSQL_USER && \
+      export MYSQL_PASSWORD=$MYSQL_PASSWORD && \
+      export SPRING_DATASOURCE_URL='$SPRING_DATASOURCE_URL' && \
+      export SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME && \
+      export SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD && \
+      docker-compose down || true && \
+      docker-compose pull && \
+      docker-compose up -d"
   rules:
     - changes:
         - backend/**
@@ -80,8 +91,19 @@ deploy-backend:
 
 deploy-frontend:
   stage: deploy
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | base64 -d | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - docker-compose -f docker-compose.yml up -d frontend
+    # EC2로 필요한 파일들 복사
+    - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
+    - scp .env $SSH_USER@$SSH_HOST:~/
+    # EC2에서 도커 컴포즈 실행
+    - ssh $SSH_USER@$SSH_HOST "docker-compose up -d frontend"
   rules:
     - changes:
         - frontend/**
