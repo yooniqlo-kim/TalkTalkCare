@@ -18,17 +18,23 @@ services:
       - "--tls=false"
       - "--host=tcp://0.0.0.0:2375"
       - "--insecure-registry=0.0.0.0:2375"
+    variables:
+      DOCKER_TLS_CERTDIR: ""
+      DOCKER_DRIVER: overlay2
 
 before_script:
-  - sleep 10  # Docker daemon이 완전히 시작될 때까지 대기
+  - sleep 20
   - apk add --no-cache docker-compose
-  - docker info || exit 1  # Docker 연결 확인, 실패시 즉시 종료
   - docker network create cicd_network || true
+  - until docker info; do
+      echo "Waiting for docker to start..."
+      sleep 1
+    done
 
 build-backend:
   stage: build
   script:
-    - docker network connect cicd_network backend || true
+    - docker network ls
     - docker-compose -f docker-compose.yml build backend
   rules:
     - changes:
@@ -38,7 +44,7 @@ build-backend:
 build-frontend:
   stage: build
   script:
-    - docker-compose -f docker-compose.yml build frontend
+    - docker-compose -f docker-compose.yml build frontend  # frontend 빌드
   rules:
     - changes:
         - frontend/**
@@ -47,7 +53,7 @@ build-frontend:
 deploy-backend:
   stage: deploy
   script:
-    - docker-compose -f docker-compose.yml up -d backend
+    - docker-compose -f docker-compose.yml up -d backend  # backend 배포
   rules:
     - changes:
         - backend/**
@@ -56,7 +62,7 @@ deploy-backend:
 deploy-frontend:
   stage: deploy
   script:
-    - docker-compose -f docker-compose.yml up -d frontend
+    - docker-compose -f docker-compose.yml up -d frontend  # frontend 배포
   rules:
     - changes:
         - frontend/**

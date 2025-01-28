@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  cicd_network:
+    driver: bridge
+
 services:
   mysql:
     image: mysql:8.0
@@ -15,10 +19,13 @@ services:
       - ./mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       retries: 3
       timeout: 5s
+    networks:
+      - cicd_network
+    restart: always
 
   backend:
     build:
@@ -34,6 +41,9 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    networks:
+      - cicd_network
+    restart: always
 
   frontend:
     build:
@@ -44,3 +54,6 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    networks:
+      - cicd_network
+    restart: always
