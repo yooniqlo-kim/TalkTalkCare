@@ -24,6 +24,8 @@ before_script:
 
 build-backend:
   stage: build-backend
+  tags:
+    - docker
   script:
     - docker-compose build backend
   rules:
@@ -33,6 +35,8 @@ build-backend:
 
 build-frontend:
   stage: build-frontend
+  tags:
+    - docker
   script:
     - docker-compose build frontend
   rules:
@@ -42,6 +46,8 @@ build-frontend:
 
 deploy-backend:
   stage: deploy-backend
+  tags:
+    - docker
   script:
     - docker-compose up -d mysql
     - sleep 30  # MySQL 시작 대기
@@ -53,6 +59,8 @@ deploy-backend:
 
 deploy-frontend:
   stage: deploy-frontend
+  tags:
+    - docker
   script:
     - docker-compose up -d frontend
   rules:
