@@ -101,8 +101,7 @@ deploy-frontend:
   script:
     # EC2로 필요한 파일들 복사
     - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
-    - scp .env $SSH_USER@$SSH_HOST:~/
-    # EC2에서 도커 컴포즈 실행
+    # EC2에서 도커 컴포즈 실행 (프론트엔드만)
     - |
       ssh $SSH_USER@$SSH_HOST "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
       docker-compose pull frontend && \
