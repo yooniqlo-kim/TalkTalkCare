@@ -107,7 +107,7 @@ deploy-frontend:
       docker stop frontend || true && \
       docker rm frontend || true && \
       docker-compose pull frontend && \
-      docker-compose up -d frontend"
+      COMPOSE_PROFILES=frontend docker-compose up -d frontend"
   rules:
     - changes:
         - frontend/**
