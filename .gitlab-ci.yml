@@ -72,6 +72,7 @@ deploy-backend:
     - |
       ssh $SSH_USER@$SSH_HOST "
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
+        docker network create cicd_network || true && \
         docker stop backend || true && \
         docker rm backend || true && \
         docker run -d \
