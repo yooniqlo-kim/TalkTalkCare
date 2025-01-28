@@ -1,20 +1,18 @@
+# ---------- [1단계: Build Stage] ----------
+FROM openjdk:17-jdk-slim AS builder
+WORKDIR /app
+
+# 소스 복사
+COPY . .
+RUN chmod +x gradlew
+RUN ./gradlew build -x test
+
+# ---------- [2단계: Runtime Stage] ----------
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 
-# 프로젝트 복사
-COPY . .
+# 빌드 스테이지에서 생성된 JAR만 복사
+COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Gradle Wrapper 실행 권한 추가
-RUN chmod +x gradlew
-
-# Gradle 빌드 실행 (테스트 제외)
-RUN ./gradlew build -x test
-
-# 상대 경로 사용
-COPY build/libs/*.jar app.jar
-
-# 실행 포트 노출
 EXPOSE 8080
-
-# 애플리케이션 실행
 CMD ["java", "-jar", "app.jar"]
