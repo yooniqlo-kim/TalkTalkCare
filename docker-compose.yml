@@ -31,7 +31,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: registry.lab.ssafy.io/s12-webmobile1-sub1/S12P11A302/backend:latest
+    image: registry.lab.ssafy.com/s12-webmobile1-sub1/s12p11a302/backend:latest
     container_name: backend
     ports:
       - "8080:8080"
@@ -50,7 +50,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: registry.lab.ssafy.io/s12-webmobile1-sub1/S12P11A302/frontend:latest
+    image: registry.lab.ssafy.com/s12-webmobile1-sub1/s12p11a302/frontend:latest
     container_name: frontend
     ports:
       - "3000:80"
