@@ -79,7 +79,7 @@ deploy-backend:
       export SPRING_DATASOURCE_URL='$SPRING_DATASOURCE_URL' && \
       export SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME && \
       export SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD && \
-      docker-compose down || true && \
+      docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
       docker-compose pull && \
       docker-compose up -d"
   rules:
@@ -103,7 +103,10 @@ deploy-frontend:
     - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
     - scp .env $SSH_USER@$SSH_HOST:~/
     # EC2에서 도커 컴포즈 실행
-    - ssh $SSH_USER@$SSH_HOST "docker-compose up -d frontend"
+    - |
+      ssh $SSH_USER@$SSH_HOST "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
+      docker-compose pull frontend && \
+      docker-compose up -d frontend"
   rules:
     - changes:
         - frontend/**
