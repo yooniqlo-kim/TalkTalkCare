@@ -73,6 +73,11 @@ deploy-backend:
       ssh $SSH_USER@$SSH_HOST "
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
         docker network create cicd_network || true && \
+        
+        # 기존 MySQL을 cicd_network에 연결
+        docker network connect cicd_network mysql || true && \
+        
+        # 백엔드 배포
         docker stop backend || true && \
         docker rm backend || true && \
         docker run -d \
