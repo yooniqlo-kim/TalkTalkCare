@@ -4,66 +4,66 @@ stages:
   - build
   - deploy
 
+services:
+  - name: docker:dind
+    alias: docker
+    command:
+      - "--tls=false"
+      - "--host=tcp://0.0.0.0:2375"
+    # DIND를 사용하려면 privileged 권한이 필요합니다.
+    privileged: true
+
 variables:
   FF_NETWORK_PER_BUILD: "true"
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: "tcp://docker:2375"
-  CI_DEBUG_TRACE: "true"  # 디버그 로그 활성화
-
-services:
-  - name: docker:dind
-    alias: docker
-    entrypoint: ["dockerd-entrypoint.sh"]
-    command: 
-      - "--tls=false"
-      - "--host=tcp://0.0.0.0:2375"
-      - "--insecure-registry=0.0.0.0:2375"
-    variables:
-      DOCKER_TLS_CERTDIR: ""
-      DOCKER_DRIVER: overlay2
+  DOCKER_DRIVER: overlay2
+  CI_DEBUG_TRACE: "true"
 
 before_script:
-  - sleep 20
+  # docker-compose 설치
   - apk add --no-cache docker-compose
-  - docker network create cicd_network || true
-  - until docker info; do
+  # Docker 데몬이 완전히 뜰 때까지 대기
+  - |
+    until docker info; do
       echo "Waiting for docker to start..."
       sleep 1
     done
+  # 필요하다면 네트워크 생성
+  - docker network create cicd_network || true
 
 build-backend:
   stage: build
   script:
-    - docker network ls
     - docker-compose -f docker-compose.yml build backend
   rules:
     - changes:
         - backend/**
-    - when: always
+      when: always
 
 build-frontend:
   stage: build
   script:
-    - docker-compose -f docker-compose.yml build frontend  # frontend 빌드
+    - docker-compose -f docker-compose.yml build frontend
   rules:
     - changes:
         - frontend/**
-    - when: always
+      when: always
 
 deploy-backend:
   stage: deploy
   script:
-    - docker-compose -f docker-compose.yml up -d backend  # backend 배포
+    - docker-compose -f docker-compose.yml up -d backend
   rules:
     - changes:
         - backend/**
-    - when: always
+      when: always
 
 deploy-frontend:
   stage: deploy
   script:
-    - docker-compose -f docker-compose.yml up -d frontend  # frontend 배포
+    - docker-compose -f docker-compose.yml up -d frontend
   rules:
     - changes:
         - frontend/**
-    - when: always
+      when: always
