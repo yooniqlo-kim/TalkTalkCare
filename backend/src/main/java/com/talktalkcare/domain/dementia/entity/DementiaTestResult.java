@@ -15,7 +15,7 @@ public class DementiaTestResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "result_id", nullable = false)
-    private Integer id;
+    private Integer num;
 
     @NotNull
     @Column(name = "user_id", nullable = false)
