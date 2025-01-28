@@ -13,34 +13,33 @@ services:
   - name: docker:dind
     alias: docker
     entrypoint: ["dockerd-entrypoint.sh"]
-    command: 
+    command:
       - "--tls=false"
       - "--host=tcp://0.0.0.0:2375"
       - "--insecure-registry=0.0.0.0:2375"
-      - "--network=host"
 
 before_script:
   - apk add --no-cache docker-compose
-  - timeout 20s sh -c 'until docker info; do sleep 1; done'  # 20초 타임아웃 설정
+  - timeout 60s sh -c 'until docker info; do sleep 2; done'
 
 build-backend:
   stage: build
   script:
-    - docker network create ci_network || true  # 네트워크 생성
     - docker-compose -f docker-compose.yml build backend
   rules:
     - changes:
         - backend/**
-    - when: always
+      when: always
 
 deploy-backend:
   stage: deploy
+  needs: ["build-backend"]
   script:
     - docker-compose -f docker-compose.yml up -d backend
   rules:
     - changes:
         - backend/**
-    - when: always
+      when: always
 
 build-frontend:
   stage: build
@@ -49,13 +48,14 @@ build-frontend:
   rules:
     - changes:
         - frontend/**
-    - when: always
+      when: always
 
 deploy-frontend:
   stage: deploy
+  needs: ["build-frontend"]
   script:
     - docker-compose -f docker-compose.yml up -d frontend
   rules:
     - changes:
         - frontend/**
-    - when: always
+      when: always
