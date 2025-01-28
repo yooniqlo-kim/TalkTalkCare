@@ -104,6 +104,8 @@ deploy-frontend:
     # EC2에서 도커 컴포즈 실행 (프론트엔드만)
     - |
       ssh $SSH_USER@$SSH_HOST "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
+      docker stop frontend || true && \
+      docker rm frontend || true && \
       docker-compose pull frontend && \
       docker-compose up -d frontend"
   rules:
