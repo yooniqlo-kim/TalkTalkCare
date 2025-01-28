@@ -10,8 +10,7 @@ RUN chmod +x gradlew
 # Gradle 빌드 실행 (테스트 제외)
 RUN ./gradlew build -x test
 
-# 빌드된 JAR 파일 복사
-COPY build/libs/*.jar app.jar
+COPY /app/build/libs/*.jar app.jar
 
 # 실행 포트 노출
 EXPOSE 8080
