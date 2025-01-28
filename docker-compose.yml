@@ -28,9 +28,6 @@ services:
     restart: always
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
     image: eoslovy/talktalkcare-backend:latest
     container_name: backend
     ports:
@@ -47,9 +44,6 @@ services:
     restart: always
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
     image: eoslovy/talktalkcare-frontend:latest
     container_name: frontend
     ports:
