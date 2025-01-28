@@ -80,8 +80,10 @@ deploy-backend:
       export LOG_LEVEL_SQL=DEBUG && \
       export LOG_LEVEL_TYPE=DEBUG && \
       docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
-      docker-compose pull && \
-      docker-compose up -d"
+      docker stop backend || true && \
+      docker rm backend || true && \
+      docker-compose pull backend && \
+      docker-compose up -d backend"
   rules:
     - changes:
         - backend/**
@@ -99,15 +101,13 @@ deploy-frontend:
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    # EC2로 필요한 파일들 복사
     - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
-    # EC2에서 도커 컴포즈 실행 (프론트엔드만)
     - |
       ssh $SSH_USER@$SSH_HOST "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
       docker stop frontend || true && \
       docker rm frontend || true && \
       docker-compose pull frontend && \
-      COMPOSE_PROFILES=frontend docker-compose up -d frontend"
+      docker-compose up -d frontend"
   rules:
     - changes:
         - frontend/**
