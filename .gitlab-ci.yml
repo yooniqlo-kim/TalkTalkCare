@@ -80,11 +80,16 @@ deploy-backend:
           --network cicd_network \
           -p 8080:8080 \
           -e SPRING_APPLICATION_NAME=talktalkcare \
-          -e SPRING_DATASOURCE_URL='$SPRING_DATASOURCE_URL' \
-          -e SPRING_DATASOURCE_USERNAME='$SPRING_DATASOURCE_USERNAME' \
-          -e SPRING_DATASOURCE_PASSWORD='$SPRING_DATASOURCE_PASSWORD' \
+          -e SPRING_DATASOURCE_URL='jdbc:mysql://mysql:3306/talktalkcare?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true' \
+          -e SPRING_DATASOURCE_USERNAME=ssafy \
+          -e SPRING_DATASOURCE_PASSWORD=1234 \
+          -e SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
+          -e SPRING_JPA_SHOW_SQL=true \
+          -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
+          -e SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true \
+          -e SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect \
           -e LOG_LEVEL_SQL=DEBUG \
-          -e LOG_LEVEL_TYPE=DEBUG \
+          -e LOG_LEVEL_TYPE=TRACE \
           eoslovy/talktalkcare-backend:latest
       "
   rules:
