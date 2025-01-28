@@ -1,7 +1,7 @@
 package com.talktalkcare.domain.users.exception;
 
-import com.talktalkcare.common.error.ErrorCodeInterface;
 import com.talktalkcare.common.response.Api;
+import com.talktalkcare.common.error.ErrorCodeInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
@@ -10,20 +10,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-@Order(1)
+@Order(2)
 public class UserExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(UserExceptionHandler.class);
 
-    @ExceptionHandler(value = UserException.class)
-    public ResponseEntity<Api<Void>> exceptionHandler(UserException userException) {
-        ErrorCodeInterface errorCodeIfs = userException.getErrorCodeIfs();
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<Api<Void>> handleUserException(UserException exception) {
+        ErrorCodeInterface errorCode = exception.getErrorCode();
 
-        log.error("{} : {}", errorCodeIfs.getErrorCode(), errorCodeIfs.getMessage(), userException);
+        log.error("UserException occurred: {} - {}", errorCode.getErrorCode(), errorCode.getMessage(), exception);
 
         return ResponseEntity
-                .status(errorCodeIfs.getHttpStatusCode())
-                .body(Api.ERROR(errorCodeIfs.getMessage()));
+                .status(errorCode.getHttpStatusCode())
+                .body(Api.ERROR(errorCode.getMessage(), errorCode.getErrorCode()));
     }
 
 }
