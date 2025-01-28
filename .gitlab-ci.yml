@@ -29,7 +29,7 @@ build-backend:
   rules:
     - changes:
         - backend/**
-      when: always
+    - when: always
 
 deploy-backend:
   stage: deploy
@@ -39,7 +39,7 @@ deploy-backend:
   rules:
     - changes:
         - backend/**
-      when: always
+    - when: always
 
 build-frontend:
   stage: build
@@ -48,7 +48,7 @@ build-frontend:
   rules:
     - changes:
         - frontend/**
-      when: always
+    - when: always
 
 deploy-frontend:
   stage: deploy
@@ -58,4 +58,4 @@ deploy-frontend:
   rules:
     - changes:
         - frontend/**
-      when: always
+    - when: always
