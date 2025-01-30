@@ -66,53 +66,43 @@ deploy-backend:
     - scp .env docker-compose.yml $SSH_USER@$SSH_HOST:~/
     - |
       ssh $SSH_USER@$SSH_HOST "
-        echo 'Starting deployment...'
+        echo 'Starting backend deployment...'
         
-        # Docker login
+        # Docker 로그인
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
         
-        # Create network
-        docker network rm cicd_network || true && \
-        docker network create cicd_network || true
+        # 기존 컨테이너 중지 및 삭제
+        echo 'Stopping & removing old containers...'
+        docker stop mysql redis openvidu backend nginx || true
+        docker rm -f mysql redis openvidu backend nginx || true
         
-        # MySQL setup
-        if docker ps -a --format '{{.Names}}' | grep -q '^mysql$'; then
-          echo 'MySQL container exists'
-          docker start mysql
-        else
-          echo 'Creating MySQL container'
-          docker-compose up -d mysql
-          echo 'Waiting for MySQL to start'
-          sleep 30
-        fi
-
-        # Redis setup
-        if docker ps -a --format '{{.Names}}' | grep -q '^redis$'; then
-          echo 'Redis container exists'
-          docker start redis
-        else
-          echo 'Creating Redis container'
-          docker-compose up -d redis
-        fi
-
-        # OpenVidu setup
-        if docker ps -a --format '{{.Names}}' | grep -q '^openvidu$'; then
-          echo 'OpenVidu container exists'
-          docker start openvidu
-        else
-          echo 'Creating OpenVidu container'
-          docker-compose up -d openvidu
-        fi
-
-        # Backend deployment
-        echo 'Cleaning up old backend container'
-        docker-compose stop backend || true
-        docker-compose rm -f backend || true
+        # 사용하지 않는 Docker 볼륨 정리 (선택 사항)
+        docker volume prune -f
         
-        echo 'Starting backend container'
+        # 네트워크 삭제 후 재생성
+        echo 'Recreating network...'
+        docker network rm cicd_network || true
+        docker network create cicd_network
+        
+        # MySQL 배포
+        echo 'Deploying MySQL...'
+        docker-compose up -d mysql
+        echo 'Waiting for MySQL to start...'
+        sleep 30  # MySQL 안정화 대기
+
+        # Redis 배포
+        echo 'Deploying Redis...'
+        docker-compose up -d redis
+
+        # OpenVidu 배포
+        echo 'Deploying OpenVidu...'
+        docker-compose up -d openvidu
+
+        # Backend 배포
+        echo 'Deploying Backend...'
         docker-compose up -d backend
-        
-        echo 'Deployment completed'
+
+        echo 'Deployment completed successfully!'
       "
   rules:
     - changes:
@@ -135,6 +125,11 @@ deploy-frontend:
     - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
     - |
       ssh $SSH_USER@$SSH_HOST "
+        # 기존 컨테이너 정리
+        docker stop frontend nginx || true
+        docker rm frontend nginx || true
+        
+        # 새 컨테이너 배포
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
         /usr/local/bin/docker-compose pull nginx && \
         /usr/local/bin/docker-compose up -d nginx
