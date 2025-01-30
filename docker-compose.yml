@@ -27,31 +27,75 @@ services:
       - cicd_network
     restart: always
 
+  redis:
+    image: redis:7.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - cicd_network
+    restart: always
+
+  openvidu:
+    image: openvidu/openvidu-server-kms:2.28.0
+    container_name: openvidu
+    ports:
+      - "4443:4443"
+      - "40000-57000:40000-57000/tcp"
+      - "40000-57000:40000-57000/udp"
+    environment:
+      - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
+      - OPENVIDU_SECRET=${OPENVIDU_SECRET}
+      - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
+      - OPENVIDU_RECORDING=false
+    volumes:
+      - ./openvidu_data:/opt/openvidu/recordings
+    networks:
+      - cicd_network
+    restart: always
+
   backend:
     image: eoslovy/talktalkcare-backend:latest
     container_name: backend
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - LOG_LEVEL_SQL=DEBUG
-      - LOG_LEVEL_TYPE=DEBUG
+      - SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME}
+      - DB_DRIVER=${DB_DRIVER}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JPA_SHOW_SQL=${JPA_SHOW_SQL}
+      - JPA_DDL_AUTO=${JPA_DDL_AUTO}
+      - JPA_FORMAT_SQL=${JPA_FORMAT_SQL}
+      - JPA_DIALECT=${JPA_DIALECT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOG_LEVEL_SQL=${LOG_LEVEL_SQL}
+      - LOG_LEVEL_TYPE=${LOG_LEVEL_TYPE}
     depends_on:
       mysql:
         condition: service_healthy
+      redis:
+        condition: service_started
+      openvidu:
+        condition: service_started
     networks:
       - cicd_network
     restart: always
-    volumes:
-      - /tmp:/tmp
 
-  frontend:
-    image: eoslovy/talktalkcare-frontend:latest
-    container_name: frontend
+  nginx:
+    image: eoslovy/talktalkcare-nginx:latest
+    container_name: nginx
     ports:
-      - "3000:80"
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
     networks:
       - cicd_network
     restart: always

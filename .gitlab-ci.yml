@@ -7,13 +7,7 @@ stages:
 variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://docker:2375
-  MYSQL_ROOT_PASSWORD: "1234"
-  MYSQL_DATABASE: "talktalkcare"
-  MYSQL_USER: "ssafy"
-  MYSQL_PASSWORD: "1234"
-  SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/talktalkcare?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true"
-  SPRING_DATASOURCE_USERNAME: "ssafy"
-  SPRING_DATASOURCE_PASSWORD: "1234"
+  DOCKER_PRIVILEGED: "true"
 
 services:
   - name: docker:dind
@@ -48,11 +42,12 @@ build-backend:
 build-frontend:
   stage: build
   script:
-    - docker-compose -f docker-compose.yml build frontend
-    - docker-compose -f docker-compose.yml push frontend
+    - docker build -t eoslovy/talktalkcare-nginx:latest -f Dockerfile .
+    - docker push eoslovy/talktalkcare-nginx:latest
   rules:
     - changes:
         - frontend/**
+        - nginx.conf
     - when: always
   variables:
     DOCKER_PRIVILEGED: "true"
@@ -67,50 +62,56 @@ deploy-backend:
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
+    - scp .env docker-compose.yml $SSH_USER@$SSH_HOST:~/
     - |
       ssh $SSH_USER@$SSH_HOST "
-        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
+        echo 'Starting deployment...'
         
-        # 기존 네트워크 정리
+        # Docker login
+        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        
+        # Create network
         docker network rm cicd_network || true && \
+        docker network create cicd_network || true
         
-        # docker-compose 네트워크 사용
-        docker network create ubuntu_cicd_network || true && \
-        
-        # MySQL이 없으면 생성
-        if ! docker ps | grep mysql; then
-          docker run -d \
-            --name mysql \
-            --network ubuntu_cicd_network \
-            -e MYSQL_ROOT_PASSWORD=1234 \
-            -e MYSQL_DATABASE=talktalkcare \
-            -e MYSQL_USER=ssafy \
-            -e MYSQL_PASSWORD=1234 \
-            mysql:8.0
-          
-          echo 'Waiting for MySQL to start...'
+        # MySQL setup
+        if docker ps -a --format '{{.Names}}' | grep -q '^mysql$'; then
+          echo 'MySQL container exists'
+          docker start mysql
+        else
+          echo 'Creating MySQL container'
+          docker-compose up -d mysql
+          echo 'Waiting for MySQL to start'
           sleep 30
         fi
+
+        # Redis setup
+        if docker ps -a --format '{{.Names}}' | grep -q '^redis$'; then
+          echo 'Redis container exists'
+          docker start redis
+        else
+          echo 'Creating Redis container'
+          docker-compose up -d redis
+        fi
+
+        # OpenVidu setup
+        if docker ps -a --format '{{.Names}}' | grep -q '^openvidu$'; then
+          echo 'OpenVidu container exists'
+          docker start openvidu
+        else
+          echo 'Creating OpenVidu container'
+          docker-compose up -d openvidu
+        fi
+
+        # Backend deployment
+        echo 'Cleaning up old backend container'
+        docker-compose stop backend || true
+        docker-compose rm -f backend || true
         
-        # 백엔드 배포
-        docker stop backend || true && \
-        docker rm backend || true && \
-        docker run -d \
-          --name backend \
-          --network ubuntu_cicd_network \
-          -p 8080:8080 \
-          -e SPRING_APPLICATION_NAME=talktalkcare \
-          -e SPRING_DATASOURCE_URL='jdbc:mysql://mysql:3306/talktalkcare?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true' \
-          -e SPRING_DATASOURCE_USERNAME=ssafy \
-          -e SPRING_DATASOURCE_PASSWORD=1234 \
-          -e SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
-          -e SPRING_JPA_SHOW_SQL=true \
-          -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
-          -e SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true \
-          -e SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect \
-          -e LOG_LEVEL_SQL=DEBUG \
-          -e LOG_LEVEL_TYPE=TRACE \
-          eoslovy/talktalkcare-backend:latest
+        echo 'Starting backend container'
+        docker-compose up -d backend
+        
+        echo 'Deployment completed'
       "
   rules:
     - changes:
@@ -118,6 +119,7 @@ deploy-backend:
     - when: always
   variables:
     DOCKER_PRIVILEGED: "true"
+
 
 deploy-frontend:
   stage: deploy
@@ -130,15 +132,13 @@ deploy-frontend:
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
     - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
-    - |
-      ssh $SSH_USER@$SSH_HOST "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
-      docker stop frontend || true && \
-      docker rm frontend || true && \
-      docker-compose pull frontend && \
-      docker-compose up -d frontend"
+    - ssh $SSH_USER@$SSH_HOST "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
+      docker-compose pull nginx && \
+      docker-compose up -d nginx"
   rules:
     - changes:
         - frontend/**
+        - nginx.conf
     - when: always
   variables:
     DOCKER_PRIVILEGED: "true"
