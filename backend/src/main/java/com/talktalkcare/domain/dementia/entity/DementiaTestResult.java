@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -32,6 +32,5 @@ public class DementiaTestResult {
 
     @NotNull
     @Column(name = "test_date", nullable = false)
-    private Instant testDate;
-
+    private LocalDateTime testDate;  // LocalDateTime으로 변경
 }
