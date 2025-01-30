@@ -71,40 +71,43 @@ deploy-backend:
         # Docker 로그인
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
         
-        # 모든 기존 컨테이너 삭제
-        echo 'Stopping and removing all containers...'
-        docker-compose down || true
-        docker stop \$(docker ps -aq) || true
-        docker rm -f \$(docker ps -aq) || true
+        # 순차적으로 컨테이너 정리 (중지 후 삭제)
+        echo 'Stopping containers one by one...'
+        docker stop -t 10 openvidu || true
+        docker stop -t 10 backend || true
+        docker stop -t 10 redis || true
+        docker stop -t 10 mysql || true
+        docker stop -t 10 nginx || true
         
-        # 네트워크 정리
-        echo 'Pruning unused networks...'
-        docker network prune -f
+        echo 'Removing containers...'
+        docker rm -f openvidu || true
+        docker rm -f backend || true
+        docker rm -f redis || true
+        docker rm -f mysql || true
+        docker rm -f nginx || true
         
-        # Docker 볼륨 정리
-        echo 'Pruning unused volumes...'
-        docker volume prune -f
-        
-        # 네트워크 재생성
+        # 네트워크 정리 후 재생성
         echo 'Recreating network...'
-        docker network create cicd_network || true
+        docker network rm cicd_network || true
+        docker network create cicd_network
         
-        # MySQL 배포
+        # MySQL 실행
         echo 'Deploying MySQL...'
         docker-compose up -d mysql
         echo 'Waiting for MySQL to start...'
         sleep 30  # MySQL 안정화 대기
 
-        # Redis 배포
+        # Redis 실행
         echo 'Deploying Redis...'
         docker-compose up -d redis
 
-        # OpenVidu 배포
+        # OpenVidu 실행 후 안정화
         echo 'Deploying OpenVidu...'
         docker-compose up -d openvidu
-        sleep 60  # OpenVidu 안정화 대기
+        echo 'Waiting for OpenVidu to stabilize...'
+        sleep 90  # OpenVidu 안정화 대기
 
-        # Backend 배포
+        # Backend 실행
         echo 'Deploying Backend...'
         docker-compose up -d backend
 
@@ -127,17 +130,21 @@ deploy-frontend:
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
+    - scp docker-compose.yml nginx.conf $SSH_USER@$SSH_HOST:~/
     - |
       ssh $SSH_USER@$SSH_HOST "
-        # 기존 컨테이너 정리
-        docker stop frontend nginx || true
-        docker rm frontend nginx || true
-        
-        # 새 컨테이너 배포
-        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
-        /usr/local/bin/docker-compose pull nginx && \
-        /usr/local/bin/docker-compose up -d nginx
+        echo 'Starting frontend deployment...'
+
+        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+        echo 'Stopping old Nginx container...'
+        docker stop nginx || true
+        docker rm -f nginx || true
+
+        echo 'Building & Deploying Nginx...'
+        docker-compose up --build -d nginx
+
+        echo 'Frontend Deployment Completed!'
       "
   rules:
     - changes:
