@@ -71,18 +71,23 @@ deploy-backend:
         # Docker 로그인
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
         
-        # 기존 컨테이너 중지 및 삭제
-        echo 'Stopping & removing old containers...'
-        docker stop mysql redis openvidu backend nginx || true
-        docker rm -f mysql redis openvidu backend nginx || true
+        # 모든 기존 컨테이너 삭제
+        echo 'Stopping and removing all containers...'
+        docker-compose down || true
+        docker stop \$(docker ps -aq) || true
+        docker rm -f \$(docker ps -aq) || true
         
-        # 사용하지 않는 Docker 볼륨 정리 (선택 사항)
+        # 네트워크 정리
+        echo 'Pruning unused networks...'
+        docker network prune -f
+        
+        # Docker 볼륨 정리
+        echo 'Pruning unused volumes...'
         docker volume prune -f
         
-        # 네트워크 삭제 후 재생성
+        # 네트워크 재생성
         echo 'Recreating network...'
-        docker network rm cicd_network || true
-        docker network create cicd_network
+        docker network create cicd_network || true
         
         # MySQL 배포
         echo 'Deploying MySQL...'
@@ -110,7 +115,6 @@ deploy-backend:
     - when: always
   variables:
     DOCKER_PRIVILEGED: "true"
-
 
 deploy-frontend:
   stage: deploy
