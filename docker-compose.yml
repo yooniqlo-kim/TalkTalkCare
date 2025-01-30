@@ -40,7 +40,7 @@ services:
     restart: always
 
   openvidu:
-    image: openvidu/openvidu-server-kms:2.28.0
+    image: openvidu/openvidu-server-kms:latest
     container_name: openvidu
     ports:
       - "4443:4443"
