@@ -133,9 +133,12 @@ deploy-frontend:
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
     - scp docker-compose.yml $SSH_USER@$SSH_HOST:~/
-    - ssh $SSH_USER@$SSH_HOST "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
-      docker-compose pull nginx && \
-      docker-compose up -d nginx"
+    - |
+      ssh $SSH_USER@$SSH_HOST "
+        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && \
+        /usr/local/bin/docker-compose pull nginx && \
+        /usr/local/bin/docker-compose up -d nginx
+      "
   rules:
     - changes:
         - frontend/**
