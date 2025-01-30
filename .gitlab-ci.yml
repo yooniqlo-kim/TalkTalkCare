@@ -130,7 +130,7 @@ deploy-frontend:
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - scp docker-compose.yml nginx.conf $SSH_USER@$SSH_HOST:~/
+    - scp docker-compose.yml frontend/nginx.conf $SSH_USER@$SSH_HOST:~/
     - |
       ssh $SSH_USER@$SSH_HOST "
         echo 'Starting frontend deployment...'
