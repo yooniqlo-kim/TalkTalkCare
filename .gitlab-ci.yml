@@ -42,7 +42,8 @@ build-backend:
 build-frontend:
   stage: build
   script:
-    - docker build -t eoslovy/talktalkcare-nginx:latest -f Dockerfile .
+    - cd frontend
+    - docker build -t eoslovy/talktalkcare-nginx:latest .
     - docker push eoslovy/talktalkcare-nginx:latest
   rules:
     - changes:
