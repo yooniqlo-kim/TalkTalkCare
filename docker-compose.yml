@@ -53,6 +53,9 @@ services:
       - OPENVIDU_SECRET=${OPENVIDU_SECRET}
       - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
       - OPENVIDU_RECORDING=false
+      # 리소스 제한 설정
+      - KMS_MEDIA_SERVER_MEMORY_LIMIT=1024  # 1GB로 제한
+      - KMS_MEDIA_SERVER_CPU_LIMIT=90      # CPU 90%로 제한
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
     networks:
