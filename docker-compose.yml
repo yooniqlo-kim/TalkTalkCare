@@ -44,18 +44,13 @@ services:
     container_name: openvidu
     ports:
       - "4443:4443"
-      - "40000-40417:40000-40417/tcp" # 40418을 제외한 첫 번째 범위
-      - "40419-57000:40419-57000/tcp" # 40418 이후의 범위
-      - "40000-40417:40000-40417/udp"
-      - "40419-57000:40419-57000/udp"
+      - "40000-40400:40000-40400/tcp"
+      - "40000-40400:40000-40400/udp"
     environment:
       - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
       - OPENVIDU_SECRET=${OPENVIDU_SECRET}
       - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
       - OPENVIDU_RECORDING=false
-      # 리소스 제한 설정
-      - KMS_MEDIA_SERVER_MEMORY_LIMIT=1024  # 1GB로 제한
-      - KMS_MEDIA_SERVER_CPU_LIMIT=90      # CPU 90%로 제한
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
     networks:
