@@ -48,18 +48,16 @@ services:
       - "40000-40400:40000-40400/udp"
     environment:
       # OpenVidu 설정
-      - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
+      # - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
+      - DOMAIN_OR_PUBLIC_IP=talktalkcare.com
       - OPENVIDU_URL=${OPENVIDU_URL}
       - OPENVIDU_SECRET=${OPENVIDU_SECRET}
-      - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
+      # - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
+      - CERTIFICATE_TYPE=selfsigned
       - OPENVIDU_RECORDING=false
       - HTTPS_PORT=443
-      
-      # SSL 설정
-      - SSL_ENABLED=${SSL_ENABLED}
-      - SSL_KEYSTORE=${SSL_KEYSTORE}
-      - SSL_PASSWORD=${SSL_PASSWORD}
-      - SSL_KEYSTORE_TYPE=${SSL_KEYSTORE_TYPE}
+    env_file:
+      - .env
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
     networks:
