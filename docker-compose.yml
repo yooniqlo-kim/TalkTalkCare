@@ -25,7 +25,7 @@ services:
       timeout: 5s
     networks:
       - cicd_network
-    restart: always
+    restart: unless-stopped
 
   redis:
     image: redis:7.2
@@ -37,7 +37,7 @@ services:
     command: redis-server --appendonly yes
     networks:
       - cicd_network
-    restart: always
+    restart: unless-stopped
 
   openvidu:
     image: openvidu/openvidu-server-kms:latest
@@ -64,7 +64,7 @@ services:
       - ./openvidu_data:/opt/openvidu/recordings
     networks:
       - cicd_network
-    restart: always
+    restart: unless-stopped
 
   backend:
     image: eoslovy/talktalkcare-backend:latest
@@ -99,7 +99,7 @@ services:
         condition: service_started
     networks:
       - cicd_network
-    restart: always
+    restart: on-failure:3
 
   nginx:
     image: eoslovy/talktalkcare-nginx:latest
@@ -114,4 +114,4 @@ services:
       - backend
     networks:
       - cicd_network
-    restart: always
+    restart: on-failure:3
