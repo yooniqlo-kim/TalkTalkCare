@@ -48,18 +48,25 @@ services:
       - "40000-40400:40000-40400/udp"
     environment:
       # OpenVidu 설정
-      # - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
+      # # - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
+      # - DOMAIN_OR_PUBLIC_IP=talktalkcare.com
+      # - OPENVIDU_URL=${OPENVIDU_URL}
+      # - OPENVIDU_SECRET=${OPENVIDU_SECRET}
+      # # - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
+      # - CERTIFICATE_TYPE=selfsigned
+      # - OPENVIDU_RECORDING=false
+      # - HTTPS_PORT=443
       - DOMAIN_OR_PUBLIC_IP=talktalkcare.com
-      - OPENVIDU_URL=${OPENVIDU_URL}
-      - OPENVIDU_SECRET=${OPENVIDU_SECRET}
-      # - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
+      - OPENVIDU_URL=https://localhost:4443
+      - OPENVIDU_SECRET=talktalkcare
       - CERTIFICATE_TYPE=selfsigned
       - OPENVIDU_RECORDING=false
-      - HTTPS_PORT=443
+      - HTTPS_PORT=4443
     env_file:
       - .env
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
+      - ./.env:/.env
     networks:
       - cicd_network
     restart: unless-stopped
