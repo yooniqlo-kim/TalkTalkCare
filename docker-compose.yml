@@ -42,12 +42,12 @@ services:
   openvidu:
     image: openvidu/openvidu-server-kms:latest
     container_name: openvidu
-ports:
-  - "4443:4443"
-  - "40000-40417:40000-40417/tcp" # 40418을 제외한 첫 번째 범위
-  - "40419-57000:40419-57000/tcp" # 40418 이후의 범위
-  - "40000-40417:40000-40417/udp"
-  - "40419-57000:40419-57000/udp"
+    ports:
+      - "4443:4443"
+      - "40000-40417:40000-40417/tcp" # 40418을 제외한 첫 번째 범위
+      - "40419-57000:40419-57000/tcp" # 40418 이후의 범위
+      - "40000-40417:40000-40417/udp"
+      - "40419-57000:40419-57000/udp"
     environment:
       - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
       - OPENVIDU_SECRET=${OPENVIDU_SECRET}
