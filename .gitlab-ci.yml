@@ -105,7 +105,7 @@ deploy-backend:
         echo 'Deploying OpenVidu...'
         docker-compose up -d openvidu
         echo 'Waiting for OpenVidu to stabilize...'
-        sleep 90  # OpenVidu 안정화 대기
+        sleep 60  # OpenVidu 안정화 대기
 
         # Backend 실행
         echo 'Deploying Backend...'

@@ -90,11 +90,6 @@ services:
       - OPENVIDU_URL=${OPENVIDU_URL}
       - OPENVIDU_SECRET=${OPENVIDU_SECRET}
       - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
-      # SSL 설정
-      - SSL_ENABLED=${SSL_ENABLED}
-      - SSL_KEYSTORE=${SSL_KEYSTORE}
-      - SSL_PASSWORD=${SSL_PASSWORD}
-      - SSL_KEYSTORE_TYPE=${SSL_KEYSTORE_TYPE}
     depends_on:
       mysql:
         condition: service_healthy
@@ -102,8 +97,6 @@ services:
         condition: service_started
       openvidu:
         condition: service_started
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       - cicd_network
     restart: always
