@@ -14,7 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class TalkTalkDto {
 
-    private String UserId;
+    private int UserId;
 
     private String Summary;
 

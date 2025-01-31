@@ -1,7 +1,9 @@
 package com.talktalkcare.domain.talktalkAI.repository;
 
-import org.springframework.stereotype.Repository;
+import com.talktalkcare.domain.talktalkAI.entity.TalkTalk;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public class TalkTalkRepository {
+public interface TalkTalkRepository extends JpaRepository<TalkTalk, Long> {
+
+    TalkTalk findByUserId(int userId);
 }

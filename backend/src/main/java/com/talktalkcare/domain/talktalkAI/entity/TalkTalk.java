@@ -17,5 +17,5 @@ public class TalkTalk {
     private Integer userId;
 
     @Column(name = "talk_summary", nullable = false)
-    private String talkSummary;
+    private String summary;
 }
