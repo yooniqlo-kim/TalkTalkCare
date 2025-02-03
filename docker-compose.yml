@@ -59,7 +59,8 @@ services:
       - DOMAIN_OR_PUBLIC_IP=talktalkcare.com
       - OPENVIDU_URL=https://talktalkcare.com/openvidu
       - OPENVIDU_SECRET=talktalkcare
-      - CERTIFICATE_TYPE=selfsigned
+      # - CERTIFICATE_TYPE=selfsigned
+      - CERTIFICATE_TYPE=owncert
       - HTTPS_PORT=4443
       # - OPENVIDU_RECORDING=false
       # - OPENVIDU_WEBHOOK=false
@@ -69,6 +70,7 @@ services:
       - .env
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       # - ./.env:/opt/openvidu/.env
     networks:
       - cicd_network
