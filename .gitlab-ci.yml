@@ -30,8 +30,9 @@ before_script:
 build-backend:
   stage: build
   script:
-    - docker-compose -f docker-compose.yml build backend
-    - docker-compose -f docker-compose.yml push backend
+    - cd backend
+    - docker build -t eoslovy/talktalkcare-backend:latest .
+    - docker push eoslovy/talktalkcare-backend:latest
   rules:
     - changes:
         - backend/**
