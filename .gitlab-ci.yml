@@ -43,7 +43,7 @@ build-frontend:
   stage: build
   script:
     - cd frontend
-    - docker build -t eoslovy/talktalkcare-nginx:latest .
+    - docker build --no-cache -t eoslovy/talktalkcare-nginx:latest .
     - docker push eoslovy/talktalkcare-nginx:latest
   rules:
     - changes:
