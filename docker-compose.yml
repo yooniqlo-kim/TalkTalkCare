@@ -57,7 +57,7 @@ services:
       # - OPENVIDU_RECORDING=false
       # - HTTPS_PORT=443
       - DOMAIN_OR_PUBLIC_IP=talktalkcare.com
-      - OPENVIDU_URL=https://localhost:4443
+      - OPENVIDU_URL=https://openvidu:4443
       - OPENVIDU_SECRET=talktalkcare
       - CERTIFICATE_TYPE=selfsigned
       - HTTPS_PORT=4443
