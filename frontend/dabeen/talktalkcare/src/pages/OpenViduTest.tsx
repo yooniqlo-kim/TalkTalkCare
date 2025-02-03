@@ -13,7 +13,6 @@ const OpenViduTest: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
 
   // WebSocket 관련 상태 추가
-  const [ws, setWs] = useState<WebSocket | null>(null);
   const [wsMessages, setWsMessages] = useState<string[]>([]);
 
   // WebSocket 연결 설정
@@ -36,8 +35,6 @@ const OpenViduTest: React.FC = () => {
     websocket.onclose = () => {
       console.log('시그널링 서버 연결 종료');
     };
-
-    setWs(websocket);
 
     return () => {
       if (websocket.readyState === WebSocket.OPEN) {
