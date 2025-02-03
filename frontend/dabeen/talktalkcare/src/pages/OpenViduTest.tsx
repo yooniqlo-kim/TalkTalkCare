@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
 import './OpenViduTest.css';
 
-const OPENVIDU_SERVER_URL = 'https://talktalkcare.com/openvidu';
+const OPENVIDU_SERVER_URL = 'https://talktalkcare.com/openvidu';  // 외부 클라이언트가 접속하는 URL
 const OPENVIDU_SERVER_SECRET = 'talktalkcare';
-const DEFAULT_SESSION_ID = 'test-session';  // 기본 세션 ID 상수로 정의
+const DEFAULT_SESSION_ID = 'test-session';
 
 const OpenViduTest: React.FC = () => {
   const [session, setSession] = useState<Session | undefined>(undefined);
@@ -12,8 +12,9 @@ const OpenViduTest: React.FC = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
+  // 세션 생성: /api/sessions 엔드포인트 사용 (중복된 "/openvidu" 제거)
   const createSession = async (sessionId: string) => {
-    const response = await fetch(`${OPENVIDU_SERVER_URL}/openvidu/api/sessions`, {
+    const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -30,8 +31,9 @@ const OpenViduTest: React.FC = () => {
     return data.id;
   };
 
+  // 토큰 생성: /api/sessions/{sessionId}/connection 엔드포인트 사용
   const createToken = async (sessionId: string) => {
-    const response = await fetch(`${OPENVIDU_SERVER_URL}/openvidu/api/sessions/${sessionId}/connection`, {
+    const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions/${sessionId}/connection`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,7 +124,7 @@ const OpenViduTest: React.FC = () => {
         {publisher && (
           <div className="stream-container">
             <h3>내 비디오</h3>
-            <video autoPlay={true} ref={video => {
+            <video autoPlay ref={video => {
               if (video) {
                 video.srcObject = publisher.stream.getMediaStream();
               }
@@ -132,7 +134,7 @@ const OpenViduTest: React.FC = () => {
         {subscribers.map((subscriber, i) => (
           <div key={i} className="stream-container">
             <h3>상대방 비디오</h3>
-            <video autoPlay={true} ref={video => {
+            <video autoPlay ref={video => {
               if (video) {
                 video.srcObject = subscriber.stream.getMediaStream();
               }
@@ -144,4 +146,4 @@ const OpenViduTest: React.FC = () => {
   );
 };
 
-export default OpenViduTest; 
+export default OpenViduTest;

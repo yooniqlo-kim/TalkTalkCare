@@ -1,6 +1,5 @@
-// App.tsx
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import './App.css'
+import './App.css';
 // 경로 수정
 import Keypad from './pages/keypad';
 import Test from './pages/test';
@@ -11,7 +10,6 @@ import VideoCall from './pages/videocall';
 import OpenViduTest from './pages/OpenViduTest';
 
 const App: React.FC = () => {
-
   return (
     <BrowserRouter>
       <div>
@@ -20,7 +18,6 @@ const App: React.FC = () => {
           <Link to="/test">치매 진단 테스트로 이동</Link>
           <Link to="/openvidu-test">OpenVidu 테스트</Link>
         </nav>
-        
         <Routes>
           <Route path="/keypad" element={<Keypad />} />
           <Route path="/test" element={<Test />} />
@@ -32,7 +29,7 @@ const App: React.FC = () => {
         </Routes>
       </div>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
