@@ -47,31 +47,17 @@ services:
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
     environment:
-      # OpenVidu 설정
-      # # - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
-      # - DOMAIN_OR_PUBLIC_IP=talktalkcare.com
-      # - OPENVIDU_URL=${OPENVIDU_URL}
-      # - OPENVIDU_SECRET=${OPENVIDU_SECRET}
-      # # - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
-      # - CERTIFICATE_TYPE=selfsigned
-      # - OPENVIDU_RECORDING=false
-      # - HTTPS_PORT=443
       - DOMAIN_OR_PUBLIC_IP=talktalkcare.com
-      - OPENVIDU_URL=https://talktalkcare.com/openvidu
+      - OPENVIDU_URL=https://talktalkcare.com
       - OPENVIDU_SECRET=talktalkcare
-      # - CERTIFICATE_TYPE=selfsigned
       - CERTIFICATE_TYPE=owncert
       - HTTPS_PORT=4443
-      # - OPENVIDU_RECORDING=false
-      # - OPENVIDU_WEBHOOK=false
-      # - OPENVIDU_CDR=false
-      # - KMS_URIS=["ws://localhost:8888/kurento"]
-    env_file:
-      - .env
+      # SSL 인증서 관련 설정 추가
+      - HTTPS_KEY=/etc/letsencrypt/live/talktalkcare.com/privkey.pem
+      - HTTPS_CERT=/etc/letsencrypt/live/talktalkcare.com/fullchain.pem
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      # - ./.env:/opt/openvidu/.env
     networks:
       - cicd_network
     restart: unless-stopped
