@@ -60,13 +60,16 @@ services:
       - OPENVIDU_URL=https://localhost:4443
       - OPENVIDU_SECRET=talktalkcare
       - CERTIFICATE_TYPE=selfsigned
-      - OPENVIDU_RECORDING=false
       - HTTPS_PORT=4443
+      # - OPENVIDU_RECORDING=false
+      # - OPENVIDU_WEBHOOK=false
+      # - OPENVIDU_CDR=false
+      # - KMS_URIS=["ws://localhost:8888/kurento"]
     env_file:
       - .env
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
-      - ./.env:/.env
+      - ./env_copy/.env:/openvidu/.env
     networks:
       - cicd_network
     restart: unless-stopped

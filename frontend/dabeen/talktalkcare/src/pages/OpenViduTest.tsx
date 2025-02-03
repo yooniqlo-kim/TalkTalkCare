@@ -7,7 +7,7 @@ const OpenViduTest: React.FC = () => {
 
   useEffect(() => {
     // WebSocket 연결
-    wsRef.current = new WebSocket('ws://localhost:8080/signal');
+    wsRef.current = new WebSocket('wss://talktalkcare.com/openvidu/signal');
 
     wsRef.current.onopen = () => {
       setIsConnected(true);
