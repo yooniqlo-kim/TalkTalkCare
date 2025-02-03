@@ -1,0 +1,54 @@
+/* 전체 메뉴 레이아웃 */
+.menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 600PX;
+}
+
+/* 그리드 레이아웃 */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2열 */
+  gap: 20px;
+  width: 500px; /* 고정 너비 */
+  margin: 0 auto;
+}
+
+/* 각 행 레이아웃 */
+.menu-row {
+  display: flex;
+  gap: 20px;
+  margin: 20px;
+}
+
+/* 메뉴 아이템 스타일 */
+.menu-item {
+  background-color: #B6F3AA;
+  border-radius: 20px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  height: 100px;
+  transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+  background-color: #a8d5a3; /* hover 상태 */
+}
+
+/* 아이콘 스타일 */
+.menu-item-icon {
+  margin-bottom: 0.75rem; /* 텍스트와 간격 */
+}
+
+/* 텍스트 스타일 */
+.menu-item-text {
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+}
