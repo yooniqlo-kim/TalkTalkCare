@@ -74,11 +74,10 @@ const OpenViduTest: React.FC = () => {
 
   const createToken = async (sessionId: string) => {
     try {
-      const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions/${sessionId}/connection`, {
+      const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions/${sessionId}/connections`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + btoa(`OPENVIDUAPP:${OPENVIDU_SERVER_SECRET}`)
         }
       });
 
