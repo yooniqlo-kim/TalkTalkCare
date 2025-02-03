@@ -148,8 +148,11 @@ deploy-frontend:
         docker stop nginx || true
         docker rm -f nginx || true
 
-        echo 'Building & Deploying Nginx...'
-        docker-compose up --build -d nginx
+        echo 'Deploying Nginx...'
+        docker-compose up -d nginx
+
+        echo 'Checking deployment status...'
+        docker ps | grep nginx
 
         echo 'Frontend Deployment Completed!'
       "
