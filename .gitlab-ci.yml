@@ -43,7 +43,7 @@ build-frontend:
   stage: build
   script:
     - cd frontend
-    - docker build --no-cache -t eoslovy/talktalkcare-nginx:latest .
+    - docker build -t eoslovy/talktalkcare-nginx:latest .
     - docker push eoslovy/talktalkcare-nginx:latest
   rules:
     - changes:
@@ -70,6 +70,9 @@ deploy-backend:
         
         # Docker 로그인
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+        echo 'Pulling latest image...'
+        docker pull eoslovy/talktalkcare-backend:latest
         
         # 순차적으로 컨테이너 정리 (중지 후 삭제)
         echo 'Stopping containers one by one...'
@@ -136,6 +139,9 @@ deploy-frontend:
         echo 'Starting frontend deployment...'
 
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+        echo 'Pulling latest image...'
+        docker pull eoslovy/talktalkcare-nginx:latest
 
         echo 'Stopping old Nginx container...'
         docker stop nginx || true

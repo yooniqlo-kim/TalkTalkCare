@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
 import './OpenViduTest.css';
 
-const OPENVIDU_SERVER_URL = 'https://talktalkcare.com/openvidu';  // 외부 클라이언트가 접속하는 URL
+const OPENVIDU_SERVER_URL = 'https://talktalkcare.com/openvidu';  // 유지
 const OPENVIDU_SERVER_SECRET = 'talktalkcare';
 const DEFAULT_SESSION_ID = 'test-session';
 
@@ -12,50 +12,74 @@ const OpenViduTest: React.FC = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
-  // 세션 생성: /api/sessions 엔드포인트 사용 (중복된 "/openvidu" 제거)
   const createSession = async (sessionId: string) => {
-    const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa(`OPENVIDUAPP:${OPENVIDU_SERVER_SECRET}`)
-      },
-      body: JSON.stringify({ customSessionId: sessionId })
-    });
+    try {
+      const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa(`OPENVIDUAPP:${OPENVIDU_SERVER_SECRET}`)
+        },
+        body: JSON.stringify({ customSessionId: sessionId })
+      });
 
-    if (response.status === 409) {
-      return sessionId;
+      if (response.status === 409) {
+        console.log('세션이 이미 존재함:', sessionId);
+        return sessionId;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('세션 생성 성공:', data);
+      return data.id;
+    } catch (error) {
+      console.error('세션 생성 에러:', error);
+      throw error;
     }
-    
-    const data = await response.json();
-    return data.id;
   };
 
-  // 토큰 생성: /api/sessions/{sessionId}/connection 엔드포인트 사용
   const createToken = async (sessionId: string) => {
-    const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions/${sessionId}/connection`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa(`OPENVIDUAPP:${OPENVIDU_SERVER_SECRET}`)
+    try {
+      const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions/${sessionId}/connection`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa(`OPENVIDUAPP:${OPENVIDU_SERVER_SECRET}`)
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    });
-    const data = await response.json();
-    return data.token;
+
+      const data = await response.json();
+      console.log('토큰 생성 성공:', data);
+      return data.token;
+    } catch (error) {
+      console.error('토큰 생성 에러:', error);
+      throw error;
+    }
   };
 
   const joinSession = async () => {
     try {
       const OV = new OpenVidu();
+      OV.enableProdMode();  // 프로덕션 모드 활성화 추가
+      
       const session = OV.initSession();
       setSession(session);
 
       session.on('streamCreated', (event) => {
+        console.log('스트림 생성됨');
         const subscriber = session.subscribe(event.stream, undefined);
         setSubscribers(prev => [...prev, subscriber]);
       });
 
       session.on('streamDestroyed', (event) => {
+        console.log('스트림 제거됨');
         setSubscribers(prev => prev.filter(sub => sub !== event.stream.streamManager));
       });
 
@@ -65,13 +89,18 @@ const OpenViduTest: React.FC = () => {
       });
 
       // 세션 생성 및 토큰 발급
+      console.log('세션 생성 시도...');
       const createdSessionId = await createSession(DEFAULT_SESSION_ID);
+      console.log('토큰 생성 시도...');
       const token = await createToken(createdSessionId);
 
       // 세션 연결
+      console.log('세션 연결 시도...');
       await session.connect(token);
+      console.log('세션 연결 성공');
 
       // 퍼블리셔 초기화
+      console.log('퍼블리셔 초기화...');
       const publisher = await OV.initPublisher(undefined, {
         audioSource: undefined,
         videoSource: undefined,
@@ -83,7 +112,9 @@ const OpenViduTest: React.FC = () => {
       });
 
       // 스트림 발행
+      console.log('스트림 발행 시도...');
       await session.publish(publisher);
+      console.log('스트림 발행 성공');
       setPublisher(publisher);
 
     } catch (error) {
