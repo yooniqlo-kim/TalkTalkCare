@@ -47,8 +47,11 @@ public class OpenViduController {
 
             ConnectionProperties properties = new ConnectionProperties.Builder().build();
             Connection connection = session.createConnection(properties);
-
-            return ResponseEntity.ok(connection.getToken());
+            
+            // JSON 객체로 응답
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", connection.getToken());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
