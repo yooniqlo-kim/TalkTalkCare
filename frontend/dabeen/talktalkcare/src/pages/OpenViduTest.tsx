@@ -12,6 +12,40 @@ const OpenViduTest: React.FC = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
+  // WebSocket 관련 상태 추가
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const [wsMessages, setWsMessages] = useState<string[]>([]);
+
+  // WebSocket 연결 설정
+  useEffect(() => {
+    const websocket = new WebSocket('wss://talktalkcare.com/ws/signal');
+
+    websocket.onopen = () => {
+      console.log('시그널링 서버 연결 성공');
+    };
+
+    websocket.onmessage = (event) => {
+      console.log('시그널링 메시지 수신:', event.data);
+      setWsMessages(prev => [...prev, event.data]);
+    };
+
+    websocket.onerror = (error) => {
+      console.error('시그널링 서버 에러:', error);
+    };
+
+    websocket.onclose = () => {
+      console.log('시그널링 서버 연결 종료');
+    };
+
+    setWs(websocket);
+
+    return () => {
+      if (websocket.readyState === WebSocket.OPEN) {
+        websocket.close();
+      }
+    };
+  }, []);
+
   const createSession = async (sessionId: string) => {
     try {
       const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions`, {
@@ -142,7 +176,7 @@ const OpenViduTest: React.FC = () => {
     <div className="openvidu-test-container">
       <h1>OpenVidu 1:1 화상통화 테스트</h1>
       <div className="connection-status">
-        연결 상태: {isConnected ? '연결됨' : '연결 안됨'}
+        OpenVidu 연결 상태: {isConnected ? '연결됨' : '연결 안됨'}
       </div>
       <div className="button-container">
         {!session ? (
@@ -171,6 +205,13 @@ const OpenViduTest: React.FC = () => {
               }
             }} />
           </div>
+        ))}
+      </div>
+      {/* WebSocket 메시지 표시 영역 추가 */}
+      <div className="signaling-messages">
+        <h3>시그널링 메시지</h3>
+        {wsMessages.map((msg, index) => (
+          <div key={index} className="message">{msg}</div>
         ))}
       </div>
     </div>
