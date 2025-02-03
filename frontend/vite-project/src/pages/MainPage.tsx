@@ -5,6 +5,7 @@ import MainMenu from './main_page/MainMenu';
 import Analytics from './main_page/Analytics';
 import FriendList from './main_page/FriendList';
 import SpeechToText from './Voice';
+import LoginPage from './user_page/LoginPage';
 
 interface MainPageProps {
   showFriendListByDefault?: boolean;
@@ -32,6 +33,14 @@ const MainPage: React.FC<MainPageProps> = ({ showFriendListByDefault = false }) 
           className="text-gray-600 hover:text-gray-900 cursor-pointer hover:underline"
         >
           회원가입
+        </span>
+      </div>
+      <div className="fixed top-4 right-20">
+        <span 
+          onClick={() => navigate('/login')}
+          className="text-gray-600 hover:text-gray-900 cursor-pointer hover:underline"
+        >
+          로그인
         </span>
       </div>
 

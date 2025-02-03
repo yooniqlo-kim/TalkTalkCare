@@ -1,17 +1,29 @@
+// src/components/Header.tsx
 import React from 'react';
-import { Link } from 'react-router-dom';
-// import logo from '../../assets/images/logo.png';
-import '../styles/components/Header.css';
+import { useNavigate } from 'react-router-dom';
 
-const Header = () => (
-  <div>
-    <div className="header-container">
-      <Link to="/" className="logo-container">
-        {/* <img src={logo} alt="톡톡케어 로고" className="logo-image" /> */}
-        <span className="logo-title">톡톡케어</span>
-      </Link>
-    </div>
-  </div>
-);
+interface HeaderProps {
+  className?: string;  // className을 optional prop으로 정의
+}
+
+const Header: React.FC<HeaderProps> = ({ className }) => {
+  const navigate = useNavigate();
+
+  return (
+    <header className={className}>
+      <div className="header-content">
+        <div className="logo" onClick={() => navigate('/')}>
+          <img 
+            src="/path-to-your-logo.png"  // 실제 로고 경로로 수정 필요
+            alt="톡톡케어" 
+            style={{ height: '40px',
+              color:'white'
+             }}
+          />
+        </div>
+      </div>
+    </header>
+  );
+};
 
 export default Header;
