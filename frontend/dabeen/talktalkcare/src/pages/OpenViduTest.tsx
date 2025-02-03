@@ -3,13 +3,13 @@ import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
 import './OpenViduTest.css';
 
 const OPENVIDU_SERVER_URL = 'https://talktalkcare.com';
-const OPENVIDU_SERVER_SECRET = 'talktalkcare';  // docker-compose.yml의 OPENVIDU_SECRET 값으로 변경
+const OPENVIDU_SERVER_SECRET = 'talktalkcare';
+const DEFAULT_SESSION_ID = 'test-session';  // 기본 세션 ID 상수로 정의
 
 const OpenViduTest: React.FC = () => {
   const [session, setSession] = useState<Session | undefined>(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-  const [sessionId, setSessionId] = useState('test-session');
   const [isConnected, setIsConnected] = useState(false);
 
   const createSession = async (sessionId: string) => {
@@ -63,8 +63,8 @@ const OpenViduTest: React.FC = () => {
       });
 
       // 세션 생성 및 토큰 발급
-      const sessionId = await createSession(sessionId);
-      const token = await createToken(sessionId);
+      const createdSessionId = await createSession(DEFAULT_SESSION_ID);
+      const token = await createToken(createdSessionId);
 
       // 세션 연결
       await session.connect(token);
