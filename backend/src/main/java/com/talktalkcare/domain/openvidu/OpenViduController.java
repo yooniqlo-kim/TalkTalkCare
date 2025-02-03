@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -26,7 +28,10 @@ public class OpenViduController {
     public ResponseEntity<?> initializeSession() {
         try {
             Session session = openVidu.createSession();
-            return ResponseEntity.ok(session.getSessionId());
+            // JSON 객체로 응답
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", session.getSessionId());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
