@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
 import './OpenViduTest.css';
 
-const OPENVIDU_SERVER_URL = 'https://talktalkcare.com';
+const OPENVIDU_SERVER_URL = 'https://talktalkcare.com/openvidu';
 const OPENVIDU_SERVER_SECRET = 'talktalkcare';
 const DEFAULT_SESSION_ID = 'test-session';  // 기본 세션 ID 상수로 정의
 
