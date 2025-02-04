@@ -2,8 +2,6 @@ package com.talktalkcare.domain.talktalkAI.controller;
 
 import com.talktalkcare.common.response.Api;
 import com.talktalkcare.domain.talktalkAI.dto.TalkTalkDto;
-import com.talktalkcare.domain.talktalkAI.dto.UserInfoDto;
-import com.talktalkcare.domain.talktalkAI.entity.TalkTalk;
 import com.talktalkcare.domain.talktalkAI.service.TalkTalkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -58,15 +56,14 @@ public class TalkTalkController {
     }
 
     @PostMapping("/save")
-    public Api<String> saveTalkTalk(@RequestBody TalkTalkDto talkTalkDto,
+    public Api saveTalkTalk(@RequestBody TalkTalkDto talkTalkDto,
                                     @RequestParam int userId) {
 
         String conversation = userConversations.get(userId).toString();
         String summary = talkTalkService.summarizeConversation(conversation);
-        System.out.println(conversation + ":" + summary);
 
         talkTalkService.saveTalkTalk(new TalkTalkDto(userId, summary));
 
-        return Api.OK("대화 내용이 저장되었습니다.");
+        return Api.OK();
     }
 }

@@ -10,6 +10,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
+@Table(name = "user_talktalk_log")
 public class TalkTalk {
 
     @Id

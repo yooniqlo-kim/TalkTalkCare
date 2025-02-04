@@ -36,14 +36,15 @@ public class TalkTalkService {
     public TalkTalk saveTalkTalk(TalkTalkDto talkTalkDto) {
         TalkTalk talkTalk = new TalkTalk();
         talkTalk.setUserId(talkTalkDto.getUserId());
-        talkTalk.setSummary(talkTalkDto.getSummary());  // Assuming "Summary" is the text field
+        talkTalk.setSummary(talkTalkDto.getSummary());
+        System.out.println(talkTalk);
         return talkTalkRepository.save(talkTalk);
     }
     public String getSummary(int userId) {
-        TalkTalk summary = talkTalkRepository.findTalkSummary(userId);
+        String summary = talkTalkRepository.findTalkSummary(userId);
         System.out.println("summary:"+summary);
         if (summary != null) {
-            return summary.getSummary(); // Return the summary if found
+            return summary; // Return the summary if found
         } else {
             return " "; // Return a default message if not found
         }
