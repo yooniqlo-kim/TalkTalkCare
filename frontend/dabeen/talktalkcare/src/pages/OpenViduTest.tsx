@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
 import './OpenViduTest.css';
 
-const OPENVIDU_SERVER_URL = 'https://talktalkcare.com';  // HTTPS 사용
-const OPENVIDU_SERVER_SECRET = 'talktalkcare';
+const OPENVIDU_SERVER_URL = 'https://www.talktalkcare.com';  // HTTPS 사용
+// const OPENVIDU_SERVER_SECRET = 'talktalkcare';
 const DEFAULT_SESSION_ID = 'test-session';
 
 const OpenViduTest: React.FC = () => {
@@ -45,13 +45,13 @@ const OpenViduTest: React.FC = () => {
 
   const createSession = async (sessionId: string) => {
     try {
+      console.log('세션 생성 시도...');
       const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + btoa(`OPENVIDUAPP:${OPENVIDU_SERVER_SECRET}`)
         },
-        body: JSON.stringify({ customSessionId: sessionId })
+        credentials: 'include'
       });
 
       if (response.status === 409) {
@@ -78,7 +78,8 @@ const OpenViduTest: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        credentials: 'include'
       });
 
       if (!response.ok) {

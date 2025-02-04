@@ -48,8 +48,8 @@ services:
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
     environment:
-      - DOMAIN_OR_PUBLIC_IP=talktalkcare.com
-      - OPENVIDU_URL=https://talktalkcare.com
+      - DOMAIN_OR_PUBLIC_IP=www.talktalkcare.com
+      - OPENVIDU_URL=https://www.talktalkcare.com
       - OPENVIDU_SECRET=talktalkcare
       - CERTIFICATE_TYPE=owncert
       - HTTPS_PORT=4443
