@@ -44,6 +44,7 @@ services:
     container_name: openvidu
     ports:
       - "4443:4443"
+      - "8888:8888"  # Kurento WebSocket
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
     environment:
@@ -52,6 +53,8 @@ services:
       - OPENVIDU_SECRET=talktalkcare
       - CERTIFICATE_TYPE=owncert
       - HTTPS_PORT=4443
+      - OPENVIDU_CDR=false
+      - KMS_URIS=["ws://localhost:8888/kurento"]
       # SSL 인증서 관련 설정 추가
       - HTTPS_KEY=/etc/letsencrypt/live/talktalkcare.com/privkey.pem
       - HTTPS_CERT=/etc/letsencrypt/live/talktalkcare.com/fullchain.pem

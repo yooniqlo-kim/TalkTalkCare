@@ -20,8 +20,8 @@ public class OpenViduController {
     private final OpenVidu openVidu;
 
     public OpenViduController() {
-        // 도커 네트워크 내부에서는 http://openvidu:4443 사용
-        this.openVidu = new OpenVidu("http://openvidu:4443", "talktalkcare");
+        // HTTPS로 변경
+        this.openVidu = new OpenVidu("https://openvidu:4443", "talktalkcare");
     }
 
     @PostMapping("/sessions")
