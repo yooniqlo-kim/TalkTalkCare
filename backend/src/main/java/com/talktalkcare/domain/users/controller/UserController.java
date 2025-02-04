@@ -11,6 +11,7 @@ import com.talktalkcare.domain.users.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,8 +40,8 @@ public class UserController {
         return Api.OK();
     }
 
-    @PostMapping("/upload-profile")
-    public Api<ProfileImageResp> uploadProfileImage(@RequestBody ProfileImagReq profileImagReq) {
+    @PostMapping(value="/upload-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Api<ProfileImageResp> uploadProfileImage(ProfileImagReq profileImagReq) {
         return Api.OK(userService.updateProfileImage(profileImagReq));
     }
 
