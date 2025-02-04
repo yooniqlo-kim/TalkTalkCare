@@ -31,7 +31,7 @@ services:
     image: redis:7.2
     container_name: redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - ./redis_data:/data
     command: redis-server --appendonly yes
@@ -40,30 +40,27 @@ services:
     restart: unless-stopped
 
   openvidu:
-    image: openvidu/openvidu-server-kms:latest
+    image: openvidu/openvidu-server:latest
     container_name: openvidu
+    environment:
+      - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
+      - OPENVIDU_SECRET=${OPENVIDU_SECRET}
+      - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
+      - HTTPS_PORT=${HTTPS_PORT}
+      - KMS_URIS=${KMS_URIS}
     ports:
       - "4443:4443"
-      - "8888:8888"  # Kurento WebSocket
+      - "3478:3478/udp"
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
-    environment:
-      - DOMAIN_OR_PUBLIC_IP=www.talktalkcare.com
-      - OPENVIDU_URL=https://www.talktalkcare.com
-      - OPENVIDU_SECRET=talktalkcare
-      - CERTIFICATE_TYPE=owncert
-      - HTTPS_PORT=4443
-      - OPENVIDU_CDR=false
-      - KMS_URIS=["ws://localhost:8888/kurento"]
-      # SSL 인증서 관련 설정 추가
-      - HTTPS_KEY=/etc/letsencrypt/live/talktalkcare.com/privkey.pem
-      - HTTPS_CERT=/etc/letsencrypt/live/talktalkcare.com/fullchain.pem
+      - "40000-57000:40000-57000/udp"
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
       - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       - cicd_network
     restart: unless-stopped
+
 
   backend:
     build: ./backend
