@@ -11,7 +11,9 @@ public enum UserErrorCode implements ErrorCodeInterface {
     USER_NOT_FOUND(400, 1004, "존재하지 않는 사용자 입니다"),
     PROFILE_IMAGE_DELETE_FAILED(500, 1005, "파일 삭제 실패"),
     USER_LOGINID_MISMATCH(400,1006,"아이디가 잘못되었거나 가입하지 않은 사용자입니다."),
-    USER_PASSWORD_MISMATCH(400,1006,"비밀번호가 잘못 되었습니다.");
+    USER_PASSWORD_MISMATCH(400,1007,"비밀번호가 잘못 되었습니다."),
+    USER_TOKEN_INVALID(400,1008,"유효하지 않은 토큰입니다."),
+    UPLOAD_IMAGE_FAILED(500,1009,"사진 업로드 실패");
 
     private final Integer httpStatusCode;
     private final Integer errorCode;

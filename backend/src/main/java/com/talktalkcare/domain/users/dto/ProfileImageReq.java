@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProfileImagReq {
+public class ProfileImageReq {
     private String userId;
     private MultipartFile file;
 }

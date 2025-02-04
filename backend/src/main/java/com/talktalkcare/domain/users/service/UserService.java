@@ -3,7 +3,7 @@ package com.talktalkcare.domain.users.service;
 import com.talktalkcare.domain.users.converter.UserConverter;
 import com.talktalkcare.domain.users.converter.UserSecurityConverter;
 import com.talktalkcare.domain.users.dto.LoginDto;
-import com.talktalkcare.domain.users.dto.ProfileImagReq;
+import com.talktalkcare.domain.users.dto.ProfileImageReq;
 import com.talktalkcare.domain.users.dto.ProfileImageResp;
 import com.talktalkcare.domain.users.dto.UserDto;
 import com.talktalkcare.domain.users.entity.User;
@@ -46,23 +46,29 @@ public class UserService {
         User user = UserConverter.dtoToEntity(userDto, encryptedPassword);
         UserSecurity userSecurity = UserSecurityConverter.toEntity(user, randomSalt);
 
-        // 여기 이미지 업로드가 들어가야함
+        String uploadedFileName;
+        try{
+            uploadedFileName = s3Service.uploadFile(userDto.getS3Filename(), null);
+        } catch (IOException e) {
+            throw new UserException(UserErrorCode.UPLOAD_IMAGE_FAILED);
+        }
+
+        user.setS3FileName(uploadedFileName);
 
         userRepository.save(user);
         userSecurityRepository.save(userSecurity);
     }
 
     @Transactional
-    public ProfileImageResp updateProfileImage(ProfileImagReq profileImagReq){
-        User user = userRepository.findByLoginId(profileImagReq.getUserId())
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    public ProfileImageResp updateProfileImage(ProfileImageReq profileImageReq){
+        User user = getUser(profileImageReq.getUserId());
 
         try {
-            String newFileName = s3Service.uploadFile(profileImagReq.getFile(), user.getS3FileName());
+            String newFileName = s3Service.uploadFile(profileImageReq.getFile(), user.getS3FileName());
             user.setS3FileName(newFileName);
             return new ProfileImageResp(newFileName);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UserException(UserErrorCode.UPLOAD_IMAGE_FAILED);
         }
     }
 
@@ -75,13 +81,18 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
+    @Transactional
     public void login(LoginDto request, HttpSession session, HttpServletResponse response) {
+        String userLoginId = request.getUserLoginId();
 
-        authenticate(request.getUserLoginId(), request.getPassword());
+        authenticate(userLoginId, request.getPassword());
 
-        session.setAttribute("loginId", request.getUserLoginId());
+        userRepository.setUserLoginedAt(userLoginId);
+
+        session.setAttribute("loginUser", userLoginId);
+
         if (request.isAutoLogin()) {
-            handleAutoLogin(request.getUserLoginId(), session, response);
+            handleAutoLogin(userLoginId, session, response);
         }
     }
 
@@ -108,12 +119,18 @@ public class UserService {
 
         session.setAttribute("autoLoginToken", token);
 
-        Cookie cookie = createAutoLoginCookie(token);
-        response.addCookie(cookie);
+        Cookie tokenCookie = new Cookie("remember-me-token",token);
+        Cookie idCookie = new Cookie("remember-me-id", loginId);
+
+        settingCookie(tokenCookie);
+        settingCookie(idCookie);
+
+        response.addCookie(tokenCookie);
+        response.addCookie(idCookie);
     }
 
     private String createAutoLoginToken(String loginId) {
-        return UUID.randomUUID().toString();
+        return PasswordEncryptor.encryptPassword(loginId,generateSalt());
     }
 
     private void storeTokenInDatabase(String loginId, String token) {
@@ -121,11 +138,25 @@ public class UserService {
         user.setToken(token);
     }
 
-    private Cookie createAutoLoginCookie(String token) {
-        Cookie cookie = new Cookie("remember-me-token", token);
+    private void settingCookie(Cookie cookie) {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(7 * 24 * 60 * 60); // 7일
         cookie.setPath("/");
-        return cookie;
+    }
+
+    @Transactional
+    public void autoLogin(String loginId, String token, HttpSession session) {
+        User user = getUser(loginId);
+
+        if (!user.getToken().equals(token)) {
+            throw new UserException(UserErrorCode.USER_TOKEN_INVALID);
+        }
+
+        session.setAttribute("loginUser", user.getLoginId());
+    }
+
+    public ProfileImageResp getProfileImage(String userLoginId) {
+        User user = getUser(userLoginId);
+        return s3Service.getFileUrl(user.getS3FileName());
     }
 }
