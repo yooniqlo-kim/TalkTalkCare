@@ -50,6 +50,7 @@ const OpenViduTest: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
         },
         credentials: 'include'
       });
@@ -74,10 +75,12 @@ const OpenViduTest: React.FC = () => {
 
   const createToken = async (sessionId: string) => {
     try {
+      console.log('토큰 생성 시도...');
       const response = await fetch(`${OPENVIDU_SERVER_URL}/openvidu/api/sessions/${sessionId}/connections`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
         },
         credentials: 'include'
       });
