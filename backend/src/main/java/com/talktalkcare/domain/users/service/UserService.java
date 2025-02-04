@@ -3,6 +3,8 @@ package com.talktalkcare.domain.users.service;
 import com.talktalkcare.domain.users.converter.UserConverter;
 import com.talktalkcare.domain.users.converter.UserSecurityConverter;
 import com.talktalkcare.domain.users.dto.LoginDto;
+import com.talktalkcare.domain.users.dto.ProfileImagReq;
+import com.talktalkcare.domain.users.dto.ProfileImageResp;
 import com.talktalkcare.domain.users.dto.UserDto;
 import com.talktalkcare.domain.users.entity.User;
 import com.talktalkcare.domain.users.entity.UserSecurity;
@@ -18,12 +20,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+    private final S3Service s3Service;
     private final UserRepository userRepository;
     private final UserSecurityRepository userSecurityRepository;
 
@@ -42,8 +46,29 @@ public class UserService {
         User user = UserConverter.dtoToEntity(userDto, encryptedPassword);
         UserSecurity userSecurity = UserSecurityConverter.toEntity(user, randomSalt);
 
+        // 여기 이미지 업로드가 들어가야함
+
         userRepository.save(user);
         userSecurityRepository.save(userSecurity);
+    }
+
+    @Transactional
+    public ProfileImageResp updateProfileImage(ProfileImagReq profileImagReq){
+        User user = userRepository.findByLoginId(profileImagReq.getUserId())
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        try {
+            String newFileName = s3Service.uploadFile(profileImagReq.getFile(), user.getS3FileName());
+            user.setS3FileName(newFileName);
+            return new ProfileImageResp(newFileName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public User getUser(String userId) {
+        return userRepository.findByLoginId(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }
 
     private String generateSalt() {
@@ -51,24 +76,31 @@ public class UserService {
     }
 
     public void login(LoginDto request, HttpSession session, HttpServletResponse response) {
-        // 인증 로직
-//        if (!authenticate(request.getUserLoginId(), request.getPassword())) {
-//            //throw new AuthenticationException("로그인 실패");
-//        }
 
-        // 세션에 기본 정보 저장
+        authenticate(request.getUserLoginId(), request.getPassword());
+
         session.setAttribute("loginId", request.getUserLoginId());
-        // 자동 로그인 처리
         if (request.isAutoLogin()) {
             handleAutoLogin(request.getUserLoginId(), session, response);
         }
     }
 
-//    private boolean authenticate(String loginId, String password) {
-//        return userRepository.findByLoginId(loginId)
-//                .map(user -> passwordEncoder.matches(password, user.getPassword()))
-//                .orElse(false);
-//    }
+    private void authenticate(String loginId, String password) {
+        if(!userRepository.existsByLoginId(loginId)) {
+            throw new UserException(UserErrorCode.USER_LOGINID_MISMATCH);
+        }
+
+        User user = getUser(loginId);
+
+        UserSecurity userSecurity = userSecurityRepository.findById(loginId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        String encryptedPassword = PasswordEncryptor.encryptPassword(password, userSecurity.getSalt());
+
+        if(!user.getPassword().equals(encryptedPassword)){
+            throw new UserException(UserErrorCode.USER_PASSWORD_MISMATCH);
+        }
+    }
 
     private void handleAutoLogin(String loginId, HttpSession session, HttpServletResponse response) {
         String token = createAutoLoginToken(loginId);
@@ -85,7 +117,8 @@ public class UserService {
     }
 
     private void storeTokenInDatabase(String loginId, String token) {
-        // 토큰 저장 로직
+        User user = getUser(loginId);
+        user.setToken(token);
     }
 
     private Cookie createAutoLoginCookie(String token) {

@@ -2,11 +2,16 @@ package com.talktalkcare.domain.users.controller;
 
 import com.talktalkcare.common.response.Api;
 import com.talktalkcare.domain.users.dto.LoginDto;
+import com.talktalkcare.domain.users.dto.ProfileImagReq;
+import com.talktalkcare.domain.users.dto.ProfileImageResp;
 import com.talktalkcare.domain.users.dto.UserDto;
+import com.talktalkcare.domain.users.entity.User;
+import com.talktalkcare.domain.users.service.S3Service;
 import com.talktalkcare.domain.users.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final S3Service s3Service;
 
     @GetMapping("/check-id")
     public Api<Void> checkUserId(@RequestParam(name = "userLoginId") String userLoginId) {
@@ -32,6 +38,18 @@ public class UserController {
     public Api<Void> login(@RequestBody LoginDto request, HttpSession session, HttpServletResponse response) {
         userService.login(request, session, response);
         return Api.OK();
+    }
+
+    @PostMapping(value="/upload-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Api<ProfileImageResp> uploadProfileImage(ProfileImagReq profileImagReq) {
+        return Api.OK(userService.updateProfileImage(profileImagReq));
+    }
+
+    @GetMapping("/profile-image")
+    public Api<ProfileImageResp> getProfileImageUrl(@RequestParam(name = "userLoginId") String userLoginId) {
+        User user = userService.getUser(userLoginId);
+        ProfileImageResp profileImageResp = s3Service.getFileUrl(user.getS3FileName());
+        return Api.OK(profileImageResp);
     }
     
 }
