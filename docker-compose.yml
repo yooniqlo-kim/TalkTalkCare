@@ -40,10 +40,11 @@ services:
     restart: unless-stopped
 
   openvidu:
-    image: openvidu/openvidu-server:latest
+    image: openvidu/openvidu-server:2.29.0
     container_name: openvidu
     environment:
       - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
+      - OPENVIDU_URL=${OPENVIDU_URL}
       - OPENVIDU_SECRET=${OPENVIDU_SECRET}
       - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
       - HTTPS_PORT=${HTTPS_PORT}
