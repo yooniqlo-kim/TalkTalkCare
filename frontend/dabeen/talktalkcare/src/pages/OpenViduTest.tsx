@@ -46,7 +46,7 @@ const OpenViduTest: React.FC = () => {
   const createSession = async (sessionId: string) => {
     try {
       console.log('세션 생성 시도...');
-      const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions`, {
+      const response = await fetch(`${OPENVIDU_SERVER_URL}/openvidu/api/sessions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ const OpenViduTest: React.FC = () => {
 
   const createToken = async (sessionId: string) => {
     try {
-      const response = await fetch(`${OPENVIDU_SERVER_URL}/api/sessions/${sessionId}/connections`, {
+      const response = await fetch(`${OPENVIDU_SERVER_URL}/openvidu/api/sessions/${sessionId}/connections`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
