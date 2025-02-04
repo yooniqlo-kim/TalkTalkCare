@@ -108,4 +108,7 @@ public class TalkTalkService {
             throw new RuntimeException("API 호출 실패: " + e.getMessage());
         }
     }
+    private String sanitizeInput(String input) {
+        return input.replaceAll("[\\u0000-\\u001F]", ""); // 제어 문자 제거
+    }
 }

@@ -20,24 +20,13 @@ public class TalkTalkController {
     @GetMapping("/chat")
     public Api<String> getTestResults(@RequestParam String requestType,
                                       @RequestParam int userId) {
-        // DementiaService에서 요청에 따른 testResult 리스트를 가져옴
-        List<DementiaTestResult> testResults = talkTalkService.handleRequest(requestType, userId);
 
-        StringBuilder analysisInputText = new StringBuilder();
         String response = ""; // 분석 결과 변수
+        StringBuilder talktalkResponse = new StringBuilder();
 
-            // 최신 결과와 이전 결과 비교
-            DementiaTestResult latestTestResult = testResults.get(0);
-            DementiaTestResult previousTestResult = testResults.get(1);
+        talktalkResponse.append("응답: " + requestType + "\n");
 
-            analysisInputText.append("Latest Test Result : ")
-                    .append(latestTestResult.getTestResult())
-                    .append("\n\n")
-                    .append("Previous Test Result : ")
-                    .append(previousTestResult.getTestResult())
-                    .append("\n\n");
-
-            response = talkTalkService.talktalkAi(analysisInputText.toString());
+            response = talkTalkService.talktalkAi(talktalkResponse.toString());
 
         return Api.OK(response);
     }
