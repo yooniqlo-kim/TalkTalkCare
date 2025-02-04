@@ -40,7 +40,7 @@ public class TalkTalkService {
         talkTalk.setSummary(talkTalkDto.getSummary());  // Assuming "Summary" is the text field
         return talkTalkRepository.save(talkTalk);
     }
-    public String getSummaryByUserId(int userId) {
+    public String getSummary(int userId) {
         TalkTalk talkTalk = talkTalkRepository.findByUserId(userId);
         if (talkTalk != null) {
             return talkTalk.getSummary(); // Return the summary if found
@@ -65,7 +65,8 @@ public class TalkTalkService {
             ObjectNode systemMessage = objectMapper.createObjectNode();
             systemMessage.put("role", "system");
             systemMessage.put("content",
-                    "유저의 자가 치매 진단 테스트 결과 2개를 너에게 보내줄거야. "
+                    "다음은 유저의 성향 및 특징이야. 이를 기반으로 대화를 이어나가줘." +
+                            " 한 문장씩 보내줘 "
                             );
             messages.add(systemMessage);
             // "user" 메시지 추가

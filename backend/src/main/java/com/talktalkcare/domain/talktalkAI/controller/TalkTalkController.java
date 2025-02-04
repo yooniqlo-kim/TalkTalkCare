@@ -48,6 +48,6 @@ public class TalkTalkController {
 
     @GetMapping("/summary/{userId}")
     public String getSummary(@PathVariable int userId) {
-        return talkTalkService.getSummaryByUserId(userId);
+        return talkTalkService.getSummary(userId);
     }
 }
