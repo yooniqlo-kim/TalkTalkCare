@@ -1,4 +1,4 @@
-package com.talktalkcare.common.response.exception;
+package com.talktalkcare.common.exception;
 
 import com.talktalkcare.common.error.ErrorCode;
 import com.talktalkcare.common.response.Api;

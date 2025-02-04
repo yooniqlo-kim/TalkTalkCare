@@ -1,4 +1,4 @@
-package com.talktalkcare.common.response.error;
+package com.talktalkcare.common.error;
 
 public interface ErrorCodeInterface {
 
