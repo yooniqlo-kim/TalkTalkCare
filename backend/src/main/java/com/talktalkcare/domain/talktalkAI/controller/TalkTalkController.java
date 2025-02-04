@@ -1,7 +1,6 @@
 package com.talktalkcare.domain.talktalkAI.controller;
 
 import com.talktalkcare.common.response.Api;
-import com.talktalkcare.domain.dementia.entity.DementiaTestResult;
 import com.talktalkcare.domain.talktalkAI.dto.TalkTalkDto;
 import com.talktalkcare.domain.talktalkAI.entity.TalkTalk;
 import com.talktalkcare.domain.talktalkAI.service.TalkTalkService;
