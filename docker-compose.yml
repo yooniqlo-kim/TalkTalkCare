@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   cicd_network:
     driver: bridge
@@ -25,7 +23,7 @@ services:
       timeout: 5s
     networks:
       - cicd_network
-    restart: unless-stopped
+    restart: on-failure:3
 
   redis:
     image: redis:7.2
@@ -37,7 +35,7 @@ services:
     command: redis-server --appendonly yes
     networks:
       - cicd_network
-    restart: unless-stopped
+    restart: on-failure:3
 
   openvidu:
     image: openvidu/openvidu-server:2.29.0
@@ -54,14 +52,12 @@ services:
       - "3478:3478/udp"
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
-      - "40000-57000:40000-57000/udp"
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
       - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       - cicd_network
-    restart: unless-stopped
-
+    restart: on-failure:3
 
   backend:
     build: ./backend
