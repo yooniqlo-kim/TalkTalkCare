@@ -37,6 +37,30 @@ services:
       - cicd_network
     restart: on-failure:3
 
+  # Kurento Media Server
+  kurento:
+    image: kurento/kurento-media-server:6.18.0
+    container_name: kurento
+    ports:
+      - "8888:8888"
+    networks:
+      - cicd_network
+    restart: on-failure:3
+
+  # Coturn (TURN Server)
+  coturn:
+    image: instrumentisto/coturn
+    container_name: coturn
+    ports:
+      - "3478:3478/udp"
+      - "3478:3478/tcp"
+    environment:
+      - REALM=talktalkcare.com
+      - USER=turnuser:turnpassword
+    networks:
+      - cicd_network
+    restart: on-failure:3
+
   openvidu:
     image: openvidu/openvidu-server:2.29.0
     container_name: openvidu
@@ -49,7 +73,6 @@ services:
       - KMS_URIS=${KMS_URIS}
     ports:
       - "4443:4443"
-      - "3478:3478/udp"
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
     volumes:
