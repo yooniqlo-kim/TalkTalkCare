@@ -1,10 +1,7 @@
 package com.talktalkcare.domain.users.controller;
 
 import com.talktalkcare.common.response.Api;
-import com.talktalkcare.domain.users.dto.LoginDto;
-import com.talktalkcare.domain.users.dto.ProfileImageReq;
-import com.talktalkcare.domain.users.dto.ProfileImageResp;
-import com.talktalkcare.domain.users.dto.UserDto;
+import com.talktalkcare.domain.users.dto.*;
 import com.talktalkcare.domain.users.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,8 +22,8 @@ public class UserController {
         return Api.OK();
     }
 
-    @PostMapping("/sign-up")
-    public Api<Void> signUp(@RequestBody UserDto userDto) {
+    @PostMapping(value="/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Api<Void> signUp(@ModelAttribute UserDto userDto) {
         userService.signUp(userDto);
         return Api.OK();
     }
@@ -45,5 +42,11 @@ public class UserController {
     @GetMapping("/profile-image")
     public Api<ProfileImageResp> getProfileImageUrl(@RequestParam(name = "userLoginId") String userLoginId) {
         return Api.OK(userService.getProfileImage(userLoginId));
+    }
+
+    @PostMapping("/add-friend")
+    public Api<Void> addFriend(@RequestBody AddFriendReq addFriendReq) {
+        userService.addFriend(addFriendReq);
+        return Api.OK();
     }
 }
