@@ -53,7 +53,19 @@ class OpenViduTest extends Component<{}, State> {
 
   // 웹소켓 연결 설정
   connectWebSocket() {
-    this.websocket = new WebSocket('wss://www.talktalkcare.com/openvidu');  // URL 수정
+    this.websocket = new WebSocket('wss://www.talktalkcare.com:4443/openvidu');
+    
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    const tryReconnect = () => {
+        if (reconnectAttempts < maxReconnectAttempts) {
+            setTimeout(() => {
+                this.connectWebSocket();
+                reconnectAttempts++;
+            }, 2000);
+        }
+    };
 
     this.websocket.onopen = () => {
       console.log('OpenVidu 서버 연결 성공');
@@ -70,6 +82,11 @@ class OpenViduTest extends Component<{}, State> {
     this.websocket.onerror = (error) => {
       console.error('OpenVidu 서버 에러:', error);
       this.setState({ isConnected: false });
+    };
+
+    this.websocket.onclose = () => {
+        console.log('WebSocket 연결 종료');
+        tryReconnect();
     };
   }
 
