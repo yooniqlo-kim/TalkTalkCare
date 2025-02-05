@@ -33,6 +33,7 @@ public class TalkTalkService {
     public int getUserInfo(String loginId) {
         return talkTalkRepository.findUserId(loginId);
     }
+
     public TalkTalk saveTalkTalk(TalkTalkDto talkTalkDto) {
         TalkTalk talkTalk = new TalkTalk();
         talkTalk.setUserId(talkTalkDto.getUserId());
@@ -49,7 +50,6 @@ public class TalkTalkService {
             return " "; // Return a default message if not found
         }
     }
-
     public String talktalkAi(String summary) {
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -66,9 +66,8 @@ public class TalkTalkService {
             ObjectNode systemMessage = objectMapper.createObjectNode();
             systemMessage.put("role", "system");
             systemMessage.put("content",
-                    "다음은 유저의 성향 및 특징이야. 이를 기반으로 대화를 이어나갈거야." +
-                            " 두 문장 이내로 보내줘 "
-                            );
+                    "다음은 유저의 성향 및 특징이야. 이를 기반으로 대화를 이어나갈 수 있게 두 문장 이내로 보내줘"
+            );
             messages.add(systemMessage);
             // "user" 메시지 추가
             ObjectNode userMessage = objectMapper.createObjectNode();
@@ -90,14 +89,22 @@ public class TalkTalkService {
             // API 호출
             String response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class).getBody();
 
+            // 응답이 null인지 확인
+            if (response == null) {
+                throw new RuntimeException("API 응답이 null입니다.");
+            }
+
             // JSON 파싱
             JsonNode responseJson = objectMapper.readTree(response);
-            String content = responseJson
-                    .get("choices") // "choices" 배열
-                    .get(0)         // 첫 번째 선택지
-                    .get("message") // "message" 객체
-                    .get("content") // "content" 필드
-                    .asText();      // 문자열로 변환
+
+            // 응답 구조 검증
+            JsonNode firstChoice = responseJson.get("choices").get(0);
+          /*  if (!firstChoice.has("message") || !firstChoice.get("message").has("content")) {
+                throw new RuntimeException("API 응답에서 'content' 필드를 찾을 수 없습니다.");
+            }*/
+
+            // content 추출
+            String content = firstChoice.get("message").get("content").asText();
 
             // content 출력
             System.out.println(content);
@@ -109,6 +116,7 @@ public class TalkTalkService {
             throw new RuntimeException("API 호출 실패: " + e.getMessage());
         }
     }
+
     private String sanitizeInput(String input) {
         return input.replaceAll("[\\u0000-\\u001F]", ""); // 제어 문자 제거
     }
@@ -129,10 +137,10 @@ public class TalkTalkService {
             ObjectNode systemMessage = objectMapper.createObjectNode();
             systemMessage.put("role", "system");
             systemMessage.put("content",
-                    "다음은 유저와의 대화 내용이야. 유저의 정보를 저장하기 위해 다음 내용을 요약해줘" +
-                            "예를 들어 유저 나이: 72세, 짬뽕 좋아함,혼자 살고있음, (이런식으로) "
-            );
+                    "다음은 유저와의 대화 내용이야. 유저 정보를 저장하기 위해 다음 내용을 최대한 간단하게 요약해줘. " +
+                            "예를 들어 유저 나이: 72세, 짬뽕 좋아함, 혼자 살고 있음 (이런 식으로)");
             messages.add(systemMessage);
+
             // "user" 메시지 추가
             ObjectNode userMessage = objectMapper.createObjectNode();
             userMessage.put("role", "user");
@@ -153,17 +161,34 @@ public class TalkTalkService {
             // API 호출
             String response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class).getBody();
 
+            // 응답이 비어 있는 경우 예외 처리
+            if (response == null || response.isEmpty()) {
+                throw new RuntimeException("API 호출 실패");
+            }
+
             // JSON 파싱
             JsonNode responseJson = objectMapper.readTree(response);
-            String content = responseJson
-                    .get("choices") // "choices" 배열
-                    .get(0)         // 첫 번째 선택지
-                    .get("message") // "message" 객체
-                    .get("content") // "content" 필드
-                    .asText();      // 문자열로 변환
 
-            // content 출력
-            System.out.println(content);
+            // 응답 로그 출력 (디버깅 용도)
+            System.out.println("API 응답: " + responseJson.toPrettyString());
+
+            // "choices" 배열이 존재하는지 확인
+            if (!responseJson.has("choices") || responseJson.get("choices").isEmpty()) {
+                throw new RuntimeException("API 응답에 'choices' 필드가 없습니다.");
+            }
+
+            // 첫 번째 choice 가져오기
+            JsonNode firstChoice = responseJson.get("choices").get(0);
+         /*   if (!firstChoice.has("message") || !firstChoice.get("message").has("content")) {
+                throw new RuntimeException("API 응답에 'message.content' 필드가 없습니다.");
+             }
+         */
+
+            // 요약된 내용 추출
+            String content = firstChoice.get("message").get("content").asText();
+
+            // 결과 로그 출력
+            System.out.println("요약 결과: " + content);
 
             return content;
 
