@@ -81,15 +81,20 @@ class OpenViduTest extends Component<{}, State> {
 
   async joinSession(sessionId: string) {
     try {
-      // 세션 생성/참여
-      const token = await this.getToken(sessionId);
-      
+      // 기존 세션이 있으면 먼저 종료
+      if (this.state.session) {
+        await this.leaveSession();
+      }
+
+      // OpenVidu 객체 초기화
       this.OV = new OpenVidu();
       this.OV.enableProdMode();
 
+      // 세션 초기화
       const session = this.OV.initSession();
       this.setState({ session });
 
+      // 세션 이벤트 핸들러 설정
       session.on('streamCreated', (event) => {
         const subscriber = session.subscribe(event.stream, undefined);
         this.setState(prevState => ({
@@ -97,50 +102,35 @@ class OpenViduTest extends Component<{}, State> {
         }));
       });
 
-      session.on('streamDestroyed', (event) => {
-        this.setState(prevState => ({
-          subscribers: prevState.subscribers.filter(sub => sub !== event.stream.streamManager)
-        }));
+      // 토큰 생성
+      const token = await this.getToken(sessionId);
+      
+      // 세션 연결
+      await session.connect(token);
+
+      // 퍼블리셔 초기화
+      const publisher = await this.OV.initPublisherAsync(undefined, {
+        audioSource: undefined,
+        videoSource: undefined,
+        publishAudio: true,
+        publishVideo: true,
+        resolution: '640x480',
+        frameRate: 30,
+        insertMode: 'APPEND',
+        mirror: false
       });
 
-      session.on('connectionCreated', () => {
-        this.setState({ isConnected: true });
-        console.log('OpenVidu 연결됨');
+      // 퍼블리셔 연결
+      await session.publish(publisher);
+      this.setState({
+        mainStreamManager: publisher,
+        publisher: publisher,
+        currentSessionId: sessionId
       });
 
-      try {
-        await session.connect(token);
-
-        const publisher = await this.OV.initPublisherAsync(undefined, {
-          audioSource: undefined,
-          videoSource: undefined,
-          publishAudio: true,
-          publishVideo: true,
-          resolution: '640x480',
-          frameRate: 30,
-          insertMode: 'APPEND',
-          mirror: false
-        });
-
-        session.publish(publisher);
-
-        // 현재 사용 중인 비디오 장치 확인
-        const devices = await this.OV.getDevices();
-        const videoDevices = devices.filter(device => device.kind === 'videoinput');
-        const currentVideoDeviceId = publisher.stream.getMediaStream().getVideoTracks()[0].getSettings().deviceId;
-        const currentVideoDevice = videoDevices.find(device => device.deviceId === currentVideoDeviceId);
-
-        this.setState({
-          currentVideoDevice,
-          mainStreamManager: publisher,
-          publisher
-        });
-
-      } catch (error) {
-        console.error('세션 연결 에러:', error);
-      }
     } catch (error) {
-      console.error('세션 참여 에러:', error);
+      console.error('세션 참가 중 오류:', error);
+      this.leaveSession();
     }
   }
 
