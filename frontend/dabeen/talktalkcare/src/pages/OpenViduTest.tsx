@@ -1,62 +1,163 @@
-import React, { useEffect, useState } from 'react';
-import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
+import { Component } from 'react';
+import { Device, OpenVidu, Publisher, Session, StreamManager, Subscriber } from 'openvidu-browser';
 import './OpenViduTest.css';
 
-const OPENVIDU_SERVER_URL = 'https://www.talktalkcare.com';  // HTTPS 사용
-// const OPENVIDU_SERVER_SECRET = 'talktalkcare';
-const DEFAULT_SESSION_ID = 'test-session';
+interface State {
+  session: Session | undefined;
+  mainStreamManager: StreamManager | undefined;
+  publisher: Publisher | undefined;
+  subscribers: Subscriber[];
+  currentVideoDevice: Device | undefined;
+  wsMessages: string[];  // 웹소켓 메시지 유지
+  isConnected: boolean;  // 연결 상태 유지
+}
 
-const OpenViduTest: React.FC = () => {
-  const [session, setSession] = useState<Session | undefined>(undefined);
-  const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
+class OpenViduTest extends Component<{}, State> {
+  private OV: OpenVidu | undefined;
+  private websocket: WebSocket | undefined;  // 웹소켓 연결 유지
 
-  // WebSocket 관련 상태 추가
-  const [wsMessages, setWsMessages] = useState<string[]>([]);
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      session: undefined,
+      mainStreamManager: undefined,
+      publisher: undefined,
+      subscribers: [],
+      currentVideoDevice: undefined,
+      wsMessages: [],
+      isConnected: false
+    };
 
-  // WebSocket 연결 설정
-  useEffect(() => {
-    const websocket = new WebSocket('wss://talktalkcare.com/ws/signal');
+    this.joinSession = this.joinSession.bind(this);
+    this.leaveSession = this.leaveSession.bind(this);
+    this.switchCamera = this.switchCamera.bind(this);
+    this.handleMainVideoStream = this.handleMainVideoStream.bind(this);
+  }
 
-    websocket.onopen = () => {
+  componentDidMount() {
+    window.addEventListener('beforeunload', this.leaveSession);
+    this.connectWebSocket();  // 웹소켓 연결 설정
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('beforeunload', this.leaveSession);
+    this.leaveSession();
+    if (this.websocket) {
+      this.websocket.close();
+    }
+  }
+
+  // 웹소켓 연결 설정
+  connectWebSocket() {
+    this.websocket = new WebSocket('wss://www.talktalkcare.com/ws/signal');
+
+    this.websocket.onopen = () => {
       console.log('시그널링 서버 연결 성공');
     };
 
-    websocket.onmessage = (event) => {
+    this.websocket.onmessage = (event) => {
       console.log('시그널링 메시지 수신:', event.data);
-      setWsMessages(prev => [...prev, event.data]);
+      this.setState(prevState => ({
+        wsMessages: [...prevState.wsMessages, event.data]
+      }));
     };
 
-    websocket.onerror = (error) => {
+    this.websocket.onerror = (error) => {
       console.error('시그널링 서버 에러:', error);
     };
 
-    websocket.onclose = () => {
+    this.websocket.onclose = () => {
       console.log('시그널링 서버 연결 종료');
     };
+  }
 
-    return () => {
-      if (websocket.readyState === WebSocket.OPEN) {
-        websocket.close();
-      }
-    };
-  }, []);
+  handleMainVideoStream(stream: StreamManager) {
+    if (this.state.mainStreamManager !== stream) {
+      this.setState({ mainStreamManager: stream });
+    }
+  }
 
-  const createSession = async (sessionId: string) => {
+  async joinSession() {
     try {
-      console.log('세션 생성 시도...');
-      const response = await fetch(`${OPENVIDU_SERVER_URL}/openvidu/api/sessions`, {
+      this.OV = new OpenVidu();
+      this.OV.enableProdMode();
+
+      const session = this.OV.initSession();
+      this.setState({ session });
+
+      session.on('streamCreated', (event) => {
+        const subscriber = session.subscribe(event.stream, undefined);
+        this.setState(prevState => ({
+          subscribers: [...prevState.subscribers, subscriber]
+        }));
+      });
+
+      session.on('streamDestroyed', (event) => {
+        this.setState(prevState => ({
+          subscribers: prevState.subscribers.filter(sub => sub !== event.stream.streamManager)
+        }));
+      });
+
+      session.on('connectionCreated', () => {
+        this.setState({ isConnected: true });
+        console.log('OpenVidu 연결됨');
+      });
+
+      try {
+        // 기존의 세션 생성 및 토큰 발급 로직 유지
+        console.log('세션 생성 시도...');
+        const sessionId = await this.createSession('test-session');
+        console.log('토큰 생성 시도...');
+        const token = await this.createToken(sessionId);
+
+        await session.connect(token);
+
+        const publisher = await this.OV.initPublisherAsync(undefined, {
+          audioSource: undefined,
+          videoSource: undefined,
+          publishAudio: true,
+          publishVideo: true,
+          resolution: '640x480',
+          frameRate: 30,
+          insertMode: 'APPEND',
+          mirror: false
+        });
+
+        session.publish(publisher);
+
+        // 현재 사용 중인 비디오 장치 확인
+        const devices = await this.OV.getDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        const currentVideoDeviceId = publisher.stream.getMediaStream().getVideoTracks()[0].getSettings().deviceId;
+        const currentVideoDevice = videoDevices.find(device => device.deviceId === currentVideoDeviceId);
+
+        this.setState({
+          currentVideoDevice,
+          mainStreamManager: publisher,
+          publisher
+        });
+
+      } catch (error) {
+        console.error('세션 연결 에러:', error);
+      }
+    } catch (error) {
+      console.error('세션 초기화 에러:', error);
+    }
+  }
+
+  // 기존의 세션 생성 메서드 유지
+  async createSession(sessionId: string) {
+    try {
+      const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
         },
-        credentials: 'include'
+        body: JSON.stringify({ customSessionId: sessionId })
       });
 
       if (response.status === 409) {
-        console.log('세션이 이미 존재함:', sessionId);
         return sessionId;
       }
 
@@ -65,24 +166,22 @@ const OpenViduTest: React.FC = () => {
       }
       
       const data = await response.json();
-      console.log('세션 생성 성공:', data);
       return data.id;
     } catch (error) {
       console.error('세션 생성 에러:', error);
       throw error;
     }
-  };
+  }
 
-  const createToken = async (sessionId: string) => {
+  // 기존의 토큰 생성 메서드 유지
+  async createToken(sessionId: string) {
     try {
-      console.log('토큰 생성 시도...');
-      const response = await fetch(`${OPENVIDU_SERVER_URL}/openvidu/api/sessions/${sessionId}/connections`, {
+      const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessionId}/connections`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
-        },
-        credentials: 'include'
+        }
       });
 
       if (!response.ok) {
@@ -90,132 +189,129 @@ const OpenViduTest: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log('토큰 생성 성공:', data);
       return data.token;
     } catch (error) {
       console.error('토큰 생성 에러:', error);
       throw error;
     }
-  };
+  }
 
-  const joinSession = async () => {
+  leaveSession() {
+    if (this.state.session) {
+      this.state.session.disconnect();
+    }
+    document.querySelectorAll('video').forEach(video => {
+      video.srcObject = null;
+    });
+
+    this.OV = undefined;
+    this.setState({
+      session: undefined,
+      subscribers: [],
+      mainStreamManager: undefined,
+      publisher: undefined
+    });
+  }
+
+  async switchCamera() {
     try {
-      const OV = new OpenVidu();
-      OV.enableProdMode();  // 프로덕션 모드 활성화 추가
-      
-      const session = OV.initSession();
-      setSession(session);
+      if (!this.OV) return;
 
-      session.on('streamCreated', (event) => {
-        console.log('스트림 생성됨');
-        const subscriber = session.subscribe(event.stream, undefined);
-        setSubscribers(prev => [...prev, subscriber]);
-      });
+      const devices = await this.OV.getDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
 
-      session.on('streamDestroyed', (event) => {
-        console.log('스트림 제거됨');
-        setSubscribers(prev => prev.filter(sub => sub !== event.stream.streamManager));
-      });
+      if (videoDevices.length > 1) {
+        const newVideoDevice = videoDevices.find(
+          device => device.deviceId !== this.state.currentVideoDevice?.deviceId
+        );
 
-      session.on('connectionCreated', () => {
-        setIsConnected(true);
-        console.log('OpenVidu 연결됨');
-      });
+        if (newVideoDevice && this.state.session) {
+          const newPublisher = this.OV.initPublisher(undefined, {
+            videoSource: newVideoDevice.deviceId,
+            publishAudio: true,
+            publishVideo: true,
+            mirror: true
+          });
 
-      // 세션 생성 및 토큰 발급
-      console.log('세션 생성 시도...');
-      const createdSessionId = await createSession(DEFAULT_SESSION_ID);
-      console.log('토큰 생성 시도...');
-      const token = await createToken(createdSessionId);
+          await this.state.session.unpublish(this.state.mainStreamManager as Publisher);
+          await this.state.session.publish(newPublisher);
 
-      // 세션 연결
-      console.log('세션 연결 시도...');
-      await session.connect(token);
-      console.log('세션 연결 성공');
-
-      // 퍼블리셔 초기화
-      console.log('퍼블리셔 초기화...');
-      const publisher = await OV.initPublisher(undefined, {
-        audioSource: undefined,
-        videoSource: undefined,
-        publishAudio: true,
-        publishVideo: true,
-        resolution: '640x480',
-        frameRate: 30,
-        insertMode: 'APPEND',
-      });
-
-      // 스트림 발행
-      console.log('스트림 발행 시도...');
-      await session.publish(publisher);
-      console.log('스트림 발행 성공');
-      setPublisher(publisher);
-
+          this.setState({
+            currentVideoDevice: newVideoDevice,
+            mainStreamManager: newPublisher,
+            publisher: newPublisher
+          });
+        }
+      }
     } catch (error) {
-      console.error('세션 연결 에러:', error);
+      console.error('카메라 전환 에러:', error);
     }
-  };
+  }
 
-  const leaveSession = () => {
-    if (session) {
-      session.disconnect();
-      setSession(undefined);
-      setPublisher(undefined);
-      setSubscribers([]);
-      setIsConnected(false);
-    }
-  };
+  render() {
+    return (
+      <div className="container">
+        <h1>OpenVidu 화상통화 테스트</h1>
+        
+        <div className="connection-status">
+          OpenVidu 연결 상태: {this.state.isConnected ? '연결됨' : '연결 안됨'}
+        </div>
 
-  useEffect(() => {
-    return () => {
-      leaveSession();
-    };
-  }, []);
+        <div className="button-container">
+          {!this.state.session ? (
+            <button onClick={this.joinSession}>세션 참여</button>
+          ) : (
+            <>
+              <button onClick={this.leaveSession}>세션 나가기</button>
+              <button onClick={this.switchCamera}>카메라 전환</button>
+            </>
+          )}
+        </div>
 
-  return (
-    <div className="openvidu-test-container">
-      <h1>OpenVidu 1:1 화상통화 테스트</h1>
-      <div className="connection-status">
-        OpenVidu 연결 상태: {isConnected ? '연결됨' : '연결 안됨'}
-      </div>
-      <div className="button-container">
-        {!session ? (
-          <button onClick={joinSession}>세션 참여</button>
-        ) : (
-          <button onClick={leaveSession}>세션 나가기</button>
-        )}
-      </div>
-      <div className="video-container">
-        {publisher && (
-          <div className="stream-container">
-            <h3>내 비디오</h3>
-            <video autoPlay ref={video => {
-              if (video) {
-                video.srcObject = publisher.stream.getMediaStream();
-              }
-            }} />
+        <div className="video-container">
+          {this.state.mainStreamManager && (
+            <div className="main-video">
+              <video autoPlay ref={video => {
+                if (video) {
+                  this.state.mainStreamManager!.addVideoElement(video);
+                }
+              }} />
+            </div>
+          )}
+
+          <div className="secondary-videos">
+            {this.state.publisher && (
+              <div className="video-box" onClick={() => this.handleMainVideoStream(this.state.publisher!)}>
+                <video autoPlay ref={video => {
+                  if (video) {
+                    this.state.publisher!.addVideoElement(video);
+                  }
+                }} />
+              </div>
+            )}
+            
+            {this.state.subscribers.map((sub, i) => (
+              <div key={i} className="video-box" onClick={() => this.handleMainVideoStream(sub)}>
+                <video autoPlay ref={video => {
+                  if (video) {
+                    sub.addVideoElement(video);
+                  }
+                }} />
+              </div>
+            ))}
           </div>
-        )}
-        {subscribers.map((subscriber, i) => (
-          <div key={i} className="stream-container">
-            <h3>상대방 비디오</h3>
-            <video autoPlay ref={video => {
-              if (video) {
-                video.srcObject = subscriber.stream.getMediaStream();
-              }
-            }} />
-          </div>
-        ))}
+        </div>
+
+        {/* 웹소켓 메시지 표시 영역 유지 */}
+        <div className="signaling-messages">
+          <h3>시그널링 메시지</h3>
+          {this.state.wsMessages.map((msg, index) => (
+            <div key={index} className="message">{msg}</div>
+          ))}
+        </div>
       </div>
-      {/* WebSocket 메시지 표시 영역 추가 */}
-      <div className="signaling-messages">
-        <h3>시그널링 메시지</h3>
-        {wsMessages.map((msg, index) => (
-          <div key={index} className="message">{msg}</div>
-        ))}
-      </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default OpenViduTest;

@@ -21,7 +21,7 @@ public class OpenViduController {
     private final OpenVidu openVidu;
 
     public OpenViduController() {
-        // HTTPS로 변경
+        // 도커 네트워크 내부 통신은 http로 가능
         this.openVidu = new OpenVidu("https://openvidu:4443", "talktalkcare");
     }
 
