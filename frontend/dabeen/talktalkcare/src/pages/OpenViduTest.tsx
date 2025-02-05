@@ -10,6 +10,7 @@ interface State {
   currentVideoDevice: Device | undefined;
   wsMessages: string[];  // 웹소켓 메시지 유지
   isConnected: boolean;  // 연결 상태 유지
+  sessionInput: string;  // 세션 ID 입력값
 }
 
 class OpenViduTest extends Component<{}, State> {
@@ -25,7 +26,8 @@ class OpenViduTest extends Component<{}, State> {
       subscribers: [],
       currentVideoDevice: undefined,
       wsMessages: [],
-      isConnected: false
+      isConnected: false,
+      sessionInput: '',
     };
 
     this.joinSession = this.joinSession.bind(this);
@@ -77,8 +79,11 @@ class OpenViduTest extends Component<{}, State> {
     }
   }
 
-  async joinSession() {
+  async joinSession(sessionId: string) {
     try {
+      // 세션 생성/참여
+      const token = await this.getToken(sessionId);
+      
       this.OV = new OpenVidu();
       this.OV.enableProdMode();
 
@@ -104,12 +109,6 @@ class OpenViduTest extends Component<{}, State> {
       });
 
       try {
-        // 기존의 세션 생성 및 토큰 발급 로직 유지
-        console.log('세션 생성 시도...');
-        const sessionId = await this.createSession('test-session');
-        console.log('토큰 생성 시도...');
-        const token = await this.createToken(sessionId);
-
         await session.connect(token);
 
         const publisher = await this.OV.initPublisherAsync(undefined, {
@@ -141,7 +140,7 @@ class OpenViduTest extends Component<{}, State> {
         console.error('세션 연결 에러:', error);
       }
     } catch (error) {
-      console.error('세션 초기화 에러:', error);
+      console.error('세션 참여 에러:', error);
     }
   }
 
@@ -196,6 +195,13 @@ class OpenViduTest extends Component<{}, State> {
     }
   }
 
+  async getToken(sessionId: string) {
+    // 세션 생성 시도
+    const sid = await this.createSession(sessionId);
+    // 토큰 생성
+    return await this.createToken(sid);
+  }
+
   leaveSession() {
     if (this.state.session) {
       this.state.session.disconnect();
@@ -248,18 +254,57 @@ class OpenViduTest extends Component<{}, State> {
     }
   }
 
+  // 세션 ID 입력 처리
+  handleSessionInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ sessionInput: e.target.value });
+  }
+
+  // 세션 참여 처리
+  handleJoinSession = async () => {
+    const sessionId = this.state.sessionInput || 'test-session';
+    await this.joinSession(sessionId);
+  }
+
   render() {
     return (
       <div className="container">
-        <h1>OpenVidu 화상통화 테스트</h1>
+        <h1>화상 통화</h1>
         
+        {/* 세션 입력 및 참여 UI */}
+        <div className="session-form">
+          <input
+            type="text"
+            placeholder="세션 ID를 입력하세요"
+            value={this.state.sessionInput}
+            onChange={this.handleSessionInput}
+          />
+          <button onClick={this.handleJoinSession}>
+            참여하기
+          </button>
+        </div>
+
+        {/* 현재 세션 정보 표시 */}
+        {this.state.session && (
+          <div className="session-info">
+            현재 세션: {this.state.session?.sessionId}
+            <button onClick={() => {
+              if (this.state.session?.sessionId) {
+                navigator.clipboard.writeText(this.state.session.sessionId);
+                alert('세션 ID가 복사되었습니다!');
+              }
+            }}>
+              세션 ID 복사
+            </button>
+          </div>
+        )}
+
         <div className="connection-status">
           OpenVidu 연결 상태: {this.state.isConnected ? '연결됨' : '연결 안됨'}
         </div>
 
         <div className="button-container">
           {!this.state.session ? (
-            <button onClick={this.joinSession}>세션 참여</button>
+            <button onClick={() => this.joinSession('test-session')}>세션 참여</button>
           ) : (
             <>
               <button onClick={this.leaveSession}>세션 나가기</button>

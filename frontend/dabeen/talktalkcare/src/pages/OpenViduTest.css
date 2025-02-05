@@ -217,4 +217,60 @@ h1 {
 
 .video-controls button.active:hover {
   background-color: #218838;
+}
+
+/* 세션 입력 폼 */
+.session-form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.session-form input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 300px;
+}
+
+.session-form button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.session-form button:hover {
+  background-color: #218838;
+}
+
+/* 세션 정보 */
+.session-info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+}
+
+.session-info button {
+  padding: 5px 10px;
+  font-size: 14px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.session-info button:hover {
+  background-color: #5a6268;
 } 
