@@ -22,15 +22,15 @@ public class TalkTalkController {
      * "대화 시작" 요청 시 해당 유저의 summary 불러오기
      */
     @PostMapping("/start")
-    public Api startChat(@RequestParam String loginId) {
+    public Api startChat(@RequestParam int userId) {
         // 해당 유저의 summary 가져와서 conversation 초기화
-        int userId = talkTalkService.getUserInfo(loginId);
+//        int userId = talkTalkService.getUserInfo(loginId);
 //        String name = userInfo.getName();
         String summary = talkTalkService.getSummary(userId);
 
         userConversations.put(userId, new StringBuilder("이전 대화 요약: " + summary + "\n"));
 
-//        System.out.println("✅" + userId + ":" + summary);
+//        System.out.println(userId + ":" + summary);
         return Api.OK();
     }
 
@@ -49,8 +49,7 @@ public class TalkTalkController {
 
         // AI 응답도 conversation에 누적
         conversation.append("AI: ").append(aiResponse).append("\n");
-
-        System.out.println( conversation  + aiResponse);
+//        System.out.println( conversation  + aiResponse);
         return Api.OK(aiResponse);
     }
 

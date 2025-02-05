@@ -99,15 +99,12 @@ public class TalkTalkService {
 
             // 응답 구조 검증
             JsonNode firstChoice = responseJson.get("choices").get(0);
-          /*  if (!firstChoice.has("message") || !firstChoice.get("message").has("content")) {
-                throw new RuntimeException("API 응답에서 'content' 필드를 찾을 수 없습니다.");
-            }*/
 
             // content 추출
             String content = firstChoice.get("message").get("content").asText();
 
             // content 출력
-            System.out.println(content);
+//            System.out.println(content);
 
             return content;
 
@@ -179,10 +176,6 @@ public class TalkTalkService {
 
             // 첫 번째 choice 가져오기
             JsonNode firstChoice = responseJson.get("choices").get(0);
-         /*   if (!firstChoice.has("message") || !firstChoice.get("message").has("content")) {
-                throw new RuntimeException("API 응답에 'message.content' 필드가 없습니다.");
-             }
-         */
 
             // 요약된 내용 추출
             String content = firstChoice.get("message").get("content").asText();
