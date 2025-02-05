@@ -261,7 +261,7 @@ class OpenViduTest extends Component<{}, State> {
 
   // 세션 참여 처리
   handleJoinSession = async () => {
-    const sessionId = this.state.sessionInput || 'test-session';
+    const sessionId = this.state.sessionInput || `session-${Date.now()}`;  // 고유한 세션 ID 생성
     await this.joinSession(sessionId);
   }
 
@@ -270,7 +270,7 @@ class OpenViduTest extends Component<{}, State> {
       <div className="container">
         <h1>화상 통화</h1>
         
-        {/* 세션 입력 및 참여 UI */}
+        {/* 세션 입력 및 참여 UI - 항상 표시 */}
         <div className="session-form">
           <input
             type="text"
@@ -279,19 +279,17 @@ class OpenViduTest extends Component<{}, State> {
             onChange={this.handleSessionInput}
           />
           <button onClick={this.handleJoinSession}>
-            참여하기
+            {this.state.session ? '다른 세션 참여' : '세션 참여'}
           </button>
         </div>
 
         {/* 현재 세션 정보 표시 */}
-        {this.state.session && (
+        {this.state.session?.sessionId && (
           <div className="session-info">
-            현재 세션: {this.state.session?.sessionId}
+            현재 세션: {this.state.session.sessionId}
             <button onClick={() => {
-              if (this.state.session?.sessionId) {
-                navigator.clipboard.writeText(this.state.session.sessionId);
-                alert('세션 ID가 복사되었습니다!');
-              }
+              navigator.clipboard.writeText(this.state.session!.sessionId);
+              alert('세션 ID가 복사되었습니다!');
             }}>
               세션 ID 복사
             </button>

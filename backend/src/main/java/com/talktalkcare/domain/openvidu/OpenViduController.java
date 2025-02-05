@@ -44,7 +44,9 @@ public class OpenViduController {
         try {
             Session session = openVidu.getActiveSession(sessionId);
             if (session == null) {
-                session = openVidu.createSession();
+                // 세션이 없으면 새로 생성
+                SessionProperties properties = SessionProperties.fromJson(params).build();
+                session = openVidu.createSession(properties);
             }
             ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
             Connection connection = session.createConnection(properties);
