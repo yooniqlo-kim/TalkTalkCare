@@ -2,10 +2,7 @@ package com.talktalkcare.domain.users.service;
 
 import com.talktalkcare.domain.users.converter.UserConverter;
 import com.talktalkcare.domain.users.converter.UserSecurityConverter;
-import com.talktalkcare.domain.users.dto.LoginDto;
-import com.talktalkcare.domain.users.dto.ProfileImageReq;
-import com.talktalkcare.domain.users.dto.ProfileImageResp;
-import com.talktalkcare.domain.users.dto.UserDto;
+import com.talktalkcare.domain.users.dto.*;
 import com.talktalkcare.domain.users.entity.User;
 import com.talktalkcare.domain.users.entity.UserSecurity;
 import com.talktalkcare.domain.users.error.UserErrorCode;
@@ -158,5 +155,14 @@ public class UserService {
     public ProfileImageResp getProfileImage(String userLoginId) {
         User user = getUser(userLoginId);
         return s3Service.getFileUrl(user.getS3FileName());
+    }
+
+    @Transactional
+    public void addFriend(AddFriendReq addFriendReq) {
+        User friend = userRepository.findByPhone(addFriendReq.getPhone())
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+
+
     }
 }

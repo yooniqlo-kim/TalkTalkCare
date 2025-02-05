@@ -1,6 +1,7 @@
 package com.talktalkcare.domain.users.repository;
 
 import com.talktalkcare.domain.users.entity.User;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,5 +19,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Modifying
     @Query("update User user  set user.loginedAt=now() where user.loginId = :userLoginId")
     void setUserLoginedAt(String userLoginId);
+
+    Optional<User> findByPhone(@NotNull String phone);
 }
 
