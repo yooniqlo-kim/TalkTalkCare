@@ -9,7 +9,7 @@ import MyPage from '../pages/my_page/MyPage.tsx';
 import UserInfoPage from '../pages/my_page/UserInfoPage.tsx';
 import Test from '../pages/DimentiaTest/test.tsx';
 import SDQ from '../pages/DimentiaTest/test_page/SDQ.tsx';
-import SMCQ from '../pages/DimentiaTest/test_page/smcq.tsx';
+import SMCQ from '../pages/DimentiaTest/test_page/SMCQ.tsx';
 import SignUp from '../pages/user_page/SignUp.tsx';
 import Login from '../pages/user_page/LoginPage.tsx';
 
