@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/dementia")
+@RequestMapping("/api/dementia-test")
 @RequiredArgsConstructor
 public class DementiaController {
 
@@ -23,7 +23,7 @@ public class DementiaController {
      * @param dto 테스트 결과 데이터 (JSON 요청 본문)
      * @return 성공 메시지
      */
-    @PostMapping("/save")
+    @PostMapping("/result")
     public Api<String> saveTestResult(@RequestBody DementiaTestDto dto) {
         dementiaService.saveTestResult(dto);
         return Api.OK("테스트 결과가 성공적으로 저장되었습니다.");
@@ -34,7 +34,7 @@ public class DementiaController {
      * @param userId 사용자 ID
      * @return 분석된 AI 결과
      */
-    @GetMapping("/results")
+    @GetMapping("/analysis")
     public Api<String> getTestResults(@RequestParam String requestType,
                                       @RequestParam int userId) {
         // DementiaService에서 요청에 따른 testResult 리스트를 가져옴
@@ -66,6 +66,7 @@ public class DementiaController {
             }
             analysisResponse = aiAnalysisService.analyzeTwoTestResults(analysisInputText.toString());
         }
+        System.out.println(analysisResponse);
         return Api.OK(analysisResponse);
     }
 }
