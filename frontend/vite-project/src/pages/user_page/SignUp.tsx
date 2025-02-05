@@ -30,10 +30,9 @@ const SignUp = () => {
     2: '전화번호를 입력해주세요.',
     3: 'SMS 인증을 진행해주세요.',
     4: '아이디를 입력해주세요. (6자 이상)',
-    5: '닉네임을 입력해주세요.',
-    6: '비밀번호를 입력해주세요. (8자 이상)',
-    7: '생년월일을 입력해주세요.',
-    8: '모든 정보를 입력하셨습니다. 회원가입하기를 눌러주세요!'
+    5: '비밀번호를 입력해주세요. (8자 이상)',
+    6: '생년월일을 입력해주세요.',
+    7: '모든 정보를 입력하셨습니다. 회원가입하기를 눌러주세요!'
   };
 
   const handleImageClick = () => {
@@ -71,20 +70,6 @@ const SignUp = () => {
       setStep(4);
     } catch (error) {
       alert('SMS 인증번호가 일치하지 않습니다.');
-    }
-  };
-
-  const checkNicknameDuplicate = async () => {
-    try {
-      const isAvailable = await authService.checkNicknameDuplicate(formData.nickname);
-      if (isAvailable) {
-        setIsNicknameChecked(true);
-        alert('사용 가능한 닉네임입니다.');
-      } else {
-        alert('이미 사용 중인 닉네임입니다.');
-      }
-    } catch (error) {
-      alert('닉네임 중복 확인에 실패했습니다.');
     }
   };
 
@@ -160,7 +145,7 @@ const SignUp = () => {
           <div className="step-guide">
             {stepGuideTexts[step as keyof typeof stepGuideTexts]}
           </div>
-
+   
           <div className="profile-upload">
             <div 
               className="profile-image-container" 
@@ -190,9 +175,9 @@ const SignUp = () => {
             />
             <p>프로필 사진 등록</p>
           </div>
-
+   
           {/* 이름 입력 */}
-          {step === 1 && (
+          {step >= 1 && (
             <div className="input-group">
               <input
                 type="text"
@@ -202,18 +187,20 @@ const SignUp = () => {
                 placeholder="이름을 입력하세요"
                 autoFocus
               />
-              <button 
-                onClick={() => handleNext(1)}
-                className="next-button"
-                disabled={!formData.name}
-              >
-                다음
-              </button>
+              {step === 1 && (
+                <button 
+                  onClick={() => handleNext(1)}
+                  className="next-button"
+                  disabled={!formData.name}
+                >
+                  다음
+                </button>
+              )}
             </div>
           )}
-
-          {/* 전화번호 입력 */}
-          {step === 2 && (
+   
+          {/* 전화번호 및 SMS 인증 */}
+          {step >= 2 && (
             <div className="input-group">
               <input
                 type="tel"
@@ -223,18 +210,20 @@ const SignUp = () => {
                 placeholder="전화번호를 입력하세요 (- 제외)"
                 maxLength={11}
               />
-              <button 
-                onClick={requestSmsVerification}
-                className="next-button"
-                disabled={!/^\d{10,11}$/.test(formData.phoneNumber.replace(/-/g, ''))}
-              >
-                인증번호 요청
-              </button>
+              {step === 2 && (
+                <button 
+                  onClick={requestSmsVerification}
+                  className="next-button"
+                  disabled={!/^\d{10,11}$/.test(formData.phoneNumber.replace(/-/g, ''))}
+                >
+                  인증번호 요청
+                </button>
+              )}
             </div>
           )}
-
+   
           {/* SMS 인증 */}
-          {step === 3 && (
+          {step >= 3 && (
             <div className="input-group">
               <input
                 type="text"
@@ -243,17 +232,19 @@ const SignUp = () => {
                 onChange={handleChange}
                 placeholder="인증번호를 입력하세요"
               />
-              <button 
-                onClick={verifySmsCode}
-                className="next-button"
-              >
-                인증 확인
-              </button>
+              {step === 3 && (
+                <button 
+                  onClick={verifySmsCode}
+                  className="next-button"
+                >
+                  인증 확인
+                </button>
+              )}
             </div>
           )}
-
+   
           {/* 아이디 입력 */}
-          {step === 4 && (
+          {step >= 4 && (
             <div className="input-group">
               <input
                 type="text"
@@ -262,47 +253,20 @@ const SignUp = () => {
                 onChange={handleChange}
                 placeholder="아이디를 입력하세요 (6자 이상)"
               />
-              <button 
-                onClick={() => handleNext(4)}
-                className="next-button"
-                disabled={formData.id.length < 6}
-              >
-                다음
-              </button>
-            </div>
-          )}
-
-          {/* 닉네임 입력 */}
-          {step === 5 && (
-            <div className="input-group">
-              <div className="nickname-container">
-                <input
-                  type="text"
-                  name="nickname"
-                  value={formData.nickname}
-                  onChange={handleChange}
-                  placeholder="닉네임을 입력하세요"
-                />
+              {step === 4 && (
                 <button 
-                  onClick={checkNicknameDuplicate}
-                  className="check-button"
-                  disabled={!formData.nickname}
+                  onClick={() => handleNext(4)}
+                  className="next-button"
+                  disabled={formData.id.length < 6}
                 >
-                  중복확인
+                  다음
                 </button>
-              </div>
-              <button 
-                onClick={() => handleNext(5)}
-                className="next-button"
-                disabled={!formData.nickname}
-              >
-                다음
-              </button>
+              )}
             </div>
           )}
-
+   
           {/* 비밀번호 입력 */}
-          {step === 6 && (
+          {step >= 6 && (
             <div className="input-group">
               <input
                 type="password"
@@ -320,18 +284,20 @@ const SignUp = () => {
                 className="mt-2"
               />
               {passwordError && <p className="error-message">{passwordError}</p>}
-              <button 
-                onClick={() => handleNext(6)}
-                className="next-button"
-                disabled={formData.password.length < 8 || formData.password !== formData.passwordConfirm}
-              >
-                다음
-              </button>
+              {step === 6 && (
+                <button 
+                  onClick={() => handleNext(6)}
+                  className="next-button"
+                  disabled={formData.password.length < 8 || formData.password !== formData.passwordConfirm}
+                >
+                  다음
+                </button>
+              )}
             </div>
           )}
-
+   
           {/* 생년월일 입력 */}
-          {step === 7 && (
+          {step >= 7 && (
             <div className="input-group">
               <input
                 type="date"
@@ -339,16 +305,18 @@ const SignUp = () => {
                 value={formData.birthdate}
                 onChange={handleChange}
               />
-              <button 
-                onClick={() => handleNext(7)}
-                className="next-button"
-                disabled={!formData.birthdate}
-              >
-                다음
-              </button>
+              {step === 7 && (
+                <button 
+                  onClick={() => handleNext(7)}
+                  className="next-button"
+                  disabled={!formData.birthdate}
+                >
+                  다음
+                </button>
+              )}
             </div>
           )}
-
+   
           {/* 최종 제출 */}
           {step === 8 && (
             <div className="input-group">
@@ -363,7 +331,6 @@ const SignUp = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-export default SignUp;
+   );
+}
+export default SignUp
