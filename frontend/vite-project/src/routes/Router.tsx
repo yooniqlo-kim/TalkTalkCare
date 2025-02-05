@@ -8,7 +8,7 @@ import GameListPage from '../pages/GameListPage.tsx';
 import MyPage from '../pages/my_page/MyPage.tsx';
 import UserInfoPage from '../pages/my_page/UserInfoPage.tsx';
 import Test from '../pages/DimentiaTest/test.tsx';
-import SMD from '../pages/DimentiaTest/test_page/smd.tsx';
+import SDQ from '../pages/DimentiaTest/test_page/SDQ.tsx';
 import SMCQ from '../pages/DimentiaTest/test_page/smcq.tsx';
 import SignUp from '../pages/user_page/SignUp.tsx';
 import Login from '../pages/user_page/LoginPage.tsx';
@@ -17,14 +17,14 @@ const Router = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<Layout />}>
+      <Route element={<Layout />}>
           <Route path="/" element={<MainPage />} />
           <Route path="/call" element={<KeyPad />} />
           <Route path="/game" element={<GameListPage />} />
           <Route path="/test" element={<Test />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/userinfopage" element={<UserInfoPage />} />
-          <Route path="/smd" element={<SMD />} />
+          <Route path="/sdq" element={<SDQ />} />
           <Route path="/smcq" element={<SMCQ />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
