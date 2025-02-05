@@ -18,19 +18,6 @@ export const authService = {
     }
   },
 
-  // 닉네임 중복 확인 메서드 추가
-  checkNicknameDuplicate: async (nickname: string) => {
-    try {
-      const response = await axios.get(`${BASE_URL}/users/check-nickname`, {
-        params: { nickname }
-      });
-      return response.data.isDuplicate === false;
-    } catch (error) {
-      console.error('닉네임 중복 확인 실패:', error);
-      throw error;
-    }
-  },
-
   sendSmsVerification: async (phoneNumber: string) => {
     try {
       const response = await axios.post(`${BASE_URL}/sms/send`, 
