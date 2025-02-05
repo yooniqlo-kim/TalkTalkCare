@@ -1,22 +1,18 @@
-.header-container {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  margin-right:420px;
+/* src/styles/components/Header.css */
+header {
+  padding: 1rem;
 }
 
-.logo-container {
+.header-content {
   display: flex;
   align-items: center;
 }
 
-.logo-image {
-  width: 40px;
+.logo {
+  cursor: pointer;
+}
+
+.logo img {
   height: 40px;
-}
-
-.logo-title {
-  margin-left: 8px;
-  font-size: 1.25rem; /* 20px */
-  font-weight: bold;
+  width: auto;
 }

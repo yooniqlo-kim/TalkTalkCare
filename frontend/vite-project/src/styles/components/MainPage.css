@@ -1,0 +1,41 @@
+.main-page-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #F5FFEA;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.main-page-content {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  transition: all 0.3s ease-in-out;
+}
+
+.main-menu-container {
+  background-color: F5FFEA;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  width: 600px;
+  transition: width 0.3s ease-in-out;
+}
+
+.friend-list-toggle {
+  display: flex;
+  justify-content: end;
+  margin-bottom: 1rem;
+}
+
+.menu-card {
+  transition: all 0.3s ease-in-out;
+}
+
+.friend-list-container {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  width: 320px;
+  transition: transform 0.3s ease-in-out;
+}
