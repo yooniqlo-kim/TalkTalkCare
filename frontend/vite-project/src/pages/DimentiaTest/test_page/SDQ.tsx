@@ -1,24 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../../styles/components/smcq.css';
+import '../../../styles/components/sdq.css';
 
 // 문항 데이터 배열 정의
 const questions = [
-  "기억력에 문제가 있다고 생각하나요?",
-  "기억력이 10년 전보다 나빠졌다고 생각하나요?",
-  "기억력이 같은 또래의 다른 사람들에 비해 나쁘다고 생각하나요?",
-  "기억력 저하로 인해 일상생활에 불편을 느끼나요?",
-  "최근에 일어난 일을 기억하기 어렵나요?",
-  "며칠 전에 나눈 대화 내용을 기억하기 어렵나요?",
-  "며칠 전에 한 약속을 기억하기 어렵나요?",
-  "친한 사람의 이름을 기억하기 어렵나요?",
-  "사용한 물건을 둔 곳을 기억하기 어렵나요?",
-  "이전에 비해 물건을 자주 잃어버리나요?",
-  "집 근처에서 길을 잃은 적이 있나요?",
-  "가게에서 2~3가지 물건을 사려고 할 때 물건 이름을 기억하기 어렵나요?",
-  "가스불이나 전기불 끄는 것을 기억하기 어렵나요?",
-  "자주 사용하는 전화번호(자신 혹은 자녀)를 기억하기 어렵나요?"
-  // 자가 진단단 문항들...
+  "전화번호나 사람이름을 기억하기 힘들다.",
+  "어떤 일이 언제 일어났는지 기억하지 못할 때가 있다.",
+  "며칠 전에 들었던 이야기를 잊는다.",
+  "오래 전부터 들었던 이야기를 잊는다.",
+  "반복되는 일상 생활에 변화가 생겼을 때 금방 적응하기 힘들다.",
+  "본인에게 중요한 사항을 잊을 때가 있다.(배우자 생일, 결혼기념일 등)",
+  "다른 사람에게 같은 이야기를 반복할 때가 있다.",
+  "어떤 일을 해 놓고도 잊어버려 다시 반복할 때가 있다.",
+  "약속을 해 놓고 잊을 때가 있다.",
+  "이야기 도중 방금 자기가 무슨 이야기를 하고 있었는지 잊을 때가 있다.",
+  "약 먹는 시간을 놓치기도 한다.",
+  "여러 가지 물건을 사러 갔다가 한두 가지를 빠뜨리기도 한다.",
+  "가스 불을 끄는 것을 잊어버리거나 음식을 태운 적이 있다.",
+  "남에게 같은 질문을 반복한다.",
+  "어떤 일을 해 놓고도 했는지 안 했는지 몰라 다시 확인해야 한다.",
+  "물건을 두고 다니거나 또는 가지고 갈 물건을 놓고 간다.",
+  "하고 싶은 말이나 표현이 금방 떠오르지 않는다.",
+  "물건 이름이 금방 생각나지 않는다.",
+  "개인적인 편지나 사무적인 편지를 쓰기 힘들다.",
+  "갈수록 말수가 감소되는 경향이 있다.",
+  "신문이나 잡지를 읽을 때 이야기 줄거리를 파악하지 못한다.",
+  "책을 읽을 때 같은 문장을 여러 번 읽어야 이해가 된다.",
+  "텔레비전에 나오는 이야기를 따라가기 힘들다.",
+  "자주 보는 친구나 친척을 바로 알아보지 못한다.",
+  "물건을 어디에 두고 나중에 어디에 두었는지 몰라 찾게 된다.",
+  "전에 가본 장소를 기억하지 못한다.",
+  "방향감각이 떨어졌다.",
+  "길을 잃거나 헤맨 적이 있다.",
+  "물건을 항상 두는 장소를 잊어버리고 엉뚱한 곳을 찾는다.",
+  "계산 능력이 떨어졌다.",
+  "돈 관리를 하는 데 실수가 있다.",
+  "과거에 쓰던 기구 사용이 서툴러졌다."
+  // 보호자 문항들...
 ];
 
 // API 서비스 분리
@@ -46,7 +64,7 @@ const submitSurvey = async (userId: number | null, testId: number, testResult: s
   }
 };
 
-const SMCQ: React.FC = () => {
+const SDQ: React.FC = () => {
   const navigate = useNavigate();
   // 각 문항의 응답을 저장할 상태 (초기값은 null로 설정)
   const [answers, setAnswers] = useState<Array<string | null>>(new Array(questions.length).fill(null));
@@ -54,26 +72,26 @@ const SMCQ: React.FC = () => {
   // 로그인한 사용자의 ID (예시: 실제로는 로그인 시스템에서 가져옴)
   const [userId, setUserId] = useState<number | null>(null); // 로그인한 사용자라면 값이 있고, 아니면 null
   // 테스트 ID (0: 보호자용, 1: 자가진단용)
-  const [testId, setTestId] = useState<number>(1); // 0 또는 1
+  const [testId, setTestId] = useState<number>(0); // 0 또는 1
 
   // 컴포넌트가 마운트될 때 세션 정보를 가져오기
-  useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const response = await fetch('/api/session'); // 세션 정보를 가져오는 API 호출
-        if (response.ok) {
-          const session = await response.json();
-          setUserId(session.userId); // 세션에서 userId 추출하여 상태 업데이트
-        } else {
-          console.error('세션 정보를 가져오는 데 실패했습니다.');
+    useEffect(() => {
+      const fetchSession = async () => {
+        try {
+          const response = await fetch('/api/session'); // 세션 정보를 가져오는 API 호출
+          if (response.ok) {
+            const session = await response.json();
+            setUserId(session.userId); // 세션에서 userId 추출하여 상태 업데이트
+          } else {
+            console.error('세션 정보를 가져오는 데 실패했습니다.');
+          }
+        } catch (error) {
+          console.error('Error fetching session:', error);
         }
-      } catch (error) {
-        console.error('Error fetching session:', error);
-      }
-    };
-
-    fetchSession();
-  }, []); // 빈 배열을 전달하여 컴포넌트 마운트 시 한 번만 실행
+      };
+  
+      fetchSession();
+    }, []); // 빈 배열을 전달하여 컴포넌트 마운트 시 한 번만 실행
 
   // 응답 처리 함수
   const handleAnswer = (index: number, answer: string) => {
@@ -116,7 +134,7 @@ const SMCQ: React.FC = () => {
   };
 
   return (
-    <div className="smcq-container">
+    <div className="sdq-container">
       <div className="logo-section">
         <img src="/logo.png" alt="톡톡케어" className="logo" />
         <h1>톡톡케어</h1>
@@ -166,4 +184,4 @@ const SMCQ: React.FC = () => {
   );
 };
 
-export default SMCQ;
+export default SDQ;
