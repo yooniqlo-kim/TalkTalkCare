@@ -11,6 +11,7 @@ interface State {
   wsMessages: string[];  // 웹소켓 메시지 유지
   isConnected: boolean;  // 연결 상태 유지
   sessionInput: string;  // 세션 ID 입력값
+  currentSessionId: string | undefined;
 }
 
 class OpenViduTest extends Component<{}, State> {
@@ -28,6 +29,7 @@ class OpenViduTest extends Component<{}, State> {
       wsMessages: [],
       isConnected: false,
       sessionInput: '',
+      currentSessionId: undefined,
     };
 
     this.joinSession = this.joinSession.bind(this);
@@ -261,8 +263,16 @@ class OpenViduTest extends Component<{}, State> {
 
   // 세션 참여 처리
   handleJoinSession = async () => {
-    const sessionId = this.state.sessionInput || `session-${Date.now()}`;  // 고유한 세션 ID 생성
-    await this.joinSession(sessionId);
+    try {
+      // 입력된 세션 ID가 있으면 그대로 사용
+      const sessionId = this.state.sessionInput || `session-${Date.now()}`;
+      await this.joinSession(sessionId);
+      
+      // 세션 ID를 상태에 저장
+      this.setState({ currentSessionId: sessionId });
+    } catch (error) {
+      console.error('세션 참여 실패:', error);
+    }
   }
 
   render() {
@@ -270,87 +280,93 @@ class OpenViduTest extends Component<{}, State> {
       <div className="container">
         <h1>화상 통화</h1>
         
-        {/* 세션 입력 및 참여 UI - 항상 표시 */}
-        <div className="session-form">
-          <input
-            type="text"
-            placeholder="세션 ID를 입력하세요"
-            value={this.state.sessionInput}
-            onChange={this.handleSessionInput}
-          />
-          <button onClick={this.handleJoinSession}>
-            {this.state.session ? '다른 세션 참여' : '세션 참여'}
-          </button>
-        </div>
-
-        {/* 현재 세션 정보 표시 */}
-        {this.state.session?.sessionId && (
-          <div className="session-info">
-            현재 세션: {this.state.session.sessionId}
-            <button onClick={() => {
-              navigator.clipboard.writeText(this.state.session!.sessionId);
-              alert('세션 ID가 복사되었습니다!');
-            }}>
-              세션 ID 복사
+        {/* 세션 정보 표시 - 상단에 고정 */}
+        <div className="session-info-container">
+          <div className="session-form">
+            <input
+              type="text"
+              placeholder="세션 ID를 입력하세요"
+              value={this.state.sessionInput}
+              onChange={this.handleSessionInput}
+            />
+            <button onClick={this.handleJoinSession}>
+              {this.state.session ? '다른 세션 참여' : '세션 참여'}
             </button>
           </div>
-        )}
 
-        <div className="connection-status">
-          OpenVidu 연결 상태: {this.state.isConnected ? '연결됨' : '연결 안됨'}
-        </div>
-
-        <div className="button-container">
-          {!this.state.session ? (
-            <button onClick={() => this.joinSession('test-session')}>세션 참여</button>
-          ) : (
-            <>
-              <button onClick={this.leaveSession}>세션 나가기</button>
-              <button onClick={this.switchCamera}>카메라 전환</button>
-            </>
-          )}
-        </div>
-
-        <div className="video-container">
-          {this.state.mainStreamManager && (
-            <div className="main-video">
-              <video autoPlay ref={video => {
-                if (video) {
-                  this.state.mainStreamManager!.addVideoElement(video);
+          {this.state.currentSessionId && (
+            <div className="current-session-info">
+              <span>현재 세션: {this.state.currentSessionId}</span>
+              <button onClick={() => {
+                if (this.state.currentSessionId) {
+                  navigator.clipboard.writeText(this.state.currentSessionId);
+                  alert('세션 ID가 복사되었습니다!');
                 }
-              }} />
+              }}>
+                세션 ID 복사
+              </button>
             </div>
           )}
+        </div>
 
-          <div className="secondary-videos">
-            {this.state.publisher && (
-              <div className="video-box" onClick={() => this.handleMainVideoStream(this.state.publisher!)}>
+        {/* 나머지 컨텐츠 */}
+        <div className="video-content">
+          <div className="connection-status">
+            OpenVidu 연결 상태: {this.state.isConnected ? '연결됨' : '연결 안됨'}
+          </div>
+
+          <div className="button-container">
+            {!this.state.session ? (
+              <button onClick={() => this.joinSession('test-session')}>세션 참여</button>
+            ) : (
+              <>
+                <button onClick={this.leaveSession}>세션 나가기</button>
+                <button onClick={this.switchCamera}>카메라 전환</button>
+              </>
+            )}
+          </div>
+
+          <div className="video-container">
+            {this.state.mainStreamManager && (
+              <div className="main-video">
                 <video autoPlay ref={video => {
                   if (video) {
-                    this.state.publisher!.addVideoElement(video);
+                    this.state.mainStreamManager!.addVideoElement(video);
                   }
                 }} />
               </div>
             )}
-            
-            {this.state.subscribers.map((sub, i) => (
-              <div key={i} className="video-box" onClick={() => this.handleMainVideoStream(sub)}>
-                <video autoPlay ref={video => {
-                  if (video) {
-                    sub.addVideoElement(video);
-                  }
-                }} />
-              </div>
+
+            <div className="secondary-videos">
+              {this.state.publisher && (
+                <div className="video-box" onClick={() => this.handleMainVideoStream(this.state.publisher!)}>
+                  <video autoPlay ref={video => {
+                    if (video) {
+                      this.state.publisher!.addVideoElement(video);
+                    }
+                  }} />
+                </div>
+              )}
+              
+              {this.state.subscribers.map((sub, i) => (
+                <div key={i} className="video-box" onClick={() => this.handleMainVideoStream(sub)}>
+                  <video autoPlay ref={video => {
+                    if (video) {
+                      sub.addVideoElement(video);
+                    }
+                  }} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 웹소켓 메시지 표시 영역 유지 */}
+          <div className="signaling-messages">
+            <h3>시그널링 메시지</h3>
+            {this.state.wsMessages.map((msg, index) => (
+              <div key={index} className="message">{msg}</div>
             ))}
           </div>
-        </div>
-
-        {/* 웹소켓 메시지 표시 영역 유지 */}
-        <div className="signaling-messages">
-          <h3>시그널링 메시지</h3>
-          {this.state.wsMessages.map((msg, index) => (
-            <div key={index} className="message">{msg}</div>
-          ))}
         </div>
       </div>
     );
