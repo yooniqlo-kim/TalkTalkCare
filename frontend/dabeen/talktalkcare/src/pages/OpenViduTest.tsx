@@ -176,7 +176,7 @@ class OpenViduTest extends Component<{}, State> {
   // 기존의 토큰 생성 메서드 유지
   async createToken(sessionId: string) {
     try {
-      const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessionId}/connections`, {
+      const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessionId}/connection`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -4,10 +4,11 @@ import io.openvidu.java.client.OpenVidu;
 import io.openvidu.java.client.Session;
 import io.openvidu.java.client.Connection;
 import io.openvidu.java.client.ConnectionProperties;
+import io.openvidu.java.client.SessionProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 @RestController
@@ -26,33 +27,28 @@ public class OpenViduController {
     }
 
     @PostMapping("/sessions")
-    public ResponseEntity<?> initializeSession() {
+    public ResponseEntity<?> initializeSession(@RequestBody(required = false) Map<String, Object> params) {
         try {
-            Session session = openVidu.createSession();
-            // JSON 객체로 응답
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", session.getSessionId());
-            return ResponseEntity.ok(response);
+            SessionProperties properties = SessionProperties.fromJson(params).build();
+            Session session = openVidu.createSession(properties);
+            return ResponseEntity.ok(Collections.singletonMap("sessionId", session.getSessionId()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
-    @PostMapping("/sessions/{sessionId}/connections")
-    public ResponseEntity<?> createConnection(@PathVariable String sessionId) {
+    @PostMapping("/sessions/{sessionId}/connection")
+    public ResponseEntity<?> createConnection(
+            @PathVariable String sessionId,
+            @RequestBody(required = false) Map<String, Object> params) {
         try {
             Session session = openVidu.getActiveSession(sessionId);
             if (session == null) {
-                return ResponseEntity.notFound().build();
+                session = openVidu.createSession();
             }
-
-            ConnectionProperties properties = new ConnectionProperties.Builder().build();
+            ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
             Connection connection = session.createConnection(properties);
-            
-            // JSON 객체로 응답
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", connection.getToken());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Collections.singletonMap("token", connection.getToken()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
