@@ -43,6 +43,11 @@ services:
     container_name: kurento
     ports:
       - "8888:8888"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    environment:
+      - KURENTO_CERTIFICATE_FILE=/etc/letsencrypt/live/talktalkcare.com/fullchain.pem
+      - KURENTO_KEY_FILE=/etc/letsencrypt/live/talktalkcare.com/privkey.pem
     networks:
       - cicd_network
     restart: on-failure:3
@@ -54,9 +59,13 @@ services:
     ports:
       - "3478:3478/udp"
       - "3478:3478/tcp"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     environment:
       - REALM=talktalkcare.com
       - USER=turnuser:turnpassword
+      - CERT_FILE=/etc/letsencrypt/live/talktalkcare.com/fullchain.pem
+      - KEY_FILE=/etc/letsencrypt/live/talktalkcare.com/privkey.pem
     networks:
       - cicd_network
     restart: on-failure:3

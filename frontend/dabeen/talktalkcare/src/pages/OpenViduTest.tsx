@@ -53,25 +53,23 @@ class OpenViduTest extends Component<{}, State> {
 
   // 웹소켓 연결 설정
   connectWebSocket() {
-    this.websocket = new WebSocket('wss://www.talktalkcare.com/ws/signal');
+    this.websocket = new WebSocket('wss://www.talktalkcare.com/openvidu');  // URL 수정
 
     this.websocket.onopen = () => {
-      console.log('시그널링 서버 연결 성공');
+      console.log('OpenVidu 서버 연결 성공');
+      this.setState({ isConnected: true });
     };
 
     this.websocket.onmessage = (event) => {
-      console.log('시그널링 메시지 수신:', event.data);
+      console.log('OpenVidu 메시지 수신:', event.data);
       this.setState(prevState => ({
         wsMessages: [...prevState.wsMessages, event.data]
       }));
     };
 
     this.websocket.onerror = (error) => {
-      console.error('시그널링 서버 에러:', error);
-    };
-
-    this.websocket.onclose = () => {
-      console.log('시그널링 서버 연결 종료');
+      console.error('OpenVidu 서버 에러:', error);
+      this.setState({ isConnected: false });
     };
   }
 
@@ -327,7 +325,8 @@ class OpenViduTest extends Component<{}, State> {
           </div>
 
           <div className="video-container">
-            {this.state.mainStreamManager && (
+            {/* 메인 비디오 화면 - publisher가 없을 때만 표시 */}
+            {this.state.mainStreamManager && !this.state.publisher && (
               <div className="main-video">
                 <video autoPlay ref={video => {
                   if (video) {
@@ -338,6 +337,7 @@ class OpenViduTest extends Component<{}, State> {
             )}
 
             <div className="secondary-videos">
+              {/* 작은 화면들 */}
               {this.state.publisher && (
                 <div className="video-box" onClick={() => this.handleMainVideoStream(this.state.publisher!)}>
                   <video autoPlay ref={video => {
@@ -348,6 +348,7 @@ class OpenViduTest extends Component<{}, State> {
                 </div>
               )}
               
+              {/* 다른 참가자들 */}
               {this.state.subscribers.map((sub, i) => (
                 <div key={i} className="video-box" onClick={() => this.handleMainVideoStream(sub)}>
                   <video autoPlay ref={video => {
