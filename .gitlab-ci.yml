@@ -19,6 +19,46 @@ services:
 
 before_script:
   - apk add --no-cache docker-compose
+      # 환경변수 파일 생성
+    - |
+      cat << EOF > .env
+      # Application
+      SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME}
+
+      # Database Configuration
+      DB_DRIVER=${DB_DRIVER}
+      DB_URL=${DB_URL}
+      DB_USERNAME=${DB_USERNAME}
+      DB_PASSWORD=${DB_PASSWORD}
+
+      # MySQL Container Configuration
+      MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE=${MYSQL_DATABASE}
+      MYSQL_USER=${DB_USERNAME}
+      MYSQL_PASSWORD=${DB_PASSWORD}
+
+      # JPA Configuration
+      JPA_SHOW_SQL=${JPA_SHOW_SQL}
+      JPA_DDL_AUTO=${JPA_DDL_AUTO}
+      JPA_FORMAT_SQL=${JPA_FORMAT_SQL}
+      JPA_DIALECT=${JPA_DIALECT}
+
+      # Logging Configuration
+      LOG_LEVEL_SQL=${LOG_LEVEL_SQL}
+      LOG_LEVEL_TYPE=${LOG_LEVEL_TYPE}
+
+      # Redis Configuration
+      REDIS_HOST=${REDIS_HOST}
+      REDIS_PORT=${REDIS_PORT}
+
+      # OpenVidu Configuration
+      DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
+      OPENVIDU_URL=${OPENVIDU_URL}
+      OPENVIDU_SECRET=${OPENVIDU_SECRET}
+      CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
+      HTTPS_PORT=${HTTPS_PORT}
+      KMS_URIS=${KMS_URIS}
+      EOF
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - |
     echo "Configuring docker..."
@@ -63,46 +103,6 @@ deploy-backend:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    # 환경변수 파일 생성
-    - |
-      cat << EOF > .env
-      # Application
-      SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME}
-
-      # Database Configuration
-      DB_DRIVER=${DB_DRIVER}
-      DB_URL=${DB_URL}
-      DB_USERNAME=${DB_USERNAME}
-      DB_PASSWORD=${DB_PASSWORD}
-
-      # MySQL Container Configuration
-      MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE=${MYSQL_DATABASE}
-      MYSQL_USER=${DB_USERNAME}
-      MYSQL_PASSWORD=${DB_PASSWORD}
-
-      # JPA Configuration
-      JPA_SHOW_SQL=${JPA_SHOW_SQL}
-      JPA_DDL_AUTO=${JPA_DDL_AUTO}
-      JPA_FORMAT_SQL=${JPA_FORMAT_SQL}
-      JPA_DIALECT=${JPA_DIALECT}
-
-      # Logging Configuration
-      LOG_LEVEL_SQL=${LOG_LEVEL_SQL}
-      LOG_LEVEL_TYPE=${LOG_LEVEL_TYPE}
-
-      # Redis Configuration
-      REDIS_HOST=${REDIS_HOST}
-      REDIS_PORT=${REDIS_PORT}
-
-      # OpenVidu Configuration
-      DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
-      OPENVIDU_URL=${OPENVIDU_URL}
-      OPENVIDU_SECRET=${OPENVIDU_SECRET}
-      CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
-      HTTPS_PORT=${HTTPS_PORT}
-      KMS_URIS=${KMS_URIS}
-      EOF
   script:
     - scp .env docker-compose.yml $SSH_USER@$SSH_HOST:~/
     - |
