@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   cicd_network:
     driver: bridge
@@ -25,7 +23,7 @@ services:
       timeout: 5s
     networks:
       - cicd_network
-    restart: unless-stopped
+    restart: on-failure:3
 
   redis:
     image: redis:7.2
@@ -37,36 +35,76 @@ services:
     command: redis-server --appendonly yes
     networks:
       - cicd_network
-    restart: unless-stopped
+    restart: on-failure:3
+
+  # Kurento Media Server
+  kurento:
+    image: kurento/kurento-media-server:6.18.0
+    container_name: kurento
+    ports:
+      - "8888:8888"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    environment:
+      - KURENTO_CERTIFICATE_FILE=/etc/letsencrypt/live/talktalkcare.com/fullchain.pem
+      - KURENTO_KEY_FILE=/etc/letsencrypt/live/talktalkcare.com/privkey.pem
+      - KMS_STUN_IP=54.180.148.155
+      - KMS_STUN_PORT=3478
+      - KMS_TURN_URL=turnuser:turnpassword@54.180.148.155:3478
+      - KMS_NETWORK_INTERFACES=eth0
+      - KMS_ICE_TCP=1
+      - KMS_MIN_PORT=40000
+      - KMS_MAX_PORT=40400
+      - GST_DEBUG=2,Kurento*:4,kms*:4,sdp*:4,webrtc*:4,*rtpendpoint:4,rtp*handler:4,rtpsynchronizer:4,agnosticbin:4
+    networks:
+      - cicd_network
+    restart: on-failure:3
+
+  # Coturn (TURN Server)
+  coturn:
+    image: instrumentisto/coturn
+    container_name: coturn
+    ports:
+      - "3478:3478/udp"
+      - "3478:3478/tcp"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    environment:
+      - REALM=talktalkcare.com
+      - USER=turnuser:turnpassword
+      - CERT_FILE=/etc/letsencrypt/live/talktalkcare.com/fullchain.pem
+      - KEY_FILE=/etc/letsencrypt/live/talktalkcare.com/privkey.pem
+    networks:
+      - cicd_network
+    restart: on-failure:3
 
   openvidu:
-    image: openvidu/openvidu-server-kms:latest
+    image: openvidu/openvidu-server:2.29.0
     container_name: openvidu
-    ports:
-      - "4443:4443"
-      - "40000-40400:40000-40400/tcp"
-      - "40000-40400:40000-40400/udp"
     environment:
-      # OpenVidu 설정
       - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
       - OPENVIDU_URL=${OPENVIDU_URL}
       - OPENVIDU_SECRET=${OPENVIDU_SECRET}
       - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
-      - OPENVIDU_RECORDING=false
-      - HTTPS_PORT=443
-      
-      # SSL 설정
-      - SSL_ENABLED=${SSL_ENABLED}
-      - SSL_KEYSTORE=${SSL_KEYSTORE}
-      - SSL_PASSWORD=${SSL_PASSWORD}
-      - SSL_KEYSTORE_TYPE=${SSL_KEYSTORE_TYPE}
+      - HTTPS_PORT=${HTTPS_PORT}
+      - KMS_URIS=${KMS_URIS}
+      - OPENVIDU_STREAMS_VIDEO_MAX_RECV_BANDWIDTH=2000
+      - OPENVIDU_STREAMS_VIDEO_MIN_RECV_BANDWIDTH=500
+      - OPENVIDU_STREAMS_VIDEO_MAX_SEND_BANDWIDTH=2000
+      - OPENVIDU_STREAMS_VIDEO_MIN_SEND_BANDWIDTH=500
+    ports:
+      # - "443:443"
+      - "40000-40400:40000-40400/tcp"
+      - "40000-40400:40000-40400/udp"
     volumes:
       - ./openvidu_data:/opt/openvidu/recordings
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       - cicd_network
-    restart: unless-stopped
+    restart: on-failure:3
 
   backend:
+    build: ./backend
     image: eoslovy/talktalkcare-backend:latest
     container_name: backend
     ports:
