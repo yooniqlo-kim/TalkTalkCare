@@ -38,7 +38,7 @@ h1 {
 
 /* 카메라 토글 버튼 - 켜진 상태 */
 .camera-on {
-  background-color: #28a745 !important;  /* 초록색 */
+  background-color: #28a745 !important;  /* 초록색 - 카메라가 켜져있음 */
 }
 
 .camera-on:hover {
@@ -47,7 +47,7 @@ h1 {
 
 /* 카메라 토글 버튼 - 꺼진 상태 */
 .camera-off {
-  background-color: #6c757d !important;  /* 회색 */
+  background-color: #6c757d !important;  /* 회색 - 카메라가 꺼져있음 */
 }
 
 .camera-off:hover {

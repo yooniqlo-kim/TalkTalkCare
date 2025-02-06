@@ -370,7 +370,7 @@ class OpenViduTest extends Component<{}, State> {
                 <button onClick={this.leaveSession}>세션 나가기</button>
                 <button 
                     onClick={this.toggleCamera.bind(this)}
-                    className={this.state.isVideoEnabled ? 'camera-on' : 'camera-off'}
+                    className={this.state.isVideoEnabled ? 'camera-off' : 'camera-on'}
                 >
                     카메라 {this.state.isVideoEnabled ? '끄기' : '켜기'}
                 </button>
