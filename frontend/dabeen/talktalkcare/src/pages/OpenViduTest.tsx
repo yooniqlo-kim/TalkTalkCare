@@ -53,7 +53,7 @@ class OpenViduTest extends Component<{}, State> {
 
   // 웹소켓 연결 설정
   connectWebSocket() {
-    this.websocket = new WebSocket('wss://talktalkcare.com/openvidu');
+    this.websocket = new WebSocket('wss://www.talktalkcare.com/openvidu');
     
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 5;
