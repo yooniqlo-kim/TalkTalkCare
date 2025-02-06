@@ -11,6 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfileImageReq {
-    private String userId;
+
+    private Integer userId;
+
     private MultipartFile file;
+
 }
