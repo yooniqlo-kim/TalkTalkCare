@@ -88,9 +88,9 @@ public class AiAnalysisService {
             // JSON 파싱
             JsonNode responseJson = objectMapper.readTree(response);
             String content = responseJson
-                    .get("choices") // "choices" 배열
-                    .get(0)         // 첫 번째 선택지
-                    .get("message") // "message" 객체
+                    .get("choices") // "choices" 배열의 첫번째의 message객체의
+                    .get(0)
+                    .get("message")
                     .get("content") // "content" 필드
                     .asText();      // 문자열로 변환
 
@@ -108,7 +108,7 @@ public class AiAnalysisService {
     private String sanitizeInput(String input) {
         return input.replaceAll("[\\u0000-\\u001F]", ""); // 제어 문자 제거
     }
-    //유저-보호자 테스트 분석
+
     public String analyzeTwoTestResults(String inputText) {
         ObjectMapper objectMapper = new ObjectMapper();
 
