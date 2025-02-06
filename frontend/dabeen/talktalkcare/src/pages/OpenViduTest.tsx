@@ -53,7 +53,7 @@ class OpenViduTest extends Component<{}, State> {
 
   // 웹소켓 연결 설정
   connectWebSocket() {
-    this.websocket = new WebSocket('wss://www.talktalkcare.com:4443/openvidu');
+    this.websocket = new WebSocket('wss://www.talktalkcare.com/openvidu');
     
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 5;
@@ -153,73 +153,59 @@ class OpenViduTest extends Component<{}, State> {
     }
   }
 
-  // 기존의 세션 생성 메서드
+  // API 요청
   async createSession(sessionId: string) {
-    return new Promise<string>(async (resolve) => {
-        try {
-            console.log('세션 생성 시도:', sessionId);
-            const response = await fetch('https://www.talktalkcare.com:4443/openvidu/api/sessions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare'),
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ customSessionId: sessionId }),
-                credentials: 'include'
-            });
-
-            console.log('세션 생성 응답:', response.status);
-            
-            // 409 에러 (세션이 이미 존재) - 정상 케이스
-            if (response.status === 409) {
-                console.log('세션이 이미 존재함:', sessionId);
-                resolve(sessionId);
-                return;
-            }
-
-            // 다른 에러 발생 시
-            if (!response.ok) {
-                console.error('세션 생성 실패:', response.status, await response.text());
-                resolve(sessionId);
-                return;
-            }
-
-            const data = await response.json();
-            console.log('세션 생성 성공:', data.id);
-            resolve(data.id);
-        } catch (error) {
-            console.error('세션 생성 중 에러:', error);
-            resolve(sessionId);
-        }
+    // nginx를 통해 프록시
+    const response = await fetch('https://www.talktalkcare.com/openvidu/api/sessions', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ customSessionId: sessionId }),
+        credentials: 'include'
     });
+
+    console.log('세션 생성 응답:', response.status);
+    
+    // 409 에러 (세션이 이미 존재) - 정상 케이스
+    if (response.status === 409) {
+        console.log('세션이 이미 존재함:', sessionId);
+        return sessionId;
+    }
+
+    // 다른 에러 발생 시
+    if (!response.ok) {
+        console.error('세션 생성 실패:', response.status, await response.text());
+        return sessionId;
+    }
+
+    const data = await response.json();
+    console.log('세션 생성 성공:', data.id);
+    return data.id;
   }
 
-  // 토큰 생성 메서드 수정
+  // API 요청
   async createToken(sessionId: string) {
-    try {
-        console.log('토큰 생성 시도:', sessionId);
-        const response = await fetch(`https://www.talktalkcare.com:4443/openvidu/api/sessions/${sessionId}/connection`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
-            },
-            credentials: 'include'  // createSession과 동일하게 설정
-        });
+    // nginx를 통해 프록시
+    const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessionId}/connection`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
+        },
+        credentials: 'include'
+    });
 
-        console.log('토큰 생성 응답:', response.status);
-        if (!response.ok) {
-            console.error('토큰 생성 실패:', response.status, await response.text());
-            throw new Error(`토큰 생성 실패: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('토큰 생성 성공:', data.token);
-        return data.token;
-    } catch (error) {
-        console.error('토큰 생성 에러:', error);
-        throw error;
+    console.log('토큰 생성 응답:', response.status);
+    if (!response.ok) {
+        console.error('토큰 생성 실패:', response.status, await response.text());
+        throw new Error(`토큰 생성 실패: ${response.status}`);
     }
+
+    const data = await response.json();
+    console.log('토큰 생성 성공:', data.token);
+    return data.token;
   }
 
   async getToken(sessionId: string) {
