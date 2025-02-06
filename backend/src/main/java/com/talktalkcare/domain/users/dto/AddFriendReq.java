@@ -4,16 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Getter @Setter
 @AllArgsConstructor
-public class ProfileImageReq {
+@NoArgsConstructor
+public class AddFriendReq {
 
     private Integer userId;
 
-    private MultipartFile file;
+    private String name;
+
+    private String phone;
 
 }

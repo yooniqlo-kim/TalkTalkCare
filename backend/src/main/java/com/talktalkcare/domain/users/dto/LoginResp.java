@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginDto {
+public class LoginResp {
 
-    private String userLoginId;
-    private String password;
-    private boolean autoLogin;
+    private String username;
+
+    private String s3Filename;
 
 }
