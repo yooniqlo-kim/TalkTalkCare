@@ -53,7 +53,7 @@ class OpenViduTest extends Component<{}, State> {
 
   // 웹소켓 연결 설정
   connectWebSocket() {
-    this.websocket = new WebSocket('wss://www.talktalkcare.com/openvidu');
+    this.websocket = new WebSocket('wss://www.talktalkcare.com:4443/openvidu');
     
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 5;
@@ -153,11 +153,12 @@ class OpenViduTest extends Component<{}, State> {
     }
   }
 
-  // 기존의 세션 생성 메서드 유지
+  // 기존의 세션 생성 메서드
   async createSession(sessionId: string) {
     return new Promise<string>(async (resolve) => {
         try {
-            const response = await fetch('https://www.talktalkcare.com/openvidu/api/sessions', {
+            console.log('세션 생성 시도:', sessionId);
+            const response = await fetch('https://www.talktalkcare.com:4443/openvidu/api/sessions', {
                 method: 'POST',
                 headers: {
                     'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare'),
@@ -167,23 +168,24 @@ class OpenViduTest extends Component<{}, State> {
                 credentials: 'include'
             });
 
-            // 409 에러 (세션이 이미 존재)
+            console.log('세션 생성 응답:', response.status);
+            
+            // 409 에러 (세션이 이미 존재) - 정상 케이스
             if (response.status === 409) {
+                console.log('세션이 이미 존재함:', sessionId);
                 resolve(sessionId);
                 return;
             }
 
             // 다른 에러 발생 시
             if (!response.ok) {
-                // 1초 후 강제로 성공 처리
-                setTimeout(() => {
-                    console.log('타임아웃으로 인한 강제 세션 생성');
-                    resolve(sessionId);
-                }, 1000);
+                console.error('세션 생성 실패:', response.status, await response.text());
+                resolve(sessionId);
                 return;
             }
 
             const data = await response.json();
+            console.log('세션 생성 성공:', data.id);
             resolve(data.id);
         } catch (error) {
             console.error('세션 생성 중 에러:', error);
@@ -192,26 +194,31 @@ class OpenViduTest extends Component<{}, State> {
     });
   }
 
-  // 기존의 토큰 생성 메서드 유지
+  // 토큰 생성 메서드 수정
   async createToken(sessionId: string) {
     try {
-      const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessionId}/connection`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
+        console.log('토큰 생성 시도:', sessionId);
+        const response = await fetch(`https://www.talktalkcare.com:4443/openvidu/api/sessions/${sessionId}/connection`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
+            },
+            credentials: 'include'  // createSession과 동일하게 설정
+        });
+
+        console.log('토큰 생성 응답:', response.status);
+        if (!response.ok) {
+            console.error('토큰 생성 실패:', response.status, await response.text());
+            throw new Error(`토큰 생성 실패: ${response.status}`);
         }
-      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.token;
+        const data = await response.json();
+        console.log('토큰 생성 성공:', data.token);
+        return data.token;
     } catch (error) {
-      console.error('토큰 생성 에러:', error);
-      throw error;
+        console.error('토큰 생성 에러:', error);
+        throw error;
     }
   }
 
@@ -282,23 +289,24 @@ class OpenViduTest extends Component<{}, State> {
   // 세션 참여 처리
   handleJoinSession = async () => {
     try {
-        // 입력된 세션 ID가 없으면 새로운 세션 ID 생성
+        console.log('세션 참여 시작');
         const sessionId = this.state.sessionInput.trim() || `session-${Date.now()}`;
+        console.log('사용할 세션 ID:', sessionId);
+        
         await this.joinSession(sessionId);
         
-        // 세션 ID를 상태에 저장
         this.setState({ 
             currentSessionId: sessionId,
-            sessionInput: sessionId  // 생성된 세션 ID를 입력창에도 표시
+            sessionInput: sessionId
         });
         
-        // 새로 생성된 세션 ID를 알림
         if (!this.state.sessionInput.trim()) {
+            console.log('새 세션 생성됨:', sessionId);
             alert(`새로운 세션이 생성되었습니다: ${sessionId}`);
         }
     } catch (error) {
         console.error('세션 참여 실패:', error);
-        alert('세션 참여에 실패했습니다.');
+        alert('세션 참여에 실패했습니다. 콘솔을 확인해주세요.');
     }
   }
 
