@@ -12,6 +12,7 @@ interface State {
   isConnected: boolean;  // 연결 상태 유지
   sessionInput: string;  // 세션 ID 입력값
   currentSessionId: string | undefined;
+  isVideoEnabled: boolean;  // 카메라 상태 추가
 }
 
 class OpenViduTest extends Component<{}, State> {
@@ -30,6 +31,7 @@ class OpenViduTest extends Component<{}, State> {
       isConnected: false,
       sessionInput: '',
       currentSessionId: undefined,
+      isVideoEnabled: true,  // 초기값 설정
     };
 
     this.joinSession = this.joinSession.bind(this);
@@ -152,7 +154,8 @@ class OpenViduTest extends Component<{}, State> {
       this.setState({
         mainStreamManager: publisher,
         publisher: publisher,
-        currentSessionId: sessionId
+        currentSessionId: sessionId,
+        isVideoEnabled: true  // 세션 참여 시 카메라 상태 초기화
       });
 
     } catch (error) {
@@ -236,7 +239,8 @@ class OpenViduTest extends Component<{}, State> {
       session: undefined,
       subscribers: [],
       mainStreamManager: undefined,
-      publisher: undefined
+      publisher: undefined,
+      isVideoEnabled: true  // 카메라 상태 초기화
     });
   }
 
@@ -304,15 +308,17 @@ class OpenViduTest extends Component<{}, State> {
     }
   }
 
-  // 카메라 끄기 기능 추가
+  // 카메라 끄기 기능 수정
   async toggleCamera() {
     try {
         if (!this.state.publisher) return;
         
-        const isVideoEnabled = this.state.publisher.stream.videoActive;
-        await this.state.publisher.publishVideo(!isVideoEnabled);
+        const newVideoState = !this.state.isVideoEnabled;
+        await this.state.publisher.publishVideo(newVideoState);
         
-        // 상태 업데이트는 필요 없음 (OpenVidu가 자동으로 처리)
+        this.setState({
+            isVideoEnabled: newVideoState
+        });
     } catch (error) {
         console.error('카메라 토글 에러:', error);
     }
@@ -362,8 +368,11 @@ class OpenViduTest extends Component<{}, State> {
             {this.state.session && (
               <>
                 <button onClick={this.leaveSession}>세션 나가기</button>
-                <button onClick={this.toggleCamera.bind(this)}>
-                  카메라 {this.state.publisher?.stream.videoActive ? '끄기' : '켜기'}
+                <button 
+                    onClick={this.toggleCamera.bind(this)}
+                    className={this.state.isVideoEnabled ? 'camera-on' : 'camera-off'}
+                >
+                    카메라 {this.state.isVideoEnabled ? '끄기' : '켜기'}
                 </button>
               </>
             )}

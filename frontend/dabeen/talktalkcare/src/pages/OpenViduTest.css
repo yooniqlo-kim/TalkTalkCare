@@ -22,23 +22,36 @@ h1 {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
-  background-color: #007bff;
   color: white;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
-.button-container button:hover {
-  background-color: #0056b3;
+/* 세션 나가기 버튼 */
+.button-container button:first-child {
+  background-color: #dc3545;  /* 빨간색 */
 }
 
-/* 카메라 끄기 버튼 스타일 */
-.button-container button:last-child {
-  background-color: #6c757d;
+.button-container button:first-child:hover {
+  background-color: #c82333;
 }
 
-.button-container button:last-child:hover {
-  background-color: #545b62;
+/* 카메라 토글 버튼 - 켜진 상태 */
+.camera-on {
+  background-color: #28a745 !important;  /* 초록색 */
+}
+
+.camera-on:hover {
+  background-color: #218838 !important;
+}
+
+/* 카메라 토글 버튼 - 꺼진 상태 */
+.camera-off {
+  background-color: #6c757d !important;  /* 회색 */
+}
+
+.camera-off:hover {
+  background-color: #545b62 !important;
 }
 
 .video-container {
