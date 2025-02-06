@@ -279,14 +279,23 @@ class OpenViduTest extends Component<{}, State> {
   // 세션 참여 처리
   handleJoinSession = async () => {
     try {
-      // 입력된 세션 ID가 있으면 그대로 사용
-      const sessionId = this.state.sessionInput || `session-${Date.now()}`;
-      await this.joinSession(sessionId);
-      
-      // 세션 ID를 상태에 저장
-      this.setState({ currentSessionId: sessionId });
+        // 입력된 세션 ID가 없으면 새로운 세션 ID 생성
+        const sessionId = this.state.sessionInput.trim() || `session-${Date.now()}`;
+        await this.joinSession(sessionId);
+        
+        // 세션 ID를 상태에 저장
+        this.setState({ 
+            currentSessionId: sessionId,
+            sessionInput: sessionId  // 생성된 세션 ID를 입력창에도 표시
+        });
+        
+        // 새로 생성된 세션 ID를 알림
+        if (!this.state.sessionInput.trim()) {
+            alert(`새로운 세션이 생성되었습니다: ${sessionId}`);
+        }
     } catch (error) {
-      console.error('세션 참여 실패:', error);
+        console.error('세션 참여 실패:', error);
+        alert('세션 참여에 실패했습니다.');
     }
   }
 
