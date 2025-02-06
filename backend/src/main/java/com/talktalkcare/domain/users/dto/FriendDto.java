@@ -1,12 +1,15 @@
 package com.talktalkcare.domain.users.dto;
 
+import com.talktalkcare.domain.users.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class FriendDto {
     private Integer userId;
@@ -30,14 +33,13 @@ public class FriendDto {
         );
     }
 
-    // 기존 사용자 정보와 상태 정보를 합치는 정적 메소드 추가
-    public static FriendDto of(UserDto userDto, boolean isOnline, LocalDateTime lastActiveTime) {
+    public static FriendDto fromUser(User user, boolean isOnline, LocalDateTime lastActiveTime) {
         String status = isOnline ? "ONLINE" : "OFFLINE";
         String displayStatus = createDisplayStatus(lastActiveTime);
         return new FriendDto(
-                userDto.getLoginId(),
-                userDto.getName(),
-                userDto.getS3Filename(),
+                user.getUserId(),
+                user.getName(),
+                user.getS3FileName(),
                 status,
                 lastActiveTime,
                 displayStatus
@@ -45,14 +47,46 @@ public class FriendDto {
     }
 
     private static String createDisplayStatus(LocalDateTime lastActiveTime) {
-        if (lastActiveTime == null) return "오프라인";
-
-        Duration duration = Duration.between(lastActiveTime, LocalDateTime.now());
-        if (duration.toMinutes() < 60) {
-            return duration.toMinutes() + "분 전";
-        } else if (duration.toHours() < 24) {
-            return duration.toHours() + "시간 전";
+        if (lastActiveTime == null) {
+            return "오프라인";
         }
-        return duration.toDays() + "일 전";
+
+        LocalDateTime now = LocalDateTime.now();
+        Duration duration = Duration.between(lastActiveTime, now);
+
+        if (duration.isNegative()) {
+            return "방금 전";
+        }
+
+        long minutes = duration.toMinutes();
+        if (minutes < 1) {
+            return "방금 전";
+        } else if (minutes < 60) {
+            return minutes + "분 전";
+        }
+
+        long hours = duration.toHours();
+        if (hours < 24) {
+            return hours + "시간 전";
+        }
+
+        long days = duration.toDays();
+        if (days < 7) {
+            return days + "일 전";
+        }
+
+        return "오래 전";
+    }
+
+    // 상태 업데이트 메서드
+    public void updateStatus(boolean isOnline, LocalDateTime lastActiveTime) {
+        this.status = isOnline ? "ONLINE" : "OFFLINE";
+        this.lastActiveTime = lastActiveTime;
+        this.displayStatus = createDisplayStatus(lastActiveTime);
+    }
+
+    // 프로필 이미지 업데이트 메서드
+    public void updateProfileImage(String s3Filename) {
+        this.s3Filename = s3Filename;
     }
 }
