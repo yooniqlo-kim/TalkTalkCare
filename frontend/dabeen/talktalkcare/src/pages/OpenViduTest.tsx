@@ -162,6 +162,7 @@ class OpenViduTest extends Component<{}, State> {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ customSessionId: sessionId }),
+                credentials: 'include'
             });
 
             // 409 에러 (세션이 이미 존재)
