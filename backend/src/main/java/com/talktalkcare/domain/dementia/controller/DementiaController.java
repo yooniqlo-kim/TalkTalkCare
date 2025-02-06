@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/dementia-test")
+@RequestMapping("/dementia-test")
 @RequiredArgsConstructor
 public class DementiaController {
 
@@ -43,7 +43,7 @@ public class DementiaController {
         String analysisInputText = buildAnalysisInput(requestType, testResults);
 
         // AI 분석 실행
-        String analysisResponse = analyzeTestResults(requestType, analysisInputText);
+        String analysisResponse = analyzeTestResults(userId,requestType, analysisInputText);
         System.out.println(analysisResponse);
 
         return Api.OK(analysisResponse);
@@ -75,38 +75,13 @@ public class DementiaController {
 
         return analysisInputText.toString();
     }
-    private String analyzeTestResults(String requestType, String analysisInputText) {
+    private String analyzeTestResults(int userId, String requestType, String analysisInputText) {
         if ("1-1".equals(requestType)) {
-            return aiAnalysisService.analyzeTestResults(analysisInputText);
-        } else if ("1-2".equals(requestType)) {
-            return aiAnalysisService.analyzeTwoTestResults(analysisInputText);
+            return aiAnalysisService.analyzeTestResults(userId,analysisInputText);
+        }
+        if ("1-2".equals(requestType)) {
+            return aiAnalysisService.analyzeTwoTestResults(userId,analysisInputText);
         }
         return "";
     }
-        //유저-유저 자가 테스트 분석
-//        if ("1-1".equals(requestType)) {
-//            // 최신 결과와 이전 결과 비교
-//            DementiaTestResult latestTestResult = testResults.get(0);
-//            DementiaTestResult previousTestResult = testResults.get(1);
-//
-//            analysisInputText.append("최근한 테스트 결과: ")
-//                    .append(latestTestResult.getTestResult())
-//                    .append("\n\n")
-//                    .append("이전 테스트 결과: ")
-//                    .append(previousTestResult.getTestResult())
-//                    .append("\n\n");
-//        analysisResponse = aiAnalysisService.analyzeTestResults(analysisInputText.toString());
-//        }
-//        //유저-보호자 테스트 분석
-//        if ("1-2".equals(requestType)) {
-//            for (DementiaTestResult testResult : testResults) {
-//                analysisInputText.append("Test ID: ").append(testResult.getTestId())
-//                        .append("\n").append("Test Result: ").append(testResult.getTestResult())
-//                        .append("\n\n");
-//            }
-//            analysisResponse = aiAnalysisService.analyzeTwoTestResults(analysisInputText.toString());
-//        }
-//        System.out.println(analysisResponse);
-//        return Api.OK(analysisResponse);
-//    }
 }

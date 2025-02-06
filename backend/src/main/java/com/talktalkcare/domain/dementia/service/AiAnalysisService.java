@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.talktalkcare.domain.dementia.dto.DementiaAiDto;
+import com.talktalkcare.domain.dementia.entity.AiDementiaAnalysis;
 import com.talktalkcare.domain.dementia.error.DementiaTestErrorCode;
 import com.talktalkcare.domain.dementia.exception.DementiaTestException;
+import com.talktalkcare.domain.dementia.repository.AiAnalysisRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +22,10 @@ import org.springframework.http.MediaType;
 public class AiAnalysisService {
 
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private AiAnalysisRepository aiAnalysisRepository; // 리포지토리 주입
 
     @Value("https://api.deepseek.com/chat/completions")
     private String baseUrl;
@@ -29,107 +37,110 @@ public class AiAnalysisService {
         this.restTemplate = restTemplate;
     }
 
-    
     //유저-유저 테스트 분석
-    public String analyzeTestResults(String inputText) {
-        ObjectMapper objectMapper = new ObjectMapper();
+    public String analyzeTestResults(int userId, String inputText) {
+        return analyzeTestResults(inputText, userId, 1); // analysisType 1은 유저-유저 분석
+    }
+//        return callDeepSeekApi(generateSystemMessage(false), inputText);
+//    }
 
+    //유저-보호자 테스트 분석
+    public String analyzeTwoTestResults(int userId, String inputText) {
+
+        return analyzeTestResults(inputText, userId, 1); // analysisType 1은 유저-유저 분석
+    }
+//        return callDeepSeekApi(generateSystemMessage(true), inputText);
+//    }
+
+    // 분석 공통 처리 메소드
+    private String analyzeTestResults(String inputText, int userId, int analysisType) {
+        // 1. DeepSeek API를 통해 summary 생성
+        String summary = callDeepSeekApi(generateSystemMessage(analysisType == 2), inputText);
+
+        // 2. 1단계에서 생성된 summary와 함께 analysisSeq 계산
+        int analysisSeq = AiAnalysisRepository.findMaxAnalysisSequenceByUserId(userId)
+                .map(maxSeq -> maxSeq + 1) // maxSeq가 존재하면 +1 처리
+                .orElse(1); // 값이 없으면 1로 설정
+
+        DementiaAiDto dto = new DementiaAiDto();
+        dto.setUserId(userId);
+        dto.setSummary(summary); // AI에서 생성된 summary
+        dto.setAnalysisType(analysisType); // 분석 타입 (유저-유저 또는 유저-보호자)
+        dto.setAnalysisSeq(analysisSeq); // 분석 순서
+
+        saveToDatabase(dto);
+
+        // 5. 생성된 summary를 반환하거나, 다른 필요한 작업 수행
+        return summary;
+    }
+    private void saveToDatabase(DementiaAiDto dto) {
+        AiDementiaAnalysis analysis = new AiDementiaAnalysis();
+        analysis.setUserId(dto.getUserId());
+        analysis.setAnalysisResult(dto.getSummary());
+        analysis.setAnalysisType(dto.getAnalysisType());
+        analysis.setAnalysisSequence(dto.getAnalysisSeq());
+
+        AiAnalysisRepository.save(analysis); // DB에 저장
+    }
+
+
+    private String generateSystemMessage(boolean isTwoTestComparison) {
+        StringBuilder message = new StringBuilder();
+
+        message.append("유저의 치매 진단 테스트 결과를 분석할 거야. ")
+                .append(isTwoTestComparison ?
+                        "유저의 자가 진단 테스트와 보호자가 평가한 테스트를 비교하여 변화와 개선점, 주의할 부분을 요약해줘." :
+                        "최근과 과거의 자가 치매 진단 테스트 결과를 비교하여 변화와 개선점, 주의할 부분을 요약해줘.")
+                .append("모든 문항과 문항 번호를 나열하지 말고, 결론만 간결하게 알려줘.");
+
+        if (isTwoTestComparison) {
+            message.append("\n유저 테스트 문항:\n").append(getUserTestQuestions())
+                    .append("\n보호자 테스트 문항:\n").append(getCaregiverTestQuestions());
+        } else {
+            message.append("\n테스트 문항:\n").append(getUserTestQuestions());
+        }
+
+        return message.toString();
+    }
+
+    //DeepSeek API 호출
+    private String callDeepSeekApi(String systemMessage, String userInput) {
         try {
-            // JSON 객체 생성
             ObjectNode rootNode = objectMapper.createObjectNode();
             rootNode.put("model", "deepseek-chat");
             rootNode.put("stream", false);
 
-            // messages 배열 생성
             ArrayNode messages = rootNode.putArray("messages");
 
-            // "system" 메시지 추가
-            ObjectNode systemMessage = objectMapper.createObjectNode();
-            systemMessage.put("role", "system");
-            systemMessage.put("content",
-                    "유저의 자가 치매 진단 테스트 결과 2개를 너에게 보내줄거야. " +
-                            "최근과 과거의 자가 치매 진단 테스트 결과를 바탕으로 전체적인 변화와 개선된 점, 주의가 필요한 부분을 요약해서 결론만 알려줘. 모든 문항과 문항 번호를 나열하지 말고, 딱 결론만 보내줘."+
-                            "각 문항은 다음과 같고, 문항에 해당되면 1, 해당되지 않으면 0이야." +
-                            "1. 기억력에 문제가 있다고 생각하나요? " +
-                            "2. 기억력이 10년 전보다 나빠졌다고 생각하나요? " +
-                            "3. 기억력이 같은 또래의 다른 사람들에 비해 나쁘다고 생각하나요? " +
-                            "4. 기억력 저하로 인해 일상생활에 불편을 느끼나요? " +
-                            "5. 최근에 일어난 일을 기억하기 어렵나요? " +
-                            "6. 며칠 전에 나눈 대화 내용을 기억하기 어렵나요? " +
-                            "7. 며칠 전에 한 약속을 기억하기 어렵나요? " +
-                            "8. 친한 사람의 이름을 기억하기 어렵나요? " +
-                            "9. 사용한 물건을 둔 곳을 기억하기 어렵나요? " +
-                            "10. 이전에 비해 물건을 자주 잃어버리나요? " +
-                            "11. 집 근처에서 길을 잃은 적이 있나요? " +
-                            "12. 가게에서 2~3가지 물건을 사려고 할 때 물건 이름을 기억하기 어렵나요? " +
-                            "13. 가스불이나 전기불 끄는 것을 기억하기 어렵나요? " +
-                            "14. 자주 사용하는 전화번호(자신 혹은 자녀)를 기억하기 어렵나요?");
-            messages.add(systemMessage);
-            // "user" 메시지 추가
-            ObjectNode userMessage = objectMapper.createObjectNode();
-            userMessage.put("role", "user");
-            userMessage.put("content", sanitizeInput(inputText));
-            messages.add(userMessage);
+            ObjectNode systemNode = objectMapper.createObjectNode();
+            systemNode.put("role", "system");
+            systemNode.put("content", systemMessage);
+            messages.add(systemNode);
 
-            // JSON 문자열로 변환
+            ObjectNode userNode = objectMapper.createObjectNode();
+            userNode.put("role", "user");
+            userNode.put("content", userInput);
+            messages.add(userNode);
+
             String requestBody = objectMapper.writeValueAsString(rootNode);
 
-            // HTTP 요청 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + apiKey);
 
-            // HTTP 요청 객체 생성
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
-            // API 호출
             String response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class).getBody();
 
-            // JSON 파싱
             JsonNode responseJson = objectMapper.readTree(response);
-            String content = responseJson
-                    .get("choices") // "choices" 배열의 첫번째의 message객체의
-                    .get(0)
-                    .get("message")
-                    .get("content") // "content" 필드
-                    .asText();      // 문자열로 변환
-
-            // content 출력
-            System.out.println(content);
-
-            return content;
-
+            return responseJson.get("choices").get(0).get("message").get("content").asText();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("API 호출 실패: " + e.getMessage());
+            throw new RuntimeException("AI 분석 실패: " + e.getMessage());
         }
     }
 
-    private String sanitizeInput(String input) {
-        return input.replaceAll("[\\u0000-\\u001F]", ""); // 제어 문자 제거
-    }
-
-    public String analyzeTwoTestResults(String inputText) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        try {
-            // JSON 객체 생성
-            ObjectNode rootNode = objectMapper.createObjectNode();
-            rootNode.put("model", "deepseek-chat");
-            rootNode.put("stream", false);
-
-            // messages 배열 생성
-            ArrayNode messages = rootNode.putArray("messages");
-
-            // "system" 메시지 추가
-            ObjectNode systemMessage = objectMapper.createObjectNode();
-            systemMessage.put("role", "system");
-            systemMessage.put("content",
-                "유저의 자가 진단 테스트와 유저 보호자가 진행한 유저의 테스트 결과를 바탕으로 전체적인 변화와 개선된 점, 주의가 필요한 부분을 요약해서 결론만 알려줘. 모든 문항과 문항 번호를 나열하지 말고, 딱 결론만 보내줘."+
-                "각 문항은 다음과 같고, 문항에 해당되면 1, 해당되지 않으면 0이야." +
-
-                "type 1:유저가 진행했던 테스트 " +
-                "1. 기억력에 문제가 있다고 생각하나요? " +
+    private String getUserTestQuestions() {
+        return "1. 기억력에 문제가 있다고 생각하나요?" +
                 "2. 기억력이 10년 전보다 나빠졌다고 생각하나요? " +
                 "3. 기억력이 같은 또래의 다른 사람들에 비해 나쁘다고 생각하나요? " +
                 "4. 기억력 저하로 인해 일상생활에 불편을 느끼나요? " +
@@ -142,10 +153,11 @@ public class AiAnalysisService {
                 "11. 집 근처에서 길을 잃은 적이 있나요? " +
                 "12. 가게에서 2~3가지 물건을 사려고 할 때 물건 이름을 기억하기 어렵나요? " +
                 "13. 가스불이나 전기불 끄는 것을 기억하기 어렵나요? " +
-                "14. 자주 사용하는 전화번호(자신 혹은 자녀)를 기억하기 어렵나요?"+
-                " " +
-                "type 2:보호자가 진행 했던 테스트 " +
-                "1. 전화번호나 사람이름을 기억하기 힘들다. " +
+                "14. 자주 사용하는 전화번호(자신 혹은 자녀)를 기억하기 어렵나요?";
+    }
+
+    private String getCaregiverTestQuestions() {
+        return "1. 전화번호나 사람이름을 기억하기 힘들다."+
                 "2. 어떤 일이 언제 일어났는지 기억하지 못할 때가 있다. " +
                 "3. 며칠 전에 들었던 이야기를 잊는다. " +
                 "4. 오래 전부터 들었던 이야기를 잊는다. " +
@@ -176,46 +188,6 @@ public class AiAnalysisService {
                 "29. 물건을 항상 두는 장소를 잊어버리고 엉뚱한 곳을 찾는다. " +
                 "30. 계산 능력이 떨어졌다. " +
                 "31. 돈 관리를 하는 데 실수가 있다. " +
-                "32. 과거에 쓰던 기구 사용이 서툴러졌다. "
-            );
-            messages.add(systemMessage);
-            // "user" 메시지 추가
-            ObjectNode userMessage = objectMapper.createObjectNode();
-            userMessage.put("role", "user");
-            userMessage.put("content", sanitizeInput(inputText));
-            messages.add(userMessage);
-
-            // JSON 문자열로 변환
-            String requestBody = objectMapper.writeValueAsString(rootNode);
-
-            // HTTP 요청 헤더 설정
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + apiKey);
-
-            // HTTP 요청 객체 생성
-            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
-            // API 호출
-            String response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class).getBody();
-
-            // JSON 파싱
-            JsonNode responseJson = objectMapper.readTree(response);
-            String content = responseJson
-                    .get("choices") // "choices" 배열
-                    .get(0)         // 첫 번째 선택지
-                    .get("message") // "message" 객체
-                    .get("content") // "content" 필드
-                    .asText();      // 문자열로 변환
-
-            // content 출력
-            System.out.println(content);
-
-            return content;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("API 호출 실패: " + e.getMessage());
-        }
+                "32. 과거에 쓰던 기구 사용이 서툴러졌다. ";
     }
 }
