@@ -4,11 +4,13 @@ import com.talktalkcare.domain.users.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class FriendDto {

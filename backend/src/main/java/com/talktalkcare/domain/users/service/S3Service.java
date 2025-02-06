@@ -46,7 +46,7 @@ public class S3Service {
     }
 
     public ProfileImageResp getFileUrl(String fileName) {
-        return new ProfileImageResp("https://talktalkcare.s3.ap-southeast-2.amazonaws.com"+amazonS3Client.getUrl(s3Properties.getBucket(), fileName).toString());
+        return new ProfileImageResp(amazonS3Client.getUrl(s3Properties.getBucket(), fileName).toString());
     }
 
     public void deleteFile(String fileName) {
