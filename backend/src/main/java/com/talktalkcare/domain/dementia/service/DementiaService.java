@@ -38,15 +38,16 @@ public class DementiaService {
      * @param userId 사용자 ID
      * @return DementiaTestResult 리스트
      */
-    public List<DementiaTestResult> handleRequest(String requestType, int userId) {
-        if ("1-2".equalsIgnoreCase(requestType)) {
-            // 테스트 ID 1, 2에 대해 최신 결과 가져오기
-            return dementiaRepository.fetchDifferentTestTypeResults(userId);
-        }
-        if ("1-1".equalsIgnoreCase(requestType)) {
+    public List<DementiaTestResult> handleRequest(boolean requestType, int userId) {
+        if (requestType) {
             // 테스트 ID 1에 대해 최신 두 개의 결과 가져오기
             List<DementiaTestResult> results = dementiaRepository.getLastTwoTestResults(userId);
             return results.size() >= 2 ? results.subList(0, 2) : results;
+            }
+        if (!requestType) {
+            // 테스트 ID 1, 2에 대해 최신 결과 가져오기
+            return dementiaRepository.fetchDifferentTestTypeResults(userId);
+
         } else {
             throw new IllegalArgumentException("잘못된 요청 타입입니다: " + requestType);
         }

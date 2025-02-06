@@ -25,12 +25,12 @@ public class DementiaController {
     }
     /**
      * 클라이언트 요청에 따른 testResult 조회 및 분석
-     * @param requestType "1-2" 또는 "1-1"
+     * @param requestType "0" 또는 "1"
      * @param userId 사용자 ID
      * @return 분석된 AI 결과
      */
     @GetMapping("/analysis")
-    public Api<?> getTestResults(@RequestParam String requestType,
+    public Api<?> getTestResults(@RequestParam boolean requestType,
                                       @RequestParam int userId) {
         // DementiaService에서 요청에 따른 testResult 리스트를 가져옴
         List<DementiaTestResult> testResults = dementiaService.handleRequest(requestType, userId);
@@ -48,38 +48,31 @@ public class DementiaController {
 
         return Api.OK(analysisResponse);
     }
-    private String buildAnalysisInput(String requestType, List<DementiaTestResult> testResults) {
+    private String buildAnalysisInput(boolean requestType, List<DementiaTestResult> testResults) {
         StringBuilder analysisInputText = new StringBuilder();
 
-        switch (requestType) {
-            case "1-1": // 유저-유저 자가 테스트 분석
-                analysisInputText.append("최근한 테스트 결과: ")
-                        .append(testResults.get(0).getTestResult())
-                        .append("\n\n")
-                        .append("이전 테스트 결과: ")
-                        .append(testResults.get(1).getTestResult())
+        if (requestType) { // 유저-유저 자가 테스트 분석
+            analysisInputText.append("최근한 테스트 결과: ")
+                    .append(testResults.get(0).getTestResult())
+                    .append("\n\n")
+                    .append("이전 테스트 결과: ")
+                    .append(testResults.get(1).getTestResult())
+                    .append("\n\n");
+        } else { // 유저-보호자 테스트 분석
+            for (DementiaTestResult testResult : testResults) {
+                analysisInputText.append("Test ID: ").append(testResult.getTestId())
+                        .append("\nTest Result: ").append(testResult.getTestResult())
                         .append("\n\n");
-                break;
-
-            case "1-2": // 유저-보호자 테스트 분석
-                for (DementiaTestResult testResult : testResults) {
-                    analysisInputText.append("Test ID: ").append(testResult.getTestId())
-                            .append("\nTest Result: ").append(testResult.getTestResult())
-                            .append("\n\n");
-                }
-                break;
-
-            default:
-                throw new IllegalArgumentException("잘못된 요청 타입입니다: " + requestType);
+            }
         }
 
         return analysisInputText.toString();
     }
-    private String analyzeTestResults(int userId, String requestType, String analysisInputText) {
-        if ("1-1".equals(requestType)) {
+    private String analyzeTestResults(int userId, boolean requestType, String analysisInputText) {
+        if (requestType) {
             return aiAnalysisService.analyzeTestResults(userId,analysisInputText);
         }
-        if ("1-2".equals(requestType)) {
+        if (!requestType) {
             return aiAnalysisService.analyzeTwoTestResults(userId,analysisInputText);
         }
         return "";

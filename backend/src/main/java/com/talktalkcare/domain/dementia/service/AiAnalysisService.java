@@ -75,7 +75,7 @@ public class AiAnalysisService {
         analysis.setAnalysisType(dto.isAnalysisType());
         analysis.setAnalysisSequence(dto.getAnalysisSeq());
 
-        AiAnalysisRepository.save(analysis); // DB에 저장
+        aiAnalysisRepository.save(analysis); // DB에 저장
     }
 
 
