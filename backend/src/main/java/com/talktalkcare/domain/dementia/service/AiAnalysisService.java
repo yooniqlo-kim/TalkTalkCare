@@ -39,28 +39,22 @@ public class AiAnalysisService {
 
     //유저-유저 테스트 분석
     public String analyzeTestResults(int userId, String inputText) {
-        return analyzeTestResults(inputText, userId, 1); // analysisType 1은 유저-유저 분석
+        return analyzeTestResults(inputText, userId, true); // analysisType 1은 유저-유저 분석
     }
-//        return callDeepSeekApi(generateSystemMessage(false), inputText);
-//    }
-
     //유저-보호자 테스트 분석
     public String analyzeTwoTestResults(int userId, String inputText) {
 
-        return analyzeTestResults(inputText, userId, 1); // analysisType 1은 유저-유저 분석
+        return analyzeTestResults(inputText, userId, false); // analysisType 1은 유저-유저 분석
     }
-//        return callDeepSeekApi(generateSystemMessage(true), inputText);
-//    }
 
     // 분석 공통 처리 메소드
-    private String analyzeTestResults(String inputText, int userId, int analysisType) {
+    private String analyzeTestResults(String inputText, int userId, boolean analysisType) {
         // 1. DeepSeek API를 통해 summary 생성
-        String summary = callDeepSeekApi(generateSystemMessage(analysisType == 2), inputText);
+        String summary = callDeepSeekApi(generateSystemMessage(analysisType), inputText);
 
         // 2. 1단계에서 생성된 summary와 함께 analysisSeq 계산
-        int analysisSeq = AiAnalysisRepository.findMaxAnalysisSequenceByUserId(userId)
-                .map(maxSeq -> maxSeq + 1) // maxSeq가 존재하면 +1 처리
-                .orElse(1); // 값이 없으면 1로 설정
+        // 2. 1단계에서 생성된 summary와 함께 analysisSeq 계산
+        int analysisSeq = aiAnalysisRepository.findMaxAnalysisSequenceByUserId(userId); // aiAnalysisRepository 인스턴스를 통해 호출
 
         DementiaAiDto dto = new DementiaAiDto();
         dto.setUserId(userId);
@@ -74,10 +68,11 @@ public class AiAnalysisService {
         return summary;
     }
     private void saveToDatabase(DementiaAiDto dto) {
+
         AiDementiaAnalysis analysis = new AiDementiaAnalysis();
         analysis.setUserId(dto.getUserId());
         analysis.setAnalysisResult(dto.getSummary());
-        analysis.setAnalysisType(dto.getAnalysisType());
+        analysis.setAnalysisType(dto.isAnalysisType());
         analysis.setAnalysisSequence(dto.getAnalysisSeq());
 
         AiAnalysisRepository.save(analysis); // DB에 저장
