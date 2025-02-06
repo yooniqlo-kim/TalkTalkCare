@@ -106,9 +106,11 @@ class OpenViduTest extends Component<{}, State> {
       // OpenVidu 객체 초기화
       this.OV = new OpenVidu();
       this.OV.enableProdMode();
-
+      
       // 세션 초기화
       const session = this.OV.initSession();
+      
+      // WebSocket URL 설정은 session.connect() 호출 시 자동으로 처리됨
       this.setState({ session });
 
       // 세션 이벤트 핸들러 설정
