@@ -18,26 +18,27 @@ h1 {
 }
 
 .button-container button {
+  margin: 5px;
   padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
+  border: none;
+  border-radius: 5px;
   background-color: #007bff;
   color: white;
-  border: none;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .button-container button:hover {
   background-color: #0056b3;
 }
 
+/* 카메라 끄기 버튼 스타일 */
 .button-container button:last-child {
-  background-color: #dc3545;
+  background-color: #6c757d;
 }
 
 .button-container button:last-child:hover {
-  background-color: #c82333;
+  background-color: #545b62;
 }
 
 .video-container {

@@ -121,6 +121,14 @@ class OpenViduTest extends Component<{}, State> {
         }));
       });
 
+      // 스트림이 삭제될 때 처리하는 핸들러 추가
+      session.on('streamDestroyed', (event) => {
+        // 나간 참가자의 subscriber를 찾아서 제거
+        this.setState(prevState => ({
+          subscribers: prevState.subscribers.filter(sub => sub.stream.streamId !== event.stream.streamId)
+        }));
+      });
+
       // 토큰 생성
       const token = await this.getToken(sessionId);
       
@@ -296,6 +304,20 @@ class OpenViduTest extends Component<{}, State> {
     }
   }
 
+  // 카메라 끄기 기능 추가
+  async toggleCamera() {
+    try {
+        if (!this.state.publisher) return;
+        
+        const isVideoEnabled = this.state.publisher.stream.videoActive;
+        await this.state.publisher.publishVideo(!isVideoEnabled);
+        
+        // 상태 업데이트는 필요 없음 (OpenVidu가 자동으로 처리)
+    } catch (error) {
+        console.error('카메라 토글 에러:', error);
+    }
+  }
+
   render() {
     return (
       <div className="container">
@@ -337,12 +359,12 @@ class OpenViduTest extends Component<{}, State> {
           </div>
 
           <div className="button-container">
-            {!this.state.session ? (
-              <button onClick={() => this.joinSession('test-session')}>세션 참여</button>
-            ) : (
+            {this.state.session && (
               <>
                 <button onClick={this.leaveSession}>세션 나가기</button>
-                <button onClick={this.switchCamera}>카메라 전환</button>
+                <button onClick={this.toggleCamera.bind(this)}>
+                  카메라 {this.state.publisher?.stream.videoActive ? '끄기' : '켜기'}
+                </button>
               </>
             )}
           </div>
