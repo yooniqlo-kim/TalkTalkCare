@@ -7,7 +7,7 @@ import SMCQ from './pages/smcq';
 import SMD from './pages/smd';
 import Result from './pages/result';
 import VideoCall from './pages/videocall';
-import OpenViduTest from './pages/OpenViduTest';
+import OpenViduComponent from './pages/openvidu';
 
 const App: React.FC = () => {
   return (
@@ -16,7 +16,7 @@ const App: React.FC = () => {
         <nav>
           <Link to="/keypad">화상통화로 이동</Link>
           <Link to="/test">치매 진단 테스트로 이동</Link>
-          <Link to="/openvidu-test">OpenVidu 테스트</Link>
+          <Link to="/openvidu">OpenVidu 테스트</Link>
         </nav>
         <Routes>
           <Route path="/keypad" element={<Keypad />} />
@@ -25,7 +25,7 @@ const App: React.FC = () => {
           <Route path="/smd" element={<SMD />} />
           <Route path="/result" element={<Result />} />
           <Route path="/videocall" element={<VideoCall />} />
-          <Route path="/openvidu-test" element={<OpenViduTest />} />
+          <Route path="/openvidu" element={<OpenViduComponent />} />
         </Routes>
       </div>
     </BrowserRouter>

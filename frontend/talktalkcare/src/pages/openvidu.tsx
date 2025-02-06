@@ -1,6 +1,6 @@
 import { Component } from 'react';
-import { Device, OpenVidu, Publisher, Session, StreamManager, Subscriber } from 'openvidu-browser';
-import './OpenViduTest.css';
+import { Device, OpenVidu as OpenViduClient, Publisher, Session, StreamManager, Subscriber } from 'openvidu-browser';
+import './openvidu.css';
 
 interface State {
   session: Session | undefined;
@@ -15,9 +15,10 @@ interface State {
   isVideoEnabled: boolean;  // 카메라 상태 추가
 }
 
-class OpenViduTest extends Component<{}, State> {
-  private OV: OpenVidu | undefined;
+class OpenViduComponent extends Component<{}, State> {
+  private OV: OpenViduClient | undefined;
   private websocket: WebSocket | undefined;  // 웹소켓 연결 유지
+
 
   constructor(props: {}) {
     super(props);
@@ -106,7 +107,7 @@ class OpenViduTest extends Component<{}, State> {
       }
 
       // OpenVidu 객체 초기화
-      this.OV = new OpenVidu();
+      this.OV = new OpenViduClient();
       this.OV.enableProdMode();
       
       // 세션 초기화
@@ -428,4 +429,4 @@ class OpenViduTest extends Component<{}, State> {
   }
 }
 
-export default OpenViduTest;
+export default OpenViduComponent;
