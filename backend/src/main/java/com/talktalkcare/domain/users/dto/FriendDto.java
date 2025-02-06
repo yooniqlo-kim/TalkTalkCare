@@ -15,11 +15,12 @@ public class FriendDto {
     private Integer userId;
     private String name;
     private String s3Filename;
+    private String phone;
     private String status;  // "ONLINE" or "OFFLINE"
     private LocalDateTime lastActiveTime;
     private String displayStatus;
 
-    public static FriendDto from(Integer userId, String name, String s3Filename,
+    public static FriendDto from(Integer userId, String name, String s3Filename, String phone,
                                  boolean isOnline, LocalDateTime lastActiveTime) {
         String status = isOnline ? "ONLINE" : "OFFLINE";
         String displayStatus = createDisplayStatus(lastActiveTime);
@@ -27,6 +28,7 @@ public class FriendDto {
                 userId,
                 name,
                 s3Filename,
+                phone,
                 status,
                 lastActiveTime,
                 displayStatus
@@ -40,6 +42,7 @@ public class FriendDto {
                 user.getUserId(),
                 user.getName(),
                 user.getS3FileName(),
+                user.getPhone(),
                 status,
                 lastActiveTime,
                 displayStatus

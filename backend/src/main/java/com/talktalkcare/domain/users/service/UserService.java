@@ -97,7 +97,10 @@ public class UserService {
             handleAutoLogin(userLoginId, response);
         }
 
-        return new LoginResp(user.getName(), getProfileImage(user.getUserId()).getImageUrl());
+        return new LoginResp(
+                user.getUserId(),
+                user.getName(),
+                getProfileImage(user.getUserId()).getImageUrl());
     }
 
     private User authenticate(String loginId, String password) {
@@ -137,7 +140,8 @@ public class UserService {
         return PasswordEncryptor.encryptPassword(loginId,generateSalt());
     }
 
-    private void storeTokenInDatabase(String loginId, String token) {
+    @Transactional
+    protected void storeTokenInDatabase(String loginId, String token) {
         User user = getUserByLoginId(loginId);
         user.setToken(token);
     }
@@ -172,7 +176,10 @@ public class UserService {
                     throw new UserException(UserErrorCode.USER_TOKEN_INVALID);
                 }
 
-                return new LoginResp(user.getName(), getProfileImage(user.getUserId()).getImageUrl());
+                return new LoginResp(
+                        user.getUserId(),
+                        user.getName(),
+                        getProfileImage(user.getUserId()).getImageUrl());
             }else {
                 throw new UserException(UserErrorCode.USER_LOGINID_MISMATCH);
             }
@@ -184,14 +191,6 @@ public class UserService {
     public ProfileImageResp getProfileImage(int userId) {
         User user = getUserById(userId);
         return s3Service.getFileUrl(user.getS3FileName());
-    }
-
-    @Transactional
-    public void addFriend(AddFriendReq addFriendReq) {
-        User friend = userRepository.findByPhone(addFriendReq.getPhone())
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-
-        userRepository.addFriend(addFriendReq.getUserId(), friend.getUserId(), friend.getName());
     }
 
     private void deleteCookies(HttpServletResponse response) {

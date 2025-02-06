@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -50,14 +48,4 @@ public class UserController {
         return Api.OK(userService.getProfileImage(userId));
     }
 
-    @PostMapping("/add-friend")
-    public Api<Void> addFriend(@RequestBody AddFriendReq addFriendReq) {
-        userService.addFriend(addFriendReq);
-        return Api.OK();
-    }
-
-    @GetMapping("/friends")
-    public Api<List<FriendDto>> getFriends(@RequestParam(name = "userId") Integer userId) {
-        return Api.OK(userService.getFriends(userId));
-    }
 }

@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginResp {
 
+    private Integer userId;
+
     private String username;
 
     private String s3Filename;
