@@ -8,6 +8,7 @@ import GameListPage from '../pages/GameListPage.tsx';
 import MyPage from '../pages/my_page/MyPage.tsx';
 import UserInfoPage from '../pages/my_page/UserInfoPage.tsx';
 import Test from '../pages/DimentiaTest/test.tsx';
+import Result from '../pages/DimentiaTest/Result.tsx';
 import SDQ from '../pages/DimentiaTest/test_page/SDQ.tsx';
 import SMCQ from '../pages/DimentiaTest/test_page/SMCQ.tsx';
 import SignUp from '../pages/user_page/SignUp.tsx';

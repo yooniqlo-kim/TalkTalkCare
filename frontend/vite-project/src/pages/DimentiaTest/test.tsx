@@ -24,8 +24,8 @@ const Test: React.FC = () => {
         
         <div className="test-option">
           <h3>보호자</h3>
-          <Link to="/smd" className="test-button">
-            SMD
+          <Link to="/sdq" className="test-button">
+            SDQ
           </Link>
         </div>
       </div>
