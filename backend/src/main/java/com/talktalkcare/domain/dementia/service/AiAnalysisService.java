@@ -41,7 +41,7 @@ public class AiAnalysisService {
     public String analyzeTestResults(int userId, String inputText) {
         return analyzeTestResults(inputText, userId, true); // analysisType 1은 유저-유저 분석
     }
-    //유저-보호자 테스트 분석
+    //유저-보호자 테스트 분석ㅂㅁ
     public String analyzeTwoTestResults(int userId, String inputText) {
 
         return analyzeTestResults(inputText, userId, false); // analysisType 1은 유저-유저 분석
@@ -51,6 +51,7 @@ public class AiAnalysisService {
     private String analyzeTestResults(String inputText, int userId, boolean analysisType) {
         // 1. DeepSeek API를 통해 summary 생성
         String summary = callDeepSeekApi(generateSystemMessage(analysisType), inputText);
+        System.out.println(summary);
 
         // 2. 1단계에서 생성된 summary와 함께 analysisSeq 계산
         // 2. 1단계에서 생성된 summary와 함께 analysisSeq 계산
@@ -84,9 +85,9 @@ public class AiAnalysisService {
 
         message.append("유저의 치매 진단 테스트 결과를 분석할 거야. ")
                 .append(isTwoTestComparison ?
-                        "유저의 자가 진단 테스트와 보호자가 평가한 테스트를 비교하여 변화와 개선점, 주의할 부분을 요약해줘." :
+                        "유저 자가 진단 테스트와 보호자가 평가한 테스트를 비교하여 변화와 개선점, 주의할 부분을 요약해줘." :
                         "최근과 과거의 자가 치매 진단 테스트 결과를 비교하여 변화와 개선점, 주의할 부분을 요약해줘.")
-                .append("모든 문항과 문항 번호를 나열하지 말고, 결론만 간결하게 알려줘.");
+                .append("모든 문항과 문항 번호를 나열하지 말고, 결론만 간결하게 3문장 이내로 알려줘 .");
 
         if (isTwoTestComparison) {
             message.append("\n유저 테스트 문항:\n").append(getUserTestQuestions())
@@ -97,8 +98,7 @@ public class AiAnalysisService {
 
         return message.toString();
     }
-
-    //DeepSeek API 호출
+    // DeepSeek API 호출
     private String callDeepSeekApi(String systemMessage, String userInput) {
         try {
             ObjectNode rootNode = objectMapper.createObjectNode();
@@ -126,6 +126,11 @@ public class AiAnalysisService {
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             String response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class).getBody();
 
+            System.out.println("DeepSeek API Response: " + response);
+            if (response == null || response.isEmpty()) {
+                System.out.println("DeepSeek API Response is null or empty.");
+                return "AI 응답 없음"; // 기본 응답 메시지 설정
+            }
             JsonNode responseJson = objectMapper.readTree(response);
             return responseJson.get("choices").get(0).get("message").get("content").asText();
         } catch (Exception e) {
