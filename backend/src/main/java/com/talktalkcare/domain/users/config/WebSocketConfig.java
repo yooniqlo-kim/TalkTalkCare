@@ -1,5 +1,6 @@
 package com.talktalkcare.domain.users.config;
 
+import com.talktalkcare.domain.users.service.UserStatusWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
