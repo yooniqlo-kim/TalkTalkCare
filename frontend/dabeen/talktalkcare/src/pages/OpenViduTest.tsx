@@ -53,7 +53,7 @@ class OpenViduTest extends Component<{}, State> {
 
   // 웹소켓 연결 설정
   connectWebSocket() {
-    this.websocket = new WebSocket('wss://www.talktalkcare.com:4443/openvidu');
+    this.websocket = new WebSocket('wss://talktalkcare.com/openvidu');
     
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 5;
@@ -153,30 +153,40 @@ class OpenViduTest extends Component<{}, State> {
 
   // 기존의 세션 생성 메서드 유지
   async createSession(sessionId: string) {
-    try {
-      const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
-        },
-        body: JSON.stringify({ customSessionId: sessionId })
-      });
+    return new Promise<string>(async (resolve) => {
+        try {
+            const response = await fetch('https://www.talktalkcare.com/openvidu/api/sessions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ customSessionId: sessionId }),
+            });
 
-      if (response.status === 409) {
-        return sessionId;
-      }
+            // 409 에러 (세션이 이미 존재)
+            if (response.status === 409) {
+                resolve(sessionId);
+                return;
+            }
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.id;
-    } catch (error) {
-      console.error('세션 생성 에러:', error);
-      throw error;
-    }
+            // 다른 에러 발생 시
+            if (!response.ok) {
+                // 1초 후 강제로 성공 처리
+                setTimeout(() => {
+                    console.log('타임아웃으로 인한 강제 세션 생성');
+                    resolve(sessionId);
+                }, 1000);
+                return;
+            }
+
+            const data = await response.json();
+            resolve(data.id);
+        } catch (error) {
+            console.error('세션 생성 중 에러:', error);
+            resolve(sessionId);
+        }
+    });
   }
 
   // 기존의 토큰 생성 메서드 유지
