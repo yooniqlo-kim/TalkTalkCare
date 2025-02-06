@@ -93,7 +93,7 @@ services:
       - OPENVIDU_STREAMS_VIDEO_MAX_SEND_BANDWIDTH=2000
       - OPENVIDU_STREAMS_VIDEO_MIN_SEND_BANDWIDTH=500
     ports:
-      - "4443:4443"
+      # - "443:443"
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
     volumes:

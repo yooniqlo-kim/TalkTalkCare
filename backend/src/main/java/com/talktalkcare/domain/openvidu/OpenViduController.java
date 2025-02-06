@@ -23,7 +23,7 @@ public class OpenViduController {
 
     public OpenViduController() {
         // 도커 네트워크 내부 통신은 http로 가능
-        this.openVidu = new OpenVidu("https://openvidu:4443", "talktalkcare");
+        this.openVidu = new OpenVidu("https://openvidu:443", "talktalkcare");
     }
 
     @PostMapping("/sessions")
