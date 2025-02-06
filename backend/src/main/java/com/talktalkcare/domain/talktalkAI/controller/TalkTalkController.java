@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/talktalk")
+@RequestMapping("/talktalk")
 public class TalkTalkController {
 
     private final TalkTalkService talkTalkService;
