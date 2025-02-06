@@ -9,7 +9,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddFriendReq {
-    private String userId;
+
+    private Integer userId;
+
     private String name;
+
     private String phone;
+
 }
