@@ -70,12 +70,7 @@ public class FriendDto {
             return hours + "시간 전";
         }
 
-        long days = duration.toDays();
-        if (days < 7) {
-            return days + "일 전";
-        }
-
-        return "오래 전";
+        return duration.toDays() + "일 전";
     }
 
     // 상태 업데이트 메서드

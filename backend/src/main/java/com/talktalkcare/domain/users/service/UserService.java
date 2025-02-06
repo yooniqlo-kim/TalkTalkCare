@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -206,8 +205,4 @@ public class UserService {
         response.addCookie(tokenCookie);
     }
 
-    public List<FriendDto> getFriends(Integer userId) {
-
-        return null;
-    }
 }
