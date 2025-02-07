@@ -7,10 +7,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/ws': {
-        target: 'ws://localhost:8080', // WebSocket 서버 주소와 포트를 여기에 설정
-        ws: true, // WebSocket을 활성화
-        changeOrigin: true, // 요청 헤더의 원본을 서버로 전달
+        target: 'ws://localhost:8080',
+        ws: true,
+        changeOrigin: true,
       },
-    },
-  },
+      '/api': {
+        target: 'http://localhost:8443',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 })

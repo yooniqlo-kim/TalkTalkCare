@@ -16,10 +16,11 @@ const Navbar: React.FC = () => {
      <div className="navbar-middle"
      style={{backgroundColor: '#F5FFEA'}}>
        <div className="navbar-menu">
-         <Link to="/signup" className="navbar-link">회원가입</Link>
+       <Link to="/talktalk" className="text-blue-500 hover:text-blue-700 font-medium">톡톡</Link>
+         <Link to="/sign-up" className="navbar-link">회원가입</Link>
          <Link to="/login" className="navbar-link">로그인</Link>
          <Link to="/test" className="navbar-link">진단 테스트</Link>
-         <Link to="/mypage" className="navbar-link">내 정보</Link>
+         <Link to="/mypage" className="navbar-link">내 정보</Link>.
        </div>
      </div>
    </nav>

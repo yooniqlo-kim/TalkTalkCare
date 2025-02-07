@@ -108,7 +108,7 @@ import MainMenu from './main_page/MainMenu';
 import Analytics from './main_page/Analytics';
 import FriendList from './main_page/FriendList';
 import '../styles/components/MainPage.css';
-
+import SpeechToText from './Voice';
 interface MainPageProps {
   showFriendListByDefault?: boolean;
 }
@@ -119,6 +119,7 @@ const MainPage: React.FC<MainPageProps> = ({ showFriendListByDefault = false }) 
 
   return (
     <div className="main-page-container">
+      {/* <SpeechToText /> */}
       <div className="main-page-content">
         <div className="main-menu-container">
           {!showFriendList && (

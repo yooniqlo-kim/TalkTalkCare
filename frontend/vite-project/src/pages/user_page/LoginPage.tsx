@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authService } from '../../services/authService';
 import '../../styles/components/Login.css';
 import Header from '../Header';
+import axios, { AxiosError } from 'axios';
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    id: '',
+    userLoginId: '',
     password: '',
+    autoLogin: false
   });
   const [autoLogin, setAutoLogin] = useState(false);
 
@@ -19,10 +22,27 @@ const Login = () => {
     }));
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: 로그인 로직 구현
-    console.log('로그인 시도:', formData, '자동로그인:', autoLogin);
+    try {
+      const response = await authService.login(formData);
+      console.log('전체 응답:', response); // 추가 로깅
+      
+      if (response.result.msg === 'success') {
+        // 토큰 저장 등의 추가 로직 필요
+
+        
+        localStorage.setItem('token', response.body.userId); // 예시
+        localStorage.setItem('name', response.body.username);
+        localStorage.setItem('profile-image', response.body.s3Filename);
+        alert('로그인 성공!');
+        navigate('/');
+      } else {
+        alert(response.result.msg || '로그인에 실패했습니다.');
+      }
+    } catch (error: any) {
+      // 에러 처리 로직
+    }
   };
 
   return (
@@ -35,8 +55,8 @@ const Login = () => {
           <div className="input-group">
             <input
               type="text"
-              name="id"
-              value={formData.id}
+              name="userLoginId"
+              value={formData.userLoginId}
               onChange={handleChange}
               placeholder="아이디"
             />
@@ -69,10 +89,10 @@ const Login = () => {
           <button 
             type="submit" 
             className="login-button"
-            disabled={!formData.id || !formData.password}
+            disabled={!formData.userLoginId || !formData.password}
           >
             로그인
-          </button>
+          </button> 
         </form>
 
         {/* 하단 링크들 */}

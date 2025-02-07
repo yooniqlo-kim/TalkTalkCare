@@ -3,6 +3,8 @@ import { User, Camera } from 'lucide-react';
 import '../../styles/components/SignUp.css';
 import { authService } from '../../services/authService';
 import { UserSignupRequest } from '../../types/user';
+import axios, { AxiosError } from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -11,17 +13,16 @@ const SignUp = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [formData, setFormData] = useState<UserSignupRequest>({
     name: '',
-    id: '',
-    nickname: '',
+    loginId: '',
     password: '',
     phoneNumber: '',
     birthdate: '',
     passwordConfirm: ''
   });
+  const navigate = useNavigate();
   const [smsVerificationCode, setSmsVerificationCode] = useState('');
   const [isSmsVerificationSent, setIsSmsVerificationSent] = useState(false);
   const [isSmsVerified, setIsSmsVerified] = useState(false);
-  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
   // 단계별 안내 텍스트
@@ -32,7 +33,7 @@ const SignUp = () => {
     4: '아이디를 입력해주세요. (6자 이상)',
     5: '비밀번호를 입력해주세요. (8자 이상)',
     6: '생년월일을 입력해주세요.',
-    7: '모든 정보를 입력하셨습니다. 회원가입하기를 눌러주세요!'
+    7: '모든 정보를 입력하셨습니다. 회원가입하기 버튼을 눌러주세요!'
   };
 
   const handleImageClick = () => {
@@ -79,35 +80,33 @@ const SignUp = () => {
     }
   };
 
-  const validateCurrentStep = (currentStep: number): boolean => {
-    switch (currentStep) {
-      case 1:
-        return formData.name.length > 0;
-      case 2:
-        return /^\d{10,11}$/.test(formData.phoneNumber.replace(/-/g, ''));
-      case 3:
-        return isSmsVerified;
-      case 4:
-        return formData.id.length >= 6;
-      case 5:
-        return formData.nickname.length > 0;
-      case 6:
-        if (formData.password.length < 8) {
-          setPasswordError('비밀번호는 8자 이상이어야 합니다.');
-          return false;
-        }
-        if (formData.password !== formData.passwordConfirm) {
-          setPasswordError('비밀번호가 일치하지 않습니다');
-          return false;
-        }
-        setPasswordError('');
-        return true;
-      case 7:
-        return formData.birthdate.length > 0;
-      default:
-        return true;
-    }
-  };
+const validateCurrentStep = (currentStep: number): boolean => {
+  switch (currentStep) {
+    case 1:
+      return formData.name.length > 0;
+    case 2:
+      return /^\d{10,11}$/.test(formData.phoneNumber.replace(/-/g, ''));
+    case 3:
+      return isSmsVerified;
+    case 4:
+      return formData.loginId.length >= 6;
+    case 5:  // 비밀번호 검증
+      if (formData.password.length < 8) {
+        setPasswordError('비밀번호는 8자 이상이어야 합니다.');
+        return false;
+      }
+      if (formData.password !== formData.passwordConfirm) {
+        setPasswordError('비밀번호가 일치하지 않습니다');
+        return false;
+      }
+      setPasswordError('');
+      return true;
+    case 6:  // 생년월일 검증으로 수정
+      return formData.birthdate.length > 0;
+    default:
+      return true;
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -119,22 +118,24 @@ const SignUp = () => {
         [name]: value
       }));
     }
-
-    if (name === 'nickname') {
-      setIsNicknameChecked(false);
-    }
   };
 
   const handleSubmit = async () => {
     try {
-      const response = await authService.signup(formData);
-      if (response.success) {
-        alert('회원가입이 완료되었습니다.');
-      } else {
-        alert(response.message);
-      }
+      const response = await authService.signup(formData, profileImage);
+      console.log('회원가입 응답:', response);  // 응답 확인용
+      
+      // 에러가 발생하지 않으면 성공으로 처리
+      alert('회원가입이 완료되었습니다.');
+      navigate('/login');  // 로그인 페이지로 이동
     } catch (error) {
-      alert('회원가입에 실패했습니다.');
+      if (axios.isAxiosError(error)) {
+        console.error('에러 응답 데이터:', error.response?.data);
+        const errorMessage = error.response?.data?.result?.msg;
+        alert(errorMessage || '회원가입에 실패했습니다.');
+      } else {
+        alert('회원가입에 실패했습니다.');
+      }
     }
   };
 
@@ -248,8 +249,8 @@ const SignUp = () => {
             <div className="input-group">
               <input
                 type="text"
-                name="id"
-                value={formData.id}
+                name="loginId"
+                value={formData.loginId}
                 onChange={handleChange}
                 placeholder="아이디를 입력하세요 (6자 이상)"
               />
@@ -257,7 +258,7 @@ const SignUp = () => {
                 <button 
                   onClick={() => handleNext(4)}
                   className="next-button"
-                  disabled={formData.id.length < 6}
+                  disabled={formData.loginId.length < 6}
                 >
                   다음
                 </button>
@@ -265,39 +266,39 @@ const SignUp = () => {
             </div>
           )}
    
-          {/* 비밀번호 입력 */}
-          {step >= 6 && (
-            <div className="input-group">
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="비밀번호를 입력하세요 (8자 이상)"
-              />
-              <input
-                type="password"
-                name="passwordConfirm"
-                value={formData.passwordConfirm || ''}
-                onChange={handleChange}
-                placeholder="비밀번호를 다시 입력하세요"
-                className="mt-2"
-              />
-              {passwordError && <p className="error-message">{passwordError}</p>}
-              {step === 6 && (
-                <button 
-                  onClick={() => handleNext(6)}
-                  className="next-button"
-                  disabled={formData.password.length < 8 || formData.password !== formData.passwordConfirm}
-                >
-                  다음
-                </button>
-              )}
-            </div>
-          )}
-   
+    {/* 비밀번호 입력 */}
+    {step >= 5 && (  // step >= 6을 step >= 5로 수정
+      <div className="input-group">
+        <input
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          placeholder="비밀번호를 입력하세요 (8자 이상)"
+        />
+        <input
+          type="password"
+          name="passwordConfirm"
+          value={formData.passwordConfirm || ''}
+          onChange={handleChange}
+          placeholder="비밀번호를 다시 입력하세요"
+          className="mt-2"
+        />
+        {passwordError && <p className="error-message">{passwordError}</p>}
+        {step === 5 && (  // step === 6을 step === 5로 수정
+          <button 
+            onClick={() => handleNext(5)}  // handleNext(6)을 handleNext(5)로 수정
+            className="next-button"
+            disabled={formData.password.length < 8 || formData.password !== formData.passwordConfirm}
+          >
+            다음
+          </button>
+        )}
+      </div>
+    )}
+      
           {/* 생년월일 입력 */}
-          {step >= 7 && (
+          {step >= 6 && (
             <div className="input-group">
               <input
                 type="date"
@@ -305,7 +306,7 @@ const SignUp = () => {
                 value={formData.birthdate}
                 onChange={handleChange}
               />
-              {step === 7 && (
+              {step === 6 && (
                 <button 
                   onClick={() => handleNext(7)}
                   className="next-button"
@@ -318,7 +319,7 @@ const SignUp = () => {
           )}
    
           {/* 최종 제출 */}
-          {step === 8 && (
+          {step === 7 && (
             <div className="input-group">
               <button 
                 onClick={handleSubmit}
