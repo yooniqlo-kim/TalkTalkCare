@@ -99,13 +99,13 @@ deploy-backend:
 
     - echo "Transferring files to EC2..."
     - scp .env docker-compose.yml $SSH_USER@$SSH_HOST:~/
-
-    # 2에서 `.env` 파일을 docker-compose.yml과 같은 위치로 이동 후 배포
     - |
       ssh $SSH_USER@$SSH_HOST "
-        echo 'Moving .env file to the correct location...'
-        mv ~/env ~/docker-compose/.env
-        chmod 600 ~/docker-compose/.env  # 보안 강화
+        echo 'Checking .env file status...'
+        ls -la ~/.env
+        
+        # 파일 권한 설정 (선택사항)
+        chmod 600 ~/.env  # 보안 강화
 
         echo 'Starting backend deployment...'
         
