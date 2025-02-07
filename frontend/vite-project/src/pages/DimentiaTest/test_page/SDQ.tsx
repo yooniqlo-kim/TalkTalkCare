@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/components/sdq.css';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+console.log(import.meta.env.VITE_API_BASE_URL);
 
 // 문항 데이터 배열 정의
 const questions = [
@@ -39,100 +41,67 @@ const questions = [
   // 보호자 문항들...
 ];
 
-// API 서비스 분리
 const submitSurvey = async (userId: number | null, testId: number, testResult: string) => {
-  // 로그인한 사용자만 백엔드로 데이터 전송
   if (userId !== null) {
-    const response = await fetch('/api/dementia-test/result', {
+    console.log('userId:', userId);
+    console.log('testId:', testId);
+    console.log('testResult:', testResult); 
+    const response = await fetch(`${BASE_URL}/dementia-test/result`,{ 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ userId, testId, testResult }), // 요청 파라미터 포함
-    });
-
-    // 응답이 성공적이지 않으면 에러 발생
+    }); 
+    console.log('Response:', response);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
 
-    // 응답 데이터를 JSON 형식으로 반환
     return response.json();
   } else {
-    // 로그인하지 않은 사용자는 데이터를 전송하지 않음
     return Promise.resolve({ message: '로그인하지 않은 사용자입니다. 결과가 저장되지 않았습니다.' });
   }
 };
 
 const SDQ: React.FC = () => {
   const navigate = useNavigate();
-  // 각 문항의 응답을 저장할 상태 (초기값은 null로 설정)
   const [answers, setAnswers] = useState<Array<string | null>>(new Array(questions.length).fill(null));
+  const [userId, setUserId] = useState<number | null>(null);
+  const [testId, setTestId] = useState<number>(2);
 
-  // 로그인한 사용자의 ID (예시: 실제로는 로그인 시스템에서 가져옴)
-  const [userId, setUserId] = useState<number | null>(null); // 로그인한 사용자라면 값이 있고, 아니면 null
-  // 테스트 ID (0: 보호자용, 1: 자가진단용)
-  const [testId, setTestId] = useState<number>(0); // 0 또는 1
+  useEffect(() => {
+    // 로컬 스토리지에서 userId 가져오기
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId) {
+      setUserId(Number(storedUserId)); // 로컬 스토리지에서 가져온 값으로 상태 업데이트
+      console.log('userId:', storedUserId);
+    } else {
+      console.error('로그인 정보가 없습니다. 로그인해주세요.');
+      navigate('/login'); // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
 
-  // 컴포넌트가 마운트될 때 세션 정보를 가져오기
-    useEffect(() => {
-      const fetchSession = async () => {
-        try {
-          const response = await fetch('/api/session'); // 세션 정보를 가져오는 API 호출
-          if (response.ok) {
-            const session = await response.json();
-            setUserId(session.userId); // 세션에서 userId 추출하여 상태 업데이트
-          } else {
-            console.error('세션 정보를 가져오는 데 실패했습니다.');
-          }
-        } catch (error) {
-          console.error('Error fetching session:', error);
-        }
-      };
-  
-      fetchSession();
-    }, []); // 빈 배열을 전달하여 컴포넌트 마운트 시 한 번만 실행
-
-  // 응답 처리 함수
   const handleAnswer = (index: number, answer: string) => {
     const newAnswers = [...answers];
-    // 이미 선택된 답변을 다시 클릭한 경우 선택 해제
-    if (answers[index] === answer) {
-      newAnswers[index] = null;
-    } else {
-      // 새로운 답변 선택 또는 다른 답변으로 변경
-      newAnswers[index] = answer;
-    }
+    newAnswers[index] = answer;
     setAnswers(newAnswers);
   };
 
-  // 설문조사 제출 함수
   const handleSubmit = async () => {
-    // 모든 문항이 답변되었는지 확인
     if (answers.includes(null)) {
       alert('모든 문항에 답변해 주세요.');
       return;
     }
 
-    // testResult를 문자열 형식으로 변환 (예: "1: 1, 2: 0, 3: 1, ...")
     const testResult = answers
       .map((answer, index) => `${index + 1}: ${answer === '예' ? 1 : 0}`)
       .join(', ');
 
-    // 콘솔에 데이터 출력 (백엔드로 전송될 데이터 확인)
-    console.log('백엔드로 전송될 데이터:', {
-      userId,
-      testId,
-      testResult,
-    });
-
     try {
-      // 백엔드로 데이터 전송 (로그인한 사용자만 전송)
       const result = await submitSurvey(userId, testId, testResult);
       console.log('Success:', result);
-
-      // 결과 페이지로 이동 (필요한 경우 answers도 함께 전달)
-      navigate('/result', { state: { answers } });
+      navigate('/result', { state: { answers, testType: 'SDQ' } });
     } catch (error) {
       console.error('Error:', error);
       alert('설문조사 제출에 실패했습니다. 다시 시도해 주세요.');
@@ -145,14 +114,12 @@ const SDQ: React.FC = () => {
         <img src="/logo.png" alt="톡톡케어" className="logo" />
         <h1>톡톡케어</h1>
       </div>
-      
       <div className="content-section">
         <h2>치매진단 테스트</h2>
         <div className="instruction">
           다음 문항을 읽고 최근 6개월 간의 해당 사항에<br />
           "예" 또는 "아니오"를 선택하시오
         </div>
-        
         <div className="questions">
           {questions.map((question, index) => (
             <div key={index} className="question-item">
@@ -162,13 +129,13 @@ const SDQ: React.FC = () => {
               <div className="answer-buttons">
                 <button 
                   className={`answer-btn ${answers[index] === '예' ? 'selected' : ''}`}
-                  onClick={() => handleAnswer(index, '예')} // "예" 선택
+                  onClick={() => handleAnswer(index, '예')}
                 >
                   예
                 </button>
                 <button 
                   className={`answer-btn ${answers[index] === '아니오' ? 'selected' : ''}`}
-                  onClick={() => handleAnswer(index, '아니오')} // "아니오" 선택
+                  onClick={() => handleAnswer(index, '아니오')}
                 >
                   아니오
                 </button>
@@ -176,11 +143,13 @@ const SDQ: React.FC = () => {
             </div>
           ))}
         </div>
-        {/* 제출 버튼 추가 */}
         <div className="submit-section">
           <button 
             className="submit-button"
-            onClick={handleSubmit} // 제출 버튼 클릭 시 handleSubmit 실행
+            onClick={handleSubmit}
+
+
+
           >
             제출하기
           </button>
