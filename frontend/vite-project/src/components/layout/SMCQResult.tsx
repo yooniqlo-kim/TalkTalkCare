@@ -30,22 +30,33 @@ const Result: React.FC = () => {
     // AI 분석 결과 요청 함수
     const fetchAiAnalysis = async () => {
         if (!userId) return;
-
+    
         try {
-            const response = await fetch('${BASE_URL}/dementia-test/analysis', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: Number(userId), requestType: 1 })
+            const url = new URL(`${BASE_URL}/dementia-test/analysis`);
+            url.searchParams.append('userId', userId);
+            url.searchParams.append('requestType', '1');
+    
+            const response = await fetch(url, { 
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
             });
-
+    
             if (!response.ok) throw new Error('분석 데이터를 가져오지 못했습니다.');
             
             const data = await response.json();
-            setAiAnalysis(data.analysisResult);
+            console.log("📌 백엔드 응답:", data); // 🛠 백엔드 응답을 확인하기 위한 로그 추가
+
+            // 응답 구조 확인 후 올바른 데이터 할당
+            if (data?.body) {
+                setAiAnalysis(data.body);  // API 응답 구조에 따라 수정 필요할 수 있음
+            } else {
+                console.error("📌 예상과 다른 응답 구조:", data);
+            }  
         } catch (error) {
             console.error(error);
         }
     };
+    
 
     useEffect(() => {
         if (isLoggedIn) {
