@@ -12,24 +12,7 @@ import lombok.Setter;
 public class DailyCategoryScore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "analysis_id", nullable = false)
+    @Column(name = "game_id", nullable = false)
     private Integer id;
-
-    @NotNull
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
-
-    @NotNull
-    @Lob
-    @Column(name = "analysis_result", nullable = false)
-    private String analysisResult;
-
-    @NotNull
-    @Column(name = "analysis_type", nullable = false)
-    private int analysisType;
-
-    @NotNull
-    @Column(name = "analysis_sequence", nullable = false)
-    private Integer analysisSequence;
 
 }

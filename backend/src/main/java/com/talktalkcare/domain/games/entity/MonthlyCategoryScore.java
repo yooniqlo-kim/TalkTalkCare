@@ -12,25 +12,15 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "game_category_score_per_month")
 public class MonthlyCategoryScore {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "result_id", nullable = false)
-    private Integer num;
+    private Long id;
 
-    @NotNull
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    @NotNull
-    @Column(name = "test_id", nullable = false)
-    private Integer testId;
-
-    @NotNull
-    @Lob
-    @Column(name = "test_result", nullable = false)
-    private String testResult;
-
-    @NotNull
-    @Column(name = "test_date", nullable = false)
-    private LocalDateTime testDate;  // LocalDateTime으로 변경
+    public Long getId() {
+        return id;
+    }
 }
