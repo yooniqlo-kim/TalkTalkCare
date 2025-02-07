@@ -61,7 +61,7 @@ public class DementiaController {
         }
         if (requestType==2)  { // 유저-보호자 테스트 분석
             for (DementiaTestResult testResult : testResults) {
-                analysisInputText.append("Test ID: ").append(testResult.getTestId())
+                analysisInputText.append("Test Type: ").append(testResult.getTestId())
                         .append("\nTest Result: ").append(testResult.getTestResult())
                         .append("\n\n");
             }

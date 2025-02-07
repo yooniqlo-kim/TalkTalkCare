@@ -19,9 +19,8 @@ public class AiDementiaAnalysis {
     @Column(name = "user_id", nullable = false)
     private Integer userId;
 
-    @NotNull
     @Lob
-    @Column(name = "analysis_result", nullable = false)
+    @Column(name = "analysis_result", columnDefinition = "TEXT", nullable = false)
     private String analysisResult;
 
     @NotNull

@@ -41,7 +41,7 @@ public class AiAnalysisService {
     public String analyzeTestResults(int userId, String inputText) {
         return analyzeTestResults(inputText, userId, 1); // analysisType 1은 유저-유저 분석
     }
-    //유저-보호자 테스트 분석ㅂㅁ
+    //유저-보호자 테스트 분석
     public String analyzeTwoTestResults(int userId, String inputText) {
 
         return analyzeTestResults(inputText, userId, 2); // analysisType 2은 유저-보호자 분석
@@ -54,14 +54,13 @@ public class AiAnalysisService {
         System.out.println(summary);
 
         // 2. 1단계에서 생성된 summary와 함께 analysisSeq 계산
-        // 2. 1단계에서 생성된 summary와 함께 analysisSeq 계산
-        int analysisSeq = aiAnalysisRepository.findMaxAnalysisSequenceByUserId(userId); // aiAnalysisRepository 인스턴스를 통해 호출
+        int analysisSeq = aiAnalysisRepository.findMaxAnalysisSequenceByUserId(userId,analysisType); // aiAnalysisRepository 인스턴스를 통해 호출
 
         DementiaAiDto dto = new DementiaAiDto();
         dto.setUserId(userId);
         dto.setSummary(summary); // AI에서 생성된 summary
         dto.setAnalysisType(analysisType); // 분석 타입 (유저-유저 또는 유저-보호자)
-        dto.setAnalysisSeq(analysisSeq); // 분석 순서
+        dto.setAnalysisSeq(analysisSeq +1); // 분석 순서
 
         saveToDatabase(dto);
 
@@ -80,19 +79,24 @@ public class AiAnalysisService {
     }
 
 
-    private String generateSystemMessage(int isTwoTestComparison) {
+    private String generateSystemMessage(int testType) {
         StringBuilder message = new StringBuilder();
 
-        message.append("유저의 치매 진단 테스트 결과를 분석할 거야. ")
-                .append(isTwoTestComparison ==1?
-                        "유저 자가 진단 테스트와 보호자가 평가한 테스트를 비교하여 변화와 개선점, 주의할 부분을 요약해줘." :
-                        "최근과 과거의 자가 치매 진단 테스트 결과를 비교하여 변화와 개선점, 주의할 부분을 요약해줘.")
-                .append("모든 문항과 문항 번호를 나열하지 말고, 결론만 간결하게 3문장 이내로 알려줘 .");
+        message.append("유저의 치매 진단 테스트 결과를 분석할 거야. ");
 
-        if (isTwoTestComparison ==1)  {
+        if (testType == 1) {
+            message.append("최근과 과거의 자가 치매 진단 테스트 결과를 비교하여 변화와 개선점, 주의할 부분을 요약해줘.");
+        }
+        if (testType == 2) {
+            message.append("유저 자가 진단 테스트와 보호자가 평가한 테스트를 비교하여 변화와 개선점, 주의할 부분을 요약해줘.");
+        }
+
+        message.append("모든 문항과 문항 번호를 나열하지 말고, 결론만 간결하게 3문장 이내로 알려줘.");
+
+        if (testType ==1)  {
             message.append("\n테스트 문항:\n").append(getUserTestQuestions());
         }
-        if (isTwoTestComparison ==2) {
+        if (testType ==2) {
             message.append("\n유저 테스트 문항:\n").append(getUserTestQuestions())
                     .append("\n보호자 테스트 문항:\n").append(getCaregiverTestQuestions());
         }
@@ -102,12 +106,15 @@ public class AiAnalysisService {
     // DeepSeek API 호출
     private String callDeepSeekApi(String systemMessage, String userInput) {
         try {
+            System.out.println(systemMessage);
+            System.out.println(userInput);
             ObjectNode rootNode = objectMapper.createObjectNode();
             rootNode.put("model", "deepseek-chat");
             rootNode.put("stream", false);
 
             ArrayNode messages = rootNode.putArray("messages");
 
+//            System.out.println(userInput);
             ObjectNode systemNode = objectMapper.createObjectNode();
             systemNode.put("role", "system");
             systemNode.put("content", systemMessage);
