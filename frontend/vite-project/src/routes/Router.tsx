@@ -12,7 +12,7 @@ import SMD from '../pages/DimentiaTest/test_page/smd.tsx';
 import SMCQ from '../pages/DimentiaTest/test_page/smcq.tsx';
 import SignUp from '../pages/user_page/SignUp.tsx';
 import Login from '../pages/user_page/LoginPage.tsx';
-
+import TalkTalkChat from '../pages/TalkTalkAi.tsx/TalkTalk.tsx';
 const Router = () => {
   return (
     <BrowserRouter>
@@ -26,8 +26,9 @@ const Router = () => {
           <Route path="/userinfopage" element={<UserInfoPage />} />
           <Route path="/smd" element={<SMD />} />
           <Route path="/smcq" element={<SMCQ />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/sign-up" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/talktalk" element={<TalkTalkChat />} />
         </Route>
       </Routes>
     </BrowserRouter>

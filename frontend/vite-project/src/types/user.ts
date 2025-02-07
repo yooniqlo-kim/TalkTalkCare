@@ -3,8 +3,7 @@
 // 회원가입 요청 데이터 타입
 export interface UserSignupRequest {
   name: string;
-  id: string;
-  nickname: string;
+  loginId: string;
   password: string;
   phoneNumber: string;
   birthdate: string;
@@ -15,8 +14,11 @@ export interface UserSignupRequest {
 // 회원가입 API 응답 타입
 export interface SignupApiResponse {
   success: boolean;
-  message: string;
-  userId?: string;
+  message?: string;
+  result?: {
+    msg?: string;
+    errorCode?: number;
+  };
 }
 
 // SMS 인증 관련 타입
@@ -27,10 +29,16 @@ export interface SmsVerificationRequest {
 
 // 사용자 정보 타입
 export interface User {
-  id: string;
+  loginId: string;    
   name: string;
-  nickname: string;
-  phoneNumber: string;
-  birthdate: string;
+  phone: string;
+  birth: string;
   profileImageUrl?: string;
+}
+
+// 로그인 요청 데이터 타입 (새로 추가)
+export interface LoginRequest {
+  userLoginId: string;
+  password: string;
+  autoLogin: boolean;
 }
