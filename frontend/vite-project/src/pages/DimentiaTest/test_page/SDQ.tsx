@@ -95,9 +95,15 @@ const SDQ: React.FC = () => {
 
   // 응답 처리 함수
   const handleAnswer = (index: number, answer: string) => {
-    const newAnswers = [...answers]; // 현재 답변 배열을 복사
-    newAnswers[index] = answer; // 선택한 답변으로 업데이트
-    setAnswers(newAnswers); // 상태 업데이트
+    const newAnswers = [...answers];
+    // 이미 선택된 답변을 다시 클릭한 경우 선택 해제
+    if (answers[index] === answer) {
+      newAnswers[index] = null;
+    } else {
+      // 새로운 답변 선택 또는 다른 답변으로 변경
+      newAnswers[index] = answer;
+    }
+    setAnswers(newAnswers);
   };
 
   // 설문조사 제출 함수

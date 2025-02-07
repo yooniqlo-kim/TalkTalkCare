@@ -15,26 +15,27 @@ import SMCQ from '../pages/DimentiaTest/test_page/SMCQ.tsx';
 import SignUp from '../pages/user_page/SignUp.tsx';
 import Login from '../pages/user_page/LoginPage.tsx';
 import TalkTalkChat from '../pages/TalkTalkAi.tsx/TalkTalk.tsx';
+// import Login from '../pages/user_page/LoginPage.tsx';
 const Router = () => {
   return (
     <BrowserRouter>
       <Routes>
-
-
-        <Route path="/" element={<MainPage />} />
-        <Route path="/call" element={<KeyPad />} />
-        <Route path="/game" element={<GameListPage />} />
-        <Route path="/test" element={<Test />} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/userinfopage" element={<UserInfoPage />} />
-        <Route path="/sdq" element={<SDQ />} />
-        <Route path="/smcq" element={<SMCQ />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/result" element={<Result />} />
-
+        <Route element={<Layout />}>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/call" element={<KeyPad />} />
+          <Route path="/game" element={<GameListPage />} />
+          <Route path="/test" element={<Test />} />
+          <Route path="/mypage" element={<MyPage />} />
+          <Route path="/userinfopage" element={<UserInfoPage />} />
+          <Route path="/sdq" element={<SDQ />} />
+          <Route path="/smcq" element={<SMCQ />} />
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/result" element={<Result />} />
+          <Route path="/talktalk" element={<TalkTalkChat />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
 };
-
 export default Router;
