@@ -12,7 +12,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/api': {
-        target: 'http://localhost:8443',
+        target: 'http://127.0.0.1:8443',
         changeOrigin: true,
         secure: false,
       }
