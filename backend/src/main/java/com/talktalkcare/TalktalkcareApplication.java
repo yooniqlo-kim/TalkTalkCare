@@ -8,6 +8,7 @@ public class TalktalkcareApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(TalktalkcareApplication.class, args);
+        
     }
 
 }
