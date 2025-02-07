@@ -10,6 +10,7 @@ import UserInfoPage from '../pages/my_page/UserInfoPage.tsx';
 import Test from '../pages/DimentiaTest/test.tsx';
 import Result from '../pages/DimentiaTest/Result.tsx';
 import SMCQResult from '../components/layout/SMCQResult.tsx';
+import SDQResult from '../components/layout/SDQResult.tsx';
 import SDQ from '../pages/DimentiaTest/test_page/SDQ.tsx';
 import SMCQ from '../pages/DimentiaTest/test_page/SMCQ.tsx';
 import SignUp from '../pages/user_page/SignUp.tsx';

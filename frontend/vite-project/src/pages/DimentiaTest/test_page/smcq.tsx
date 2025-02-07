@@ -82,7 +82,7 @@ const SMCQ: React.FC = () => {
     try {
       const result = await submitSurvey(userId, testId, testResult);
       console.log('Success:', result);
-      navigate('/result', { state: { answers } });
+      navigate('/result', { state: { answers, testType: 'SMCQ' } });
     } catch (error) {
       console.error('Error:', error);
       alert('설문조사 제출에 실패했습니다. 다시 시도해 주세요.');
