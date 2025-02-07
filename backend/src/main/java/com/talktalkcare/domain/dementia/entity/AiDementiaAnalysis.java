@@ -26,7 +26,7 @@ public class AiDementiaAnalysis {
 
     @NotNull
     @Column(name = "analysis_type", nullable = false)
-    private Boolean analysisType = false;
+    private int analysisType;
 
     @NotNull
     @Column(name = "analysis_sequence", nullable = false)

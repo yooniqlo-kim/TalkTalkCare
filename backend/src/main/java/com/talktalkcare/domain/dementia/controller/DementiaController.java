@@ -30,7 +30,7 @@ public class DementiaController {
      * @return 분석된 AI 결과
      */
     @GetMapping("/analysis")
-    public Api<?> getTestResults(@RequestParam boolean requestType,
+    public Api<?> getTestResults(@RequestParam int requestType,
                                       @RequestParam int userId) {
         // DementiaService에서 요청에 따른 testResult 리스트를 가져옴
         List<DementiaTestResult> testResults = dementiaService.handleRequest(requestType, userId);
@@ -48,17 +48,18 @@ public class DementiaController {
 
         return Api.OK(analysisResponse);
     }
-    private String buildAnalysisInput(boolean requestType, List<DementiaTestResult> testResults) {
+    private String buildAnalysisInput(int requestType, List<DementiaTestResult> testResults) {
         StringBuilder analysisInputText = new StringBuilder();
 
-        if (requestType) { // 유저-유저 자가 테스트 분석
+        if (requestType==1) { // 유저-유저 자가 테스트 분석
             analysisInputText.append("최근한 테스트 결과: ")
                     .append(testResults.get(0).getTestResult())
                     .append("\n\n")
                     .append("이전 테스트 결과: ")
                     .append(testResults.get(1).getTestResult())
                     .append("\n\n");
-        } else { // 유저-보호자 테스트 분석
+        }
+        if (requestType==2)  { // 유저-보호자 테스트 분석
             for (DementiaTestResult testResult : testResults) {
                 analysisInputText.append("Test ID: ").append(testResult.getTestId())
                         .append("\nTest Result: ").append(testResult.getTestResult())
@@ -68,11 +69,11 @@ public class DementiaController {
 
         return analysisInputText.toString();
     }
-    private String analyzeTestResults(int userId, boolean requestType, String analysisInputText) {
-        if (requestType) {
+    private String analyzeTestResults(int userId, int requestType, String analysisInputText) {
+        if (requestType==1) {
             return aiAnalysisService.analyzeTestResults(userId,analysisInputText);
         }
-        if (!requestType) {
+        if (requestType==2) {
             return aiAnalysisService.analyzeTwoTestResults(userId,analysisInputText);
         }
         return "";
