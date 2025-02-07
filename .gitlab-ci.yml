@@ -34,9 +34,10 @@ build-backend:
     - docker build -t eoslovy/talktalkcare-backend:latest .
     - docker push eoslovy/talktalkcare-backend:latest
   rules:
-    - changes:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      changes:
         - backend/**
-    - when: always
+      when: always
   variables:
     DOCKER_PRIVILEGED: "true"
 
@@ -47,10 +48,11 @@ build-frontend:
     - docker build -t eoslovy/talktalkcare-nginx:latest .
     - docker push eoslovy/talktalkcare-nginx:latest
   rules:
-    - changes:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      changes:
         - frontend/**
         - nginx.conf
-    - when: always
+      when: always
   variables:
     DOCKER_PRIVILEGED: "true"
 
@@ -170,9 +172,10 @@ deploy-backend:
         echo 'Deployment completed successfully!'
       "
   rules:
-    - changes:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      changes:
         - backend/**
-    - when: always
+      when: always
   variables:
     DOCKER_PRIVILEGED: "true"
 
@@ -209,9 +212,10 @@ deploy-frontend:
         echo 'Frontend Deployment Completed!'
       "
   rules:
-    - changes:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      changes:
         - frontend/**
         - nginx.conf
-    - when: always
+      when: always
   variables:
     DOCKER_PRIVILEGED: "true"
