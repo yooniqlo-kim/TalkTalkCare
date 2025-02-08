@@ -43,14 +43,14 @@ public class TalkTalkController {
         // 기존 summary + 현재 response 누적
         StringBuilder conversation = userConversations.get(userId);
         conversation.append("유저: ").append(response).append("\n");
-
+        System.out.println(conversation);
         // AI 응답 생성
-        String aiResponse = talkTalkService.talktalkAi(conversation.toString());
+//        String aiResponse = talkTalkService.talktalkAi(conversation.toString());
 
         // AI 응답도 conversation에 누적
-        conversation.append("AI: ").append(aiResponse).append("\n");
+//        conversation.append("AI: ").append(aiResponse).append("\n");
 //        System.out.println( conversation  + aiResponse);
-        return Api.OK(aiResponse);
+        return Api.OK("응 반가워");
     }
 
     @PostMapping("/end")

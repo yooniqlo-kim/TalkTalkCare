@@ -50,9 +50,9 @@ public class TalkTalkService {
             return " "; // Return a default message if not found
         }
     }
-    public String talktalkAi(String summary) {
+    public String talktalkAi(String chat) {
         ObjectMapper objectMapper = new ObjectMapper();
-
+        System.out.println("chat:"+chat);
         try {
             // JSON 객체 생성
             ObjectNode rootNode = objectMapper.createObjectNode();
@@ -72,7 +72,7 @@ public class TalkTalkService {
             // "user" 메시지 추가
             ObjectNode userMessage = objectMapper.createObjectNode();
             userMessage.put("role", "user");
-            userMessage.put("content", sanitizeInput(summary));
+            userMessage.put("content", sanitizeInput(chat));
             messages.add(userMessage);
 
             // JSON 문자열로 변환
@@ -85,13 +85,14 @@ public class TalkTalkService {
 
             // HTTP 요청 객체 생성
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
+            System.out.println("APi 호출");
             // API 호출
             String response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class).getBody();
-
+            System.out.println("response:"+response);
             // 응답이 null인지 확인
-            if (response == null) {
-                throw new RuntimeException("API 응답이 null입니다.");
+            if (response == null || response.isEmpty()) {
+                System.out.println("DeepSeek API Response is null or empty.");
+                return "AI 응답 없음"; // 기본 응답 메시지 설정
             }
 
             // JSON 파싱
