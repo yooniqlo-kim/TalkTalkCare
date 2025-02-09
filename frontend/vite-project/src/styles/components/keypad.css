@@ -1,104 +1,112 @@
 .page-container {
-  width: 100%;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #f8fff8;
+  justify-content: center;
+  height: 100vh;
+  background-color: white; /* 연한 연두색 */
 }
 
-/* 삭제 버튼 아이콘 */
-.clear-icon {
-  font-size: 24px;
-  color: #ff5252;
-}
 .logo-section {
-  width: 100%;
-  padding: 20px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
 }
 
 .main-container {
-  width: 100%;
-  max-width: 800px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 30px;
-  padding: 20px;
 }
+
 .input-display-container {
-  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 왼쪽은 입력, 오른쪽은 삭제 버튼 */
+  justify-content: space-between;
+  background-color: #e8ffe0;
+  width: 330px;
+  height: 40px;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
 }
 
 .input-display {
-  width: 90%; /* 삭제 버튼을 위한 공간 확보 */
-  height: 60px;
-  background-color: white;
-  border: 2px solid #c8e6c9;
-  border-radius: 10px;
-  font-size: 28px;
-  text-align: center;
-  padding: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  flex-grow: 1;
 }
 
 .clear-button {
   background: none;
   border: none;
+  font-size: 20px;
   cursor: pointer;
-  font-size: 24px;
-  color: #ff5252;
+  color: black;
 }
 
-
 .bottom-section {
-  width: 100%;
   display: flex;
+  align-items: center;
   gap: 20px;
 }
 
 .keypad-grid {
-  flex: 3;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  background-color: #c8e6c9;
-  padding: 20px;
+  gap: 8px;
+  background-color: #e8ffe0;
+  padding: 15px;
   border-radius: 15px;
 }
 
 .keypad-button {
-  aspect-ratio: 1;
+  width: 60px;
+  height: 60px;
+  font-size: 22px;
+  font-weight: bold;
   background-color: white;
   border: none;
   border-radius: 10px;
-  font-size: 24px;
   cursor: pointer;
 }
 
+.keypad-button:hover {
+  background-color: #b3e59f;
+}
+
 .side-buttons {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
 .call-button, .contacts-button {
-  font-size: 28px; /* 글씨 크기 더욱 크게 설정 */
-  font-weight: bold; /* 글씨 두껍게 */
-  flex: 1;
-  background-color: #c8e6c9;
-  border: none;
-  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 20px;
+  width: 80px;
+  height: 140px;
+  background-color: #e8ffe0;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.call-button:hover, .contacts-button:hover {
+  background-color: #b3e59f;
+}
+
+.phone-icon, .contacts-icon {
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: black;
 }

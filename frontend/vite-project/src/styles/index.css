@@ -3,6 +3,8 @@
 @font-face {
   font-family: "MyFont";
   src: url("/fonts/MyFont.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
 }
 
 @layer base {
@@ -18,7 +20,7 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', 'MyFont',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

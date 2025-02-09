@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Analytics = () => (
-  <div>
+  <div className='font-custom text-lg'>
     <div className="p-4 bg-white rounded-xl mx-4 mb-4">
       <h2 className="text-xl font-bold mb-2">한 눈에 보는 맞춤 분석</h2>
       <p className="text-sm text-gray-600">현재 상태에 따른 개인별 맞춤 분석을 제공합니다.</p>
