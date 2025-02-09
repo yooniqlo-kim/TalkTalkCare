@@ -108,65 +108,36 @@ import MainMenu from './main_page/MainMenu';
 import Analytics from './main_page/Analytics';
 import FriendList from './main_page/FriendList';
 import '../styles/components/MainPage.css';
-import SpeechToText from './Voice';
-interface MainPageProps {
-  showFriendListByDefault?: boolean;
-}
 
-const MainPage: React.FC<MainPageProps> = ({ showFriendListByDefault = false }) => {
-  const [showFriendList, setShowFriendList] = useState(showFriendListByDefault);
+const MainPage: React.FC = () => {
+  const [showFriendList, setShowFriendList] = useState(false);
   const navigate = useNavigate();
 
   return (
     <div className="main-page-container">
-      {/* <SpeechToText /> */}
       <div className="main-page-content">
-        <div className="main-menu-container">
-          {!showFriendList && (
-            <div className="friend-list-toggle">
-              <button
-                onClick={() => setShowFriendList(true)}
-                className="p-3 bg-green-100 rounded-full hover:bg-green-200 transition-colors"
-                aria-label="친구목록 열기"
-              >
-                <List size={24} />
-              </button>
-            </div>
-          )}
-          <div
-            className={`menu-card ${showFriendList ? 'flex gap-6' : 'flex flex-col items-center'}`}
-            style={{
-              justifyContent: !showFriendList ? 'center' : 'flex-start',
-            }}
-          >
-            <div
-              style={{
-                width: showFriendList ? 'calc(50% - 12px)' : '100%',
-                marginBottom: !showFriendList ? '12px' : '0',
-                textAlign: !showFriendList ? 'center' : 'left',
-              }}
-            >
-              <MainMenu />
-            </div>
-            <div
-              style={{
-                width: showFriendList ? 'calc(50% - 12px)' : '100%',
-                textAlign: !showFriendList ? 'center' : 'left',
-                display: 'flex',
-                justifyContent: 'center',
-              }}
-            >
-              <Analytics />
-            </div>
-          </div>
-        </div>
-
-        {showFriendList && (
-          <div className="friend-list-container">
-            <FriendList onClose={() => setShowFriendList(false)} />
+        {/* 친구 목록 열기 버튼 */}
+        {!showFriendList && (
+          <div className="friend-list-toggle">
+            <button onClick={() => setShowFriendList(true)} aria-label="친구 목록 열기">
+              <List size={28} />
+            </button>
           </div>
         )}
+
+        {/* 메뉴 카드 (일렬 정렬) */}
+        <div className="menu-card">
+          <MainMenu />
+          <Analytics />
+        </div>
       </div>
+
+      {/* 친구 목록 표시 */}
+      {showFriendList && (
+        <div className="friend-list-container">
+          <FriendList onClose={() => setShowFriendList(false)} />
+        </div>
+      )}
     </div>
   );
 };
