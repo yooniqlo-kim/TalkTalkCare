@@ -15,12 +15,12 @@ const Test: React.FC = () => {
   return (
     <div className="test-container">
       <div className="logo-section">
-        <img src="/logo.png" alt="톡톡케어" className="logo" />
-        <h1>톡톡케어</h1>
+        <img src="/images/logo.png" alt="톡톡케어" className="logo" />
+        <h1 className='font-bold'>톡톡케어</h1>
       </div>
 
       <div className="title-section">
-        <h2>치매 진단 테스트</h2>
+        <h2 className='font-bold'>치매 진단 테스트</h2>
       </div>
 
       <div className="buttons-container">
