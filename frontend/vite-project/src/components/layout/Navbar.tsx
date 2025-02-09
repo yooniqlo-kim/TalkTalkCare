@@ -8,7 +8,7 @@ const Navbar: React.FC = () => {
  return (
    <nav className="navbar">
      <div className="navbar-top"
-     style={{backgroundColor: 'black'}}>
+     style={{backgroundColor: 'white'}}>
        <div className="navbar-logo">
          <Header />
        </div>
