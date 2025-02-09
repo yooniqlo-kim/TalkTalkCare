@@ -7,6 +7,11 @@
   background-color: #f8fff8;
 }
 
+/* 삭제 버튼 아이콘 */
+.clear-icon {
+  font-size: 24px;
+  color: #ff5252;
+}
 .logo-section {
   width: 100%;
   padding: 20px;
@@ -24,9 +29,15 @@
   gap: 30px;
   padding: 20px;
 }
+.input-display-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 왼쪽은 입력, 오른쪽은 삭제 버튼 */
+}
 
 .input-display {
-  width: 100%;
+  width: 90%; /* 삭제 버튼을 위한 공간 확보 */
   height: 60px;
   background-color: white;
   border: 2px solid #c8e6c9;
@@ -35,6 +46,15 @@
   text-align: center;
   padding: 10px;
 }
+
+.clear-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #ff5252;
+}
+
 
 .bottom-section {
   width: 100%;
@@ -69,6 +89,8 @@
 }
 
 .call-button, .contacts-button {
+  font-size: 28px; /* 글씨 크기 더욱 크게 설정 */
+  font-weight: bold; /* 글씨 두껍게 */
   flex: 1;
   background-color: #c8e6c9;
   border: none;

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // useNavigate 추가
+import { useNavigate } from 'react-router-dom';
 import '../../styles/components/keypad.css';
 
 const KeyPad: React.FC = () => {
-  const navigate = useNavigate();  // useNavigate 훅 사용
+  const navigate = useNavigate();
   const [input, setInput] = useState<string>('');
 
   const handleButtonClick = (value: string) => {
@@ -11,7 +11,7 @@ const KeyPad: React.FC = () => {
   };
 
   const handleClear = () => {
-    setInput('');7
+    setInput(prev => prev.slice(0, -1)); // 마지막 입력 삭제
   };
 
   const handleCall = () => {
@@ -30,8 +30,10 @@ const KeyPad: React.FC = () => {
       </div>
 
       <div className="main-container">
-        <div className="input-display">
-          {input}
+        <div className="input-display-container">
+          <div className="input-display">
+            <span>{input}</span>
+          </div>
           {input.length > 0 && (
             <button className="clear-button" onClick={handleClear}>⌫</button>
           )}
@@ -49,8 +51,8 @@ const KeyPad: React.FC = () => {
               </button>
             ))}
           </div>
-        {/* 사이드 버튼 추가 */}
-        <div className="side-buttons">
+          {/* 사이드 버튼 */}
+          <div className="side-buttons">
             <button className="call-button" onClick={handleCall}>
               <span className="phone-icon">📞</span>
               <span>전화걸기</span>
