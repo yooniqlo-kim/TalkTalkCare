@@ -27,7 +27,7 @@ const submitSurvey = async (userId: number | null, testId: number, testResult: s
     console.log('userId:', userId);
     console.log('testId:', testId);
     console.log('testResult:', testResult); 
-    const response = await fetch(`${BASE_URL}/dementia-test/result`,{ 
+    const response = await fetch(`http://localhost:8443/api/dementia-test/result`,{ 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -128,9 +128,6 @@ const SMCQ: React.FC = () => {
           <button 
             className="submit-button"
             onClick={handleSubmit}
-
-
-
           >
             제출하기
           </button>

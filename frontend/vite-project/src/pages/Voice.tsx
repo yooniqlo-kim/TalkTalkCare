@@ -1,382 +1,235 @@
 // import React, { useState, useEffect, useRef } from 'react';
 // import "../styles/components/Voice.css";
 // import axios from 'axios';
+// import talktalk from "../assets/talktalk.png";
+// import talkbubble from "../assets/talkbubble.png"
 
-// const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-// const USER_ID = 7;  // 고정된 사용자 ID
+// interface RobotImageProps {
+//   isListening: boolean;
+//   isWaiting: boolean;
+// }
 
-// const SpeechToText = () => {
-//   const [isListening, setIsListening] = useState(false);
-//   const [transcript, setTranscript] = useState('');
-//   const [savedTranscripts, setSavedTranscripts] = useState<string[]>([]);
-//   const [isLoading, setIsLoading] = useState(false);
-  
-//   const recognitionRef = useRef<any>(null);
-//   const tempTranscriptRef = useRef<string>('');
 
-//   // 대화 시작
-//   const startChat = async () => {
-//     try {
-//       const response = await axios.post('/api/talktalk/start', null, {
-//         params: {
-//           userId: USER_ID
-//         }
-//       });
-      
-//       if (response.data) {
-//         console.log('대화 시작');
-//       }
-//     } catch (error) {
-//       console.error('대화 시작 에러:', error);
-//     }
-//   };
-
-//   // 텍스트 전송
-//   const sendTranscriptToServer = async (text: string) => {
-//     try {
-//       setIsLoading(true);
-//       console.log(text);
-      
-//       const response = await axios.get('/api/talktalk/chat', {
-//         params: {
-//           response: text,
-//           userId: USER_ID
-//         }
-//       });
-
-//       if (response.data && response.data.data) {
-//         console.log('AI 응답:', response.data.data);
-//       }
-      
-//     } catch (error) {
-//       console.error('전송 중 에러:', error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   // 대화 종료
-//   const endChat = async () => {
-//     try {
-//       const response = await axios.post('/api/talktalk/end', null, {
-//         params: {
-//           userId: USER_ID
-//         }
-//       });
-      
-//       if (response.data) {
-//         console.log('대화 종료 및 저장 완료');
-//       }
-//     } catch (error) {
-//       console.error('대화 종료 에러:', error);
-//     }
-//   };
-
-//   useEffect(() => {
-//     if ('webkitSpeechRecognition' in window) {
-//       recognitionRef.current = new (window as any).webkitSpeechRecognition();
-//       recognitionRef.current.continuous = true;
-//       recognitionRef.current.interimResults = true;
-//       recognitionRef.current.lang = 'ko-KR';
-
-//       recognitionRef.current.onresult = (event: any) => {
-//         const current = event.resultIndex;
-//         const transcriptText = event.results[current][0].transcript;
-        
-//         if (event.results[current].isFinal) {
-//           setSavedTranscripts(prev => {
-//             const newTranscripts = [...prev, transcriptText];
-//             sendTranscriptToServer(transcriptText);
-//             return newTranscripts;
-//           });
-          
-//           tempTranscriptRef.current = '';
-//           setTranscript('');
-//         } else {
-//           tempTranscriptRef.current = transcriptText;
-//           setTranscript(transcriptText);
-//         }
-//       };
-
-//       recognitionRef.current.onerror = (event: any) => {
-//         console.error('음성 인식 에러:', event.error);
-//         setIsListening(false);
-//       };
-
-//       recognitionRef.current.onend = () => {
-//         setIsListening(false);
-//         tempTranscriptRef.current = '';
-//         setTranscript('');
-//       };
-//     }
-
-//     return () => {
-//       if (recognitionRef.current) {
-//         recognitionRef.current.stop();
-//       }
-//     };
-//   }, []);
-
-//   const startListening = async () => {
-//     if (recognitionRef.current) {
-//       try {
-//         await startChat();  // 대화 시작 API 호출
-//         recognitionRef.current.start();
-//         setIsListening(true);
-//         tempTranscriptRef.current = '';
-//         setTranscript('');
-//       } catch (error) {
-//         console.error('시작 에러:', error);
-//         recognitionRef.current.stop();
-//         setTimeout(() => {
-//           recognitionRef.current.start();
-//           setIsListening(true);
-//         }, 100);
-//       }
-//     } else {
-//       console.error('이 브라우저는 음성 인식을 지원하지 않습니다');
-//     }
-//   };
-
-//   const stopListening = async () => {
-//     if (recognitionRef.current) {
-//       recognitionRef.current.stop();
-//       setIsListening(false);
-//       tempTranscriptRef.current = '';
-//       setTranscript('');
-//       await endChat();  // 대화 종료 API 호출
-//     }
-//   };
-
-//   const clearTranscripts = () => {
-//     setSavedTranscripts([]);
-//     tempTranscriptRef.current = '';
-//     setTranscript('');
-//   };
-
+// const RobotImage: React.FC<RobotImageProps> = ({ isListening, isWaiting }) => {
 //   return (
-//     <div className="speech-to-text-container">
-//       <div className="controls">
-//         {!isListening ? (
-//           <button 
-//             onClick={startListening} 
-//             className="control-button"
-//             disabled={isLoading}
-//           >
-//             마이크 켜기
-//           </button>
-//         ) : (
-//           <button 
-//             onClick={stopListening} 
-//             className="control-button"
-//             disabled={isLoading}
-//           >
-//             마이크 끄기
-//           </button>
-//         )}
-//         <button 
-//           onClick={clearTranscripts} 
-//           className="clear-button"
-//           disabled={isLoading}
-//         >
-//           기록 지우기
-//         </button>
-//       </div>
+//     <div className="robot-image-container">
+//       <img 
+//         src={talktalk}
+//         alt="AI 로봇" 
+//         className={`robot-image ${isListening ? 'listening' : ''}`}
+//       />
       
-//       <div className="transcript-box">
-//         <h3>현재 입력 중인 텍스트:</h3>
-//         <p>{transcript}</p>
-//         {isLoading && <p className="loading-text">전송 중...</p>}
-//       </div>
-
-//       <div className="saved-transcripts">
-//         <h3>저장된 문장 기록:</h3>
-//         <div className="transcripts-list">
-//           {savedTranscripts.map((text, index) => (
-//             <p key={index} className="transcript-item">
-//               {index + 1}. {text}
-//             </p>
-//           ))}
+//       {isWaiting && (
+//         <div className="speech-bubble-container">
+//           <img 
+//             src={talkbubble} 
+//             alt="말풍선" 
+//             className="speech-bubble-image"
+//           />
+//           <div className="speech-bubble-text">전송 중입니다...</div>
 //         </div>
-//       </div>
+//       )}
 //     </div>
 //   );
 // };
-
-// export default SpeechToText;
-// import React, { useState, useEffect, useRef } from 'react';
-// import "../styles/components/Voice.css";
-// import axios from 'axios';
-
-// const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-// const USER_ID = 7;  // 고정된 사용자 ID
-
 // const SpeechToText = () => {
-//   const [isListening, setIsListening] = useState(false);
-//   const [transcript, setTranscript] = useState('');
-//   const [savedTranscripts, setSavedTranscripts] = useState<string[]>([]);
-//   const [isLoading, setIsLoading] = useState(false);
-  
-//   const recognitionRef = useRef<any>(null);
-//   const tempTranscriptRef = useRef<string>('');
+//  const [userId, setUserId] = useState<number>(() => {
+//    const storedUserId = localStorage.getItem('userId');
+//    return storedUserId ? parseInt(storedUserId) : 7;
+//  });
 
-//   // 대화 시작
-//   const startChat = async () => {
-//     try {
-//       const response = await axios.post('/api/talktalk/start', null, {
-//         params: {
-//           userId: USER_ID
-//         }
-//       });
-      
-//       if (response.data) {
-//         console.log('대화 시작');
-//       }
-//     } catch (error) {
-//       console.error('대화 시작 에러:', error);
-//     }
-//   };
+//  const [isListening, setIsListening] = useState(false);
+//  const [transcript, setTranscript] = useState('');
+//  const [savedTranscripts, setSavedTranscripts] = useState<Array<{text: string, isUser: boolean}>>([]);
+//  const [isLoading, setIsLoading] = useState(false);
+//  const [isWaiting, setIsWaiting] = useState(false);
+ 
+//  const recognitionRef = useRef<any>(null);
+//  const tempTranscriptRef = useRef<string>('');
+//  const transcriptsEndRef = useRef<HTMLDivElement>(null);
 
-//   // 텍스트 전송
-//   const sendTranscriptToServer = async (text: string) => {
-//     try {
-//       setIsLoading(true);
-//       console.log('전송할 데이터:', {
-//         response: text,
-//         userId: USER_ID
-//       });
-      
-//       const response = await axios.get('/api/talktalk/chat', {
-//         params: {
-//           response: text,
-//           userId: USER_ID
-//         }
-//       });
+//  // 스크롤을 맨 아래로 이동하는 함수
+//  const scrollToBottom = () => {
+//    transcriptsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+//  };
 
-//       console.log('서버 응답:', response);
+//  // 새 메시지 추가 시 스크롤 이동
+//  useEffect(() => {
+//    scrollToBottom();
+//  }, [savedTranscripts]);
 
-//       if (response.data && response.data.data) {
-//         console.log('AI 응답:', response.data.data);
-//       }
-      
-//     } catch (error) {
-//       console.error('전송 중 에러:', error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
+//  useEffect(() => {
+//    localStorage.setItem('userId', userId.toString());
+//  }, [userId]);
 
-//   // 대화 종료
-//   const endChat = async () => {
-//     try {
-//       const response = await axios.post('/api/talktalk/end', null, {
-//         params: {
-//           userId: USER_ID
-//         }
-//       });
-      
-//       if (response.data) {
-//         console.log('대화 종료 및 저장 완료');
-//       }
-//     } catch (error) {
-//       console.error('대화 종료 에러:', error);
-//     }
-//   };
+//  const startChat = async () => {
+//    try {
+//      const response = await axios.post(`http://localhost:8443/api/talktalk/start`, null, {
+//        params: {
+//          userId: userId
+//        }
+//      });
+     
+//      if (response.data) {
+//        console.log('대화 시작');
+//      }
+//    } catch (error) {
+//      console.error('대화 시작 에러:', error);
+//    }
+//  };
 
-//   useEffect(() => {
-//     if ('webkitSpeechRecognition' in window) {
-//       recognitionRef.current = new (window as any).webkitSpeechRecognition();
-//       recognitionRef.current.continuous = true;
-//       recognitionRef.current.interimResults = true;
-//       recognitionRef.current.lang = 'ko-KR';
+//  const sendTranscriptToServer = async (text: string) => {
+//    try {
+//      setIsLoading(true);
+//      setIsWaiting(true);
+//      stopListening();
+ 
+//      // 사용자 메시지 먼저 추가
+//      setSavedTranscripts(prev => [
+//        ...prev,
+//        { text, isUser: true }
+//      ]);
+ 
+//      console.log('전송할 데이터:', { response: text, userId });
+ 
+//      const response = await axios.get(`http://localhost:8443/api/talktalk/chat`, {
+//        params: { response: text, userId },
+//        timeout: 100000
+//      });
+ 
+//      if (response.data && response.data.body) {
+//        console.log('AI 응답:', response.data.body);
+//        setSavedTranscripts(prev => [
+//          ...prev,
+//          { text: response.data.body, isUser: false }
+//        ]);
+//      }
+ 
+//    } catch (error) {
+//      console.error('전송 중 에러:', error);
+//    } finally {
+//      setIsLoading(false);
+//      setIsWaiting(false);
+//      startListening();
+//    }
+//  };
 
-//       recognitionRef.current.onresult = (event: any) => {
-//         const current = event.resultIndex;
-//         const transcriptText = event.results[current][0].transcript;
+//  const endChat = async () => {
+//    try {
+//      const response = await axios.post(`http://localhost:8443/api/talktalk/end`, null, {
+//        params: {
+//          userId: userId
+//        }
+//      });
+     
+//      if (response.data) {
+//        console.log('대화 종료 및 저장 완료');
+//      }
+//    } catch (error) {
+//      console.error('대화 종료 에러:', error);
+//    }
+//  };
+
+//  useEffect(() => {
+//    if ('webkitSpeechRecognition' in window) {
+//      recognitionRef.current = new (window as any).webkitSpeechRecognition();
+//      recognitionRef.current.continuous = true;
+//      recognitionRef.current.interimResults = true;
+//      recognitionRef.current.lang = 'ko-KR';
+
+//      recognitionRef.current.onresult = (event: any) => {
+//        const current = event.resultIndex;
+//        const transcriptText = event.results[current][0].transcript;
+       
+//        if (event.results[current].isFinal) {
+//          sendTranscriptToServer(transcriptText);
+//        } else {
+//          tempTranscriptRef.current = transcriptText;
+//          setTranscript(transcriptText);
+//        }
+//      };
+
+//      recognitionRef.current.onerror = (event: any) => {
+//        console.error('음성 인식 에러:', event.error);
+//        setIsListening(false);
+//      };
+
+//      recognitionRef.current.onend = () => {
+//        setIsListening(false);
+//        tempTranscriptRef.current = '';
+//        setTranscript('');
+//      };
+
+//      startListening();
+//    }
+
+//    return () => {
+//      if (recognitionRef.current) {
+//        recognitionRef.current.stop();
+//      }
+//    };
+//  }, []);
+
+//  const startListening = async () => {
+//    if (!recognitionRef.current || isLoading || isListening) return;
+ 
+//    try {
+//      await startChat();
+//      recognitionRef.current.start();
+//      setIsListening(true);
+//      tempTranscriptRef.current = '';
+//      setTranscript('');
+//    } catch (error) {
+//      console.error('시작 에러:', error);
+//    }
+//  };
+
+//  const stopListening = async () => {
+//    if (recognitionRef.current) {
+//      recognitionRef.current.stop();
+//      setIsListening(false);
+//      tempTranscriptRef.current = '';
+//      setTranscript('');
+//    }
+//  };
+
+//  const clearTranscripts = () => {
+//    setSavedTranscripts([]);
+//    tempTranscriptRef.current = '';
+//    setTranscript('');
+//  };
+
+//  return (
+//   <div className="overall-chat-container">
+//     <div className="chat-header-container">
+//       {/* 헤더 내용 */}
+//       <h1>똑똑이와의 즐거운 대화~~!</h1>
+//     </div>
+ 
+//     <div className="chat-main-content">
+//       <div className="speech-to-text-section">
+//         {/* 로봇 이미지 섹션 */}
+//         <div className="speech-recognition-container">
+//           <RobotImage isListening={isListening} isWaiting={isWaiting} />
+//         </div>
+//       </div>
+ 
+//       <div className="chat-content-section">
+//         <div className="saved-transcripts">
+//           <div className="transcripts-list">
+//             {savedTranscripts.map((message, index) => (
+//               <p 
+//                 key={index} 
+//                 className={`transcript-item ${message.isUser ? 'user-message' : 'ai-message'}`}
+//               >
+//                 {message.text}
+//               </p>
+//             ))}
+//             <div ref={transcriptsEndRef} />
+//           </div>
+//         </div>
         
-//         if (event.results[current].isFinal) {
-//           setSavedTranscripts(prev => {
-//             const newTranscripts = [...prev, transcriptText];
-//             sendTranscriptToServer(transcriptText);
-//             return newTranscripts;
-//           });
-          
-//           tempTranscriptRef.current = '';
-//           setTranscript('');
-//         } else {
-//           tempTranscriptRef.current = transcriptText;
-//           setTranscript(transcriptText);
-//         }
-//       };
-
-//       recognitionRef.current.onerror = (event: any) => {
-//         console.error('음성 인식 에러:', event.error);
-//         setIsListening(false);
-//       };
-
-//       recognitionRef.current.onend = () => {
-//         setIsListening(false);
-//         tempTranscriptRef.current = '';
-//         setTranscript('');
-//       };
-//     }
-
-//     return () => {
-//       if (recognitionRef.current) {
-//         recognitionRef.current.stop();
-//       }
-//     };
-//   }, []);
-
-//   const startListening = async () => {
-//     if (recognitionRef.current) {
-//       try {
-//         await startChat();  // 대화 시작 API 호출
-//         recognitionRef.current.start();
-//         setIsListening(true);
-//         tempTranscriptRef.current = '';
-//         setTranscript('');
-//       } catch (error) {
-//         console.error('시작 에러:', error);
-//         recognitionRef.current.stop();
-//         setTimeout(() => {
-//           recognitionRef.current.start();
-//           setIsListening(true);
-//         }, 100);
-//       }
-//     } else {
-//       console.error('이 브라우저는 음성 인식을 지원하지 않습니다');
-//     }
-//   };
-
-//   const stopListening = async () => {
-//     if (recognitionRef.current) {
-//       recognitionRef.current.stop();
-//       setIsListening(false);
-//       tempTranscriptRef.current = '';
-//       setTranscript('');
-//       await endChat();  // 대화 종료 API 호출
-//     }
-//   };
-
-//   const clearTranscripts = () => {
-//     setSavedTranscripts([]);
-//     tempTranscriptRef.current = '';
-//     setTranscript('');
-//   };
-
-//   return (
-//     <div className="speech-to-text-container">
-//       <div className="controls">
-//         {!isListening ? (
-//           <button 
-//             onClick={startListening} 
-//             className="control-button"
-//             disabled={isLoading}
-//           >
-//             마이크 켜기
-//           </button>
-//         ) : (
+//         <div className="controls">
 //           <button 
 //             onClick={stopListening} 
 //             className="control-button"
@@ -384,34 +237,18 @@
 //           >
 //             마이크 끄기
 //           </button>
-//         )}
-//         <button 
-//           onClick={clearTranscripts} 
-//           className="clear-button"
-//           disabled={isLoading}
-//         >
-//           기록 지우기
-//         </button>
-//       </div>
-      
-//       <div className="transcript-box">
-//         <h3>현재 입력 중인 텍스트:</h3>
-//         <p>{transcript}</p>
-//         {isLoading && <p className="loading-text">전송 중...</p>}
-//       </div>
-
-//       <div className="saved-transcripts">
-//         <h3>저장된 문장 기록:</h3>
-//         <div className="transcripts-list">
-//           {savedTranscripts.map((text, index) => (
-//             <p key={index} className="transcript-item">
-//               {index + 1}. {text}
-//             </p>
-//           ))}
+//           <button 
+//             onClick={clearTranscripts} 
+//             className="clear-button"
+//             disabled={isLoading}
+//           >
+//             기록 지우기
+//           </button>
 //         </div>
 //       </div>
 //     </div>
-//   );
+//   </div>
+//  );
 // };
 
 // export default SpeechToText;
@@ -419,11 +256,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "../styles/components/Voice.css";
 import axios from 'axios';
+import talktalk from "../assets/talktalk.png";
+import talkbubble from "../assets/talkbubble.png"
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+interface RobotImageProps {
+  isListening: boolean;
+  isWaiting: boolean;
+}
+
+const RobotImage: React.FC<RobotImageProps> = ({ isListening, isWaiting }) => {
+  return (
+    <div className="robot-image-container">
+      <img 
+        src={talktalk}
+        alt="AI 로봇" 
+        className={`robot-image ${isListening ? 'listening' : ''}`}
+      />
+      
+      {isWaiting && (
+        <div className="speech-bubble-container">
+          <img 
+            src={talkbubble} 
+            alt="말풍선" 
+            className="speech-bubble-image"
+          />
+          <div className="speech-bubble-text">전송 중입니다...</div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const SpeechToText = () => {
-  // 로컬 스토리지에서 userId 가져오기, 없으면 기본값 7로 설정
   const [userId, setUserId] = useState<number>(() => {
     const storedUserId = localStorage.getItem('userId');
     return storedUserId ? parseInt(storedUserId) : 7;
@@ -431,22 +295,31 @@ const SpeechToText = () => {
 
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [savedTranscripts, setSavedTranscripts] = useState<string[]>([]);
+  const [savedTranscripts, setSavedTranscripts] = useState<Array<{text: string, isUser: boolean}>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
   
   const recognitionRef = useRef<any>(null);
   const tempTranscriptRef = useRef<string>('');
+  const transcriptsEndRef = useRef<HTMLDivElement>(null);
 
-  // 컴포넌트 마운트 시 userId 체크 및 설정
+  // 스크롤을 맨 아래로 이동하는 함수
+  const scrollToBottom = () => {
+    transcriptsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // 새 메시지 추가 시 스크롤 이동
   useEffect(() => {
-    // 로컬 스토리지에 userId 저장
+    scrollToBottom();
+  }, [savedTranscripts]);
+
+  useEffect(() => {
     localStorage.setItem('userId', userId.toString());
   }, [userId]);
 
-  // 대화 시작
   const startChat = async () => {
     try {
-      const response = await axios.post(`${BASE_URL}/talktalk/start`, null, {
+      const response = await axios.post(`http://localhost:8443/api/talktalk/start`, null, {
         params: {
           userId: userId
         }
@@ -460,45 +333,51 @@ const SpeechToText = () => {
     }
   };
 
-  // 텍스트 전송
   const sendTranscriptToServer = async (text: string) => {
     try {
       setIsLoading(true);
-      stopListening(); // 전송 시작 시 마이크 중지
-      
-      console.log('전송할 데이터:', {
-        response: text,
-        userId: userId
+      setIsWaiting(true);
+      stopListening();
+  
+      // 사용자 메시지 먼저 추가
+      setSavedTranscripts(prev => [
+        ...prev,
+        { text, isUser: true }
+      ]);
+  
+      console.log('전송할 데이터:', { response: text, userId });
+  
+      const response = await axios.get(`http://localhost:8443/api/talktalk/chat`, {
+        params: { response: text, userId },
+        timeout: 100000
       });
-      
-      const response = await axios.get(`${BASE_URL}/talktalk/chat`, {
-        params: {
-          response: text,
-          userId: userId
-        },
-        timeout: 5000 // 타임아웃 설정
-      });
+  
+      if (response.data && response.data.body) {
+        console.log('AI 응답:', response.data.body);
+        setSavedTranscripts(prev => [
+          ...prev,
+          { text: response.data.body, isUser: false }
+        ]);
 
-      console.log('서버 응답:', response);
+        // AI 응답을 로컬 저장소에 저장
+        localStorage.setItem('aiResponse', response.data.body);
 
-      if (response.data && response.data.data) {
-        console.log('AI 응답:', response.data.data);
+        // AI 응답을 음성으로 변환
+        convertTextToSpeech(response.data.body);
       }
-      
+  
     } catch (error) {
       console.error('전송 중 에러:', error);
-      setIsLoading(false); // 에러 발생 시 로딩 상태 해제
-      startListening(); // 에러 후 마이크 다시 시작
     } finally {
       setIsLoading(false);
-      startListening(); // 전송 완료 후 마이크 다시 시작
+      setIsWaiting(false);
+      startListening();
     }
   };
 
-  // 대화 종료
   const endChat = async () => {
     try {
-      const response = await axios.post(`${BASE_URL}/talktalk/end`, null, {
+      const response = await axios.post(`http://localhost:8443/api/talktalk/end`, null, {
         params: {
           userId: userId
         }
@@ -524,14 +403,7 @@ const SpeechToText = () => {
         const transcriptText = event.results[current][0].transcript;
         
         if (event.results[current].isFinal) {
-          setSavedTranscripts(prev => {
-            const newTranscripts = [...prev, transcriptText];
-            sendTranscriptToServer(transcriptText);
-            return newTranscripts;
-          });
-          
-          tempTranscriptRef.current = '';
-          setTranscript('');
+          sendTranscriptToServer(transcriptText);
         } else {
           tempTranscriptRef.current = transcriptText;
           setTranscript(transcriptText);
@@ -549,7 +421,6 @@ const SpeechToText = () => {
         setTranscript('');
       };
 
-      // 마이크 자동 시작
       startListening();
     }
 
@@ -561,31 +432,25 @@ const SpeechToText = () => {
   }, []);
 
   const startListening = async () => {
-    if (recognitionRef.current && !isLoading) { // 전송 중이 아닐 때만 마이크 시작
-      try {
-        await startChat();  // 대화 시작 API 호출
-        recognitionRef.current.start();
-        setIsListening(true);
-        tempTranscriptRef.current = '';
-        setTranscript('');
-      } catch (error) {
-        console.error('시작 에러:', error);
-        recognitionRef.current.stop();
-        setTimeout(() => {
-          recognitionRef.current.start();
-          setIsListening(true);
-        }, 100);
-      }
+    if (!recognitionRef.current || isLoading || isListening) return;
+  
+    try {
+      await startChat();
+      recognitionRef.current.start();
+      setIsListening(true);
+      tempTranscriptRef.current = '';
+      setTranscript('');
+    } catch (error) {
+      console.error('시작 에러:', error);
     }
   };
 
   const stopListening = async () => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
-      setIsListening(false); // 마이크 중지 상태로 설정
+      setIsListening(false);
       tempTranscriptRef.current = '';
       setTranscript('');
-      await endChat();  // 대화 종료 API 호출
     }
   };
 
@@ -595,40 +460,118 @@ const SpeechToText = () => {
     setTranscript('');
   };
 
-  return (
-    <div className="speech-to-text-container">
-      <div className="controls">
-        {/* 마이크 켜기 버튼 숨기기 */}
-        <button 
-          onClick={stopListening} 
-          className="control-button"
-          disabled={isLoading}
-        >
-          마이크 끄기
-        </button>
-        <button 
-          onClick={clearTranscripts} 
-          className="clear-button"
-          disabled={isLoading}
-        >
-          기록 지우기
-        </button>
-      </div>
-      
-      <div className="transcript-box">
-        <h3>현재 입력 중인 텍스트:</h3>
-        <p>{transcript}</p>
-        {isLoading && <p className="loading-text">전송 중...</p>}
-      </div>
+  // 네이버 클로바 VOICE API를 사용하여 음성 변환
+  const getNaverToken = async () => {
+    const clientId = import.meta.env.VITE_NAVER_CLIENT_ID;
+    const clientSecret = import.meta.env.VITE_NAVER_CLIENT_SECRET;
 
-      <div className="saved-transcripts">
-        <h3>저장된 문장 기록:</h3>
-        <div className="transcripts-list">
-          {savedTranscripts.map((text, index) => (
-            <p key={index} className="transcript-item">
-              {index + 1}. {text}
-            </p>
-          ))}
+    try {
+        const response = await axios.post('https://api.ncloud-auth.com/oauth2.0/token', 
+            `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
+
+        return response.data.access_token;
+    } catch (error: any) {
+        console.error('네이버 토큰 발급 에러:', error);
+        // 네트워크 오류 처리
+        if (error.code === 'ERR_NETWORK') {
+            alert('네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인해주세요.');
+        } else {
+            alert('네이버 토큰 발급 중 오류가 발생했습니다.');
+        }
+        return null;
+    }
+};
+
+const convertTextToSpeech = async (text: string) => {
+  // 음성 합성을 지원하는지 확인
+  if ('speechSynthesis' in window) {
+    // 기존에 재생 중인 음성 중지
+    window.speechSynthesis.cancel();
+
+    // 새 음성 객체 생성
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // 한국어 음성 설정
+    utterance.lang = 'ko-KR';
+    
+    // 음성 속성 조절 (선택사항)
+    utterance.rate = 1.0; // 말하기 속도 (0.1 ~ 10)
+    utterance.pitch = 1.0; // 음높이 (0 ~ 2)
+    utterance.volume = 1.0; // 볼륨 (0 ~ 1)
+
+    return new Promise<void>((resolve, reject) => {
+      // 재생 완료 시 resolve
+      utterance.onend = () => {
+        console.log('음성 재생 완료');
+        resolve();
+      };
+      
+      // 오류 발생 시 reject
+      utterance.onerror = (error) => {
+        console.error('음성 재생 오류:', error);
+        reject(error);
+      };
+
+      // 음성 재생
+      window.speechSynthesis.speak(utterance);
+    });
+  } else {
+    // 음성 합성을 지원하지 않는 브라우저
+    console.warn('이 브라우저는 음성 합성을 지원하지 않습니다.');
+    return Promise.reject(new Error('음성 합성 미지원'));
+  }
+};
+
+  return (
+    <div className="overall-chat-container">
+      <div className="chat-header-container">
+        {/* 헤더 내용 */}
+        <h1>똑똑이와의 즐거운 대화~~!</h1>
+      </div>
+ 
+      <div className="chat-main-content">
+        <div className="speech-to-text-section">
+          {/* 로봇 이미지 섹션 */}
+          <div className="speech-recognition-container">
+            <RobotImage isListening={isListening} isWaiting={isWaiting} />
+          </div>
+        </div>
+ 
+        <div className="chat-content-section">
+          <div className="saved-transcripts">
+            <div className="transcripts-list">
+              {savedTranscripts.map((message, index) => (
+                <p 
+                  key={index} 
+                  className={`transcript-item ${message.isUser ? 'user-message' : 'ai-message'}`}
+                >
+                  {message.text}
+                </p>
+              ))}
+              <div ref={transcriptsEndRef} />
+            </div>
+          </div>
+          
+          <div className="controls">
+            <button 
+              onClick={stopListening} 
+              className="control-button"
+              disabled={isLoading}
+            >
+              마이크 끄기
+            </button>
+            <button 
+              onClick={clearTranscripts} 
+              className="clear-button"
+              disabled={isLoading}
+            >
+              기록 지우기
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -636,7 +579,4 @@ const SpeechToText = () => {
 };
 
 export default SpeechToText;
-
-
-
 
