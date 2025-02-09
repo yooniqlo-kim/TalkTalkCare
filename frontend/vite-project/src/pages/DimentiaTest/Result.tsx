@@ -1,15 +1,21 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import '../../styles/components/Result.css';
-import Result from '../../components/layout/SMCQResult'; '../../components/layout/DimentiaResult';
+import SMCQResult from '../../components/layout/SMCQResult';
+import SDQResult from '../../components/layout/SDQResult';
 
 const ResultPage: React.FC = () => {
-    return (
+  const location = useLocation();
+  const testType = location.state?.testType || 'SMCQ'; // 기본값 SMCQ
+
+  return (
       <div className="result-page">
-        {/* 테스트 결과 */}
-        <Result />
+          {/* SMCQ 또는 SDQ 결과 페이지 렌더링 */}
+          {testType === 'SMCQ' ? <SMCQResult /> : <SDQResult />}
       </div>
-    );
-  };
+  );
+};
   
   export default ResultPage;
+
+
