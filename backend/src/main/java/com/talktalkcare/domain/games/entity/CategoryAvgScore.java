@@ -15,17 +15,9 @@ import org.hibernate.annotations.ColumnDefault;
 public class CategoryAvgScore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "test_id", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Integer id;
 
-    @Size(max = 20)
-    @NotNull
-    @Column(name = "test_name", nullable = false, length = 20)
-    private String testName;
-
-    @NotNull
-    @Column(name = "total_questions", nullable = false)
-    private Integer totalQuestions;
 
     @MapsId
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

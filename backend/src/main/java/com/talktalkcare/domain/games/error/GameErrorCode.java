@@ -2,19 +2,18 @@ package com.talktalkcare.domain.games.error;
 
 import com.talktalkcare.common.error.ErrorCodeInterface;
 
-public enum DementiaTestErrorCode implements ErrorCodeInterface {
+public enum GameErrorCode implements ErrorCodeInterface {
 
-    API_CONNECTION_FAILED(500, 2000, "DeepSeek API 연결 실패"),
-    API_AUTHENTICATION_FAILED(401, 2001, "API 인증 실패"),
-    API_REQUEST_TIMEOUT(408, 2002, "API 요청 시간 초과"),
-    API_INTERNAL_SERVER_ERROR(500, 2003, "API 내부 서버 오류"),
-    INVALID_API_RESPONSE(500, 2004, "잘못된 API 응답");
+    GAME_CONNECTION_FAILED(500, 3000, "게임 서버 연결 실패"),
+    GAME_AUTHENTICATION_FAILED(401, 3001, "게임 결과 전송 실패"),
+    GAME_REQUEST_TIMEOUT(408, 3002, "게임 요청 시간 초과");
 
     private final Integer httpStatusCode;
     private final Integer errorCode;
     private final String message;
 
-    DementiaTestErrorCode(Integer httpStatusCode, Integer errorCode, String message) {
+    // Constructor to initialize the error codes
+    GameErrorCode(Integer httpStatusCode, Integer errorCode, String message) {
         this.httpStatusCode = httpStatusCode;
         this.errorCode = errorCode;
         this.message = message;
@@ -34,5 +33,4 @@ public enum DementiaTestErrorCode implements ErrorCodeInterface {
     public String getMessage() {
         return this.message;
     }
-
 }

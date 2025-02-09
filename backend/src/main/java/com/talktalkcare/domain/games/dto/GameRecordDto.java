@@ -12,7 +12,7 @@ import lombok.Setter;
 public class GameRecordDto {
 
     private int userId;
-    private int testId;  // 테스트 타입
-    private String testResult; // 테스트 결과
+    private int gameId;
+    private int score;
 
 }

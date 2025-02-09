@@ -11,10 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GameCategoryDto {
 
-    //테스트 ai 요약본
-    private int userId;
-    private String summary;
-    private int analysisType;  // 테스트 타입
-    private int analysisSeq;
+    private int categoryId;
+    private int gameId;
+
 
 }
