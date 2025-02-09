@@ -25,7 +25,7 @@ public class FriendDto {
     public static FriendDto from(Integer userId, String name, String s3Filename, String phone,
                                  boolean isOnline, LocalDateTime lastActiveTime) {
         String status = isOnline ? "ONLINE" : "OFFLINE";
-        String displayStatus = createDisplayStatus(lastActiveTime);
+        String displayStatus = createDisplayStatus(lastActiveTime, isOnline);
         return new FriendDto(
                 userId,
                 name,
@@ -39,7 +39,7 @@ public class FriendDto {
 
     public static FriendDto fromUser(User user, boolean isOnline, LocalDateTime lastActiveTime) {
         String status = isOnline ? "ONLINE" : "OFFLINE";
-        String displayStatus = createDisplayStatus(lastActiveTime);
+        String displayStatus = createDisplayStatus(lastActiveTime, isOnline);
         return new FriendDto(
                 user.getUserId(),
                 user.getName(),
@@ -51,7 +51,11 @@ public class FriendDto {
         );
     }
 
-    private static String createDisplayStatus(LocalDateTime lastActiveTime) {
+    private static String createDisplayStatus(LocalDateTime lastActiveTime, boolean isOnline) {
+        if(isOnline) {
+            return "온라인";
+        }
+
         if (lastActiveTime == null) {
             return "오프라인";
         }
@@ -60,7 +64,7 @@ public class FriendDto {
         Duration duration = Duration.between(lastActiveTime, now);
 
         if (duration.isNegative()) {
-            return "방금 전";
+            return "온라인";
         }
 
         long minutes = duration.toMinutes();
@@ -82,7 +86,7 @@ public class FriendDto {
     public void updateStatus(boolean isOnline, LocalDateTime lastActiveTime) {
         this.status = isOnline ? "ONLINE" : "OFFLINE";
         this.lastActiveTime = lastActiveTime;
-        this.displayStatus = createDisplayStatus(lastActiveTime);
+        this.displayStatus = createDisplayStatus(lastActiveTime, isOnline);
     }
 
     // 프로필 이미지 업데이트 메서드

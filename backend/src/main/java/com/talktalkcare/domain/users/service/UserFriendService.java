@@ -8,22 +8,21 @@ import com.talktalkcare.domain.users.error.UserErrorCode;
 import com.talktalkcare.domain.users.exception.UserException;
 import com.talktalkcare.domain.users.repository.UserFriendRepository;
 import com.talktalkcare.domain.users.repository.UserRepository;
+import com.talktalkcare.infrastructure.repository.RedisRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class UserFriendService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisRepository redisRepository;
     private final UserRepository userRepository;
     private final UserFriendRepository userFriendRepository;
 
@@ -32,37 +31,36 @@ public class UserFriendService {
 
     // 사용자 온라인 상태 설정
     public void setUserOnline(Integer userId) {
-        redisTemplate.opsForValue().set(USER_STATUS_PREFIX + userId, "ONLINE");
+        redisRepository.save(USER_STATUS_PREFIX + userId, "ONLINE");
         updateLastActiveTime(userId);
     }
 
     // 사용자 오프라인 상태 설정
     public void setUserOffline(Integer userId) {
-        redisTemplate.opsForValue().set(USER_STATUS_PREFIX + userId, "OFFLINE");
+        redisRepository.save(USER_STATUS_PREFIX + userId, "OFFLINE");
         updateLastActiveTime(userId);
     }
 
     // 사용자의 온라인 상태 확인
     @Transactional(readOnly = true)
     public boolean isUserOnline(Integer userId) {
-        Object status = redisTemplate.opsForValue().get(USER_STATUS_PREFIX + userId);
+        Object status = redisRepository.find(USER_STATUS_PREFIX + userId);
         return "ONLINE".equals(status);
     }
 
     // 마지막 활동 시간 업데이트
     public void updateLastActiveTime(Integer userId) {
-        redisTemplate.opsForValue().set(
+        redisRepository.save(
                 USER_LAST_ACTIVE_PREFIX + userId,
                 LocalDateTime.now().toString(),
-                24,
-                TimeUnit.HOURS
+                24
         );
     }
 
     // 마지막 활동 시간 조회
     @Transactional(readOnly = true)
     public LocalDateTime getLastActiveTime(Integer userId) {
-        String time = (String) redisTemplate.opsForValue().get(USER_LAST_ACTIVE_PREFIX + userId);
+        String time = (String) redisRepository.find(USER_LAST_ACTIVE_PREFIX + userId);
         return time != null ? LocalDateTime.parse(time) : null;
     }
 
@@ -111,7 +109,9 @@ public class UserFriendService {
     // 모든 사용자의 상태 정보 초기화 (서버 재시작시 사용)
     public void resetAllUserStatus() {
         String pattern = USER_STATUS_PREFIX + "*";
-        redisTemplate.delete(redisTemplate.keys(pattern));
+        for(String key : redisRepository.keys(pattern)) {
+            redisRepository.delete(key);
+        }
     }
 
     // 비활성 사용자 정리 (24시간 이상 미접속)
@@ -119,14 +119,14 @@ public class UserFriendService {
         String pattern = USER_LAST_ACTIVE_PREFIX + "*";
         LocalDateTime cutoffTime = LocalDateTime.now().minusHours(24);
 
-        redisTemplate.keys(pattern).forEach(key -> {
-            String timeStr = (String) redisTemplate.opsForValue().get(key);
+        redisRepository.keys(pattern).forEach(key -> {
+            String timeStr = (String) redisRepository.find(key);
             if (timeStr != null) {
                 LocalDateTime lastActive = LocalDateTime.parse(timeStr);
                 if (lastActive.isBefore(cutoffTime)) {
                     String userId = key.replace(USER_LAST_ACTIVE_PREFIX, "");
-                    redisTemplate.delete(USER_STATUS_PREFIX + userId);
-                    redisTemplate.delete(key);
+                    redisRepository.delete(USER_STATUS_PREFIX + userId);
+                    redisRepository.delete(key);
                 }
             }
         });

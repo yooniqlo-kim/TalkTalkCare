@@ -45,11 +45,14 @@ public class UserService {
         User user = UserConverter.dtoToEntity(userDto, encryptedPassword);
         UserSecurity userSecurity = UserSecurityConverter.toEntity(user, randomSalt);
 
-        String uploadedFileName;
-        try{
-            uploadedFileName = s3Service.uploadFile(userDto.getS3Filename(), null);
-        } catch (IOException e) {
-            throw new UserException(UserErrorCode.UPLOAD_IMAGE_FAILED);
+        String uploadedFileName = "https://talktalkcare.s3.ap-southeast-2.amazonaws.com/originImg.webp";
+
+        if(userDto.getS3Filename() != null) {
+            try{
+                uploadedFileName = "https://talktalkcare.s3.ap-southeast-2.amazonaws.com/"+s3Service.uploadFile(userDto.getS3Filename(), null);
+            } catch (IOException e) {
+                throw new UserException(UserErrorCode.UPLOAD_IMAGE_FAILED);
+            }
         }
 
         user.setS3FileName(uploadedFileName);
@@ -100,7 +103,7 @@ public class UserService {
         return new LoginResp(
                 user.getUserId(),
                 user.getName(),
-                getProfileImage(user.getUserId()).getImageUrl());
+                user.getS3FileName());
     }
 
     private User authenticate(String loginId, String password) {
@@ -179,7 +182,7 @@ public class UserService {
                 return new LoginResp(
                         user.getUserId(),
                         user.getName(),
-                        getProfileImage(user.getUserId()).getImageUrl());
+                        user.getS3FileName());
             }else {
                 throw new UserException(UserErrorCode.USER_LOGINID_MISMATCH);
             }
@@ -188,17 +191,17 @@ public class UserService {
         throw new UserException(UserErrorCode.TOKEN_NOT_FOUND);
     }
 
-    public ProfileImageResp getProfileImage(int userId) {
-        User user = getUserById(userId);
-        return s3Service.getFileUrl(user.getS3FileName());
-    }
+//    public ProfileImageResp getProfileImage(int userId) {
+//        User user = getUserById(userId);
+//        return s3Service.getFileUrl(user.getS3FileName());
+//    }
 
-    private void deleteCookies(HttpServletResponse response) {
+    public void deleteCookies(HttpServletResponse response) {
         Cookie idCookie = new Cookie("remember-me-id", null);
         Cookie tokenCookie = new Cookie("remember-me-token", null);
 
-        idCookie.setMaxAge(0);
-        tokenCookie.setMaxAge(0);
+        settingCookie(tokenCookie);
+        settingCookie(idCookie);
 
         response.addCookie(idCookie);
         response.addCookie(tokenCookie);
