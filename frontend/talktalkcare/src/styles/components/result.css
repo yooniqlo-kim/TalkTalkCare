@@ -75,7 +75,13 @@
     margin-top: 20px;
   }
   
-  .game-button:hover {
+  .game-button:hover, .ai-analysis-button:hover {
     background-color: #a5d6a7;
   }
   
+  .ai-analysis-button {
+    background-color: white;
+    border-radius: 20px;
+    width: 150px;
+    height: 30px;
+  }

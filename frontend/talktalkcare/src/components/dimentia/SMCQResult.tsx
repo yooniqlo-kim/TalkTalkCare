@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import '../../styles/components/Result.css';
 
@@ -14,6 +14,8 @@ const Result: React.FC = () => {
     const location = useLocation();
     const state = location.state as LocationState;
     const answers = state?.answers || [];
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     
     // 로컬 스토리지에서 로그인된 사용자 정보 가져오기
     const userId = localStorage.getItem('userId');
@@ -57,13 +59,6 @@ const Result: React.FC = () => {
         }
     };
     
-
-    useEffect(() => {
-        if (isLoggedIn) {
-            fetchAiAnalysis();
-        }
-    }, [isLoggedIn]);
-
     return (
         <div className="result-container">
             <div className="logo-section">
@@ -87,8 +82,12 @@ const Result: React.FC = () => {
                 </div>
                 
                 {isLoggedIn && (
-                    <button className="ai-analysis-button" onClick={fetchAiAnalysis}>
-                        AI 분석 결과 보기
+                    <button 
+                        className="ai-analysis-button" 
+                        onClick={fetchAiAnalysis}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? '분석 중...' : 'AI 분석 결과 보기'}
                     </button>
                 )}
                 
