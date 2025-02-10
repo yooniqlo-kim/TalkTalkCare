@@ -12,16 +12,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   return (
     <header className={className}>
       <div className="header-content">
-        <div className="logo" onClick={() => navigate('/')}>
-          <img 
-            src="/images/logo.png"  // 실제 로고 경로로 수정 필요
-            alt="톡톡케어" 
-            style={{ height: '40px',
-              color:'white'
-             }}
-          />
-          <h1>톡톡케어</h1>
-        </div>
+        
       </div>
     </header>
   );
