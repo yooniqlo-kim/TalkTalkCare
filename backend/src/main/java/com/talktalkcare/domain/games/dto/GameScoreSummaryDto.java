@@ -1,4 +1,4 @@
-package com.talktalkcare.domain.game.dto;
+package com.talktalkcare.domain.games.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

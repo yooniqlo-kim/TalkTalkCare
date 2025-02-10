@@ -1,7 +1,7 @@
 package com.talktalkcare.batch.processor;
 
-import com.talktalkcare.domain.game.dto.GameScoreSummaryDto;
-import com.talktalkcare.domain.game.entity.GameCategoryScorePerMonth;
+import com.talktalkcare.domain.games.dto.GameScoreSummaryDto;
+import com.talktalkcare.domain.games.entity.GameCategoryScorePerMonth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;

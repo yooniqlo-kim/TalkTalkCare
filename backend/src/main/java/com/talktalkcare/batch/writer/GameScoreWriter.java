@@ -1,7 +1,7 @@
 package com.talktalkcare.batch.writer;
 
-import com.talktalkcare.domain.game.entity.GameCategoryScorePerMonth;
-import com.talktalkcare.domain.game.repository.GameCategoryScorePerMonthRepository;
+import com.talktalkcare.domain.games.entity.GameCategoryScorePerMonth;
+import com.talktalkcare.domain.games.repository.GameCategoryScorePerMonthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;

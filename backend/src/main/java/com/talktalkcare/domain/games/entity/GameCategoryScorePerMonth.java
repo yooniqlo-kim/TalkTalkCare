@@ -1,4 +1,4 @@
-package com.talktalkcare.domain.game.entity;
+package com.talktalkcare.domain.games.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

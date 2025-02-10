@@ -3,7 +3,7 @@ package com.talktalkcare.batch.job;
 import com.talktalkcare.batch.processor.GameScoreProcessor;
 import com.talktalkcare.batch.reader.GameScoreReader;
 import com.talktalkcare.batch.writer.GameScoreWriter;
-import com.talktalkcare.domain.game.entity.GameCategoryScorePerMonth;
+import com.talktalkcare.domain.games.entity.GameCategoryScorePerMonth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
