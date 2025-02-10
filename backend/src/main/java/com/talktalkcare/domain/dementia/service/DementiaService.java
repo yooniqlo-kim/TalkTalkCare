@@ -1,8 +1,14 @@
 package com.talktalkcare.domain.dementia.service;
 
+import com.talktalkcare.domain.dementia.converter.TestResultConverter;
 import com.talktalkcare.domain.dementia.dto.DementiaTestDto;
+import com.talktalkcare.domain.dementia.dto.RequestType;
 import com.talktalkcare.domain.dementia.entity.DementiaTestResult;
+import com.talktalkcare.domain.dementia.error.DementiaTestErrorCode;
+import com.talktalkcare.domain.dementia.exception.DementiaTestException;
 import com.talktalkcare.domain.dementia.repository.DementiaRepository;
+import com.talktalkcare.domain.dementia.service.handler.RequestTypeHandler;
+import com.talktalkcare.domain.dementia.service.handler.RequestTypeHandlerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,41 +21,25 @@ import java.util.List;
 public class DementiaService {
 
     private final DementiaRepository dementiaRepository;
+    private final RequestTypeHandlerFactory requestTypeHandlerFactory;
 
     @Transactional
-    public DementiaTestResult saveTestResult(DementiaTestDto dto) {
-        // DTO를 엔티티로 변환
-        DementiaTestResult testResult = new DementiaTestResult();
-        testResult.setUserId(dto.getUserId());
-        testResult.setTestId(dto.getTestId());
-        testResult.setTestResult(dto.getTestResult());
+    public void saveTestResult(DementiaTestDto dementiaTestDto) {
+        DementiaTestResult testResult = TestResultConverter.dtoToEntity(dementiaTestDto);
 
-        // 현재 날짜와 시간 저장 (DATETIME 형식)
-        testResult.setTestDate(LocalDateTime.now());
-
-        // 저장 후 반환
-        return dementiaRepository.save(testResult);
+        dementiaRepository.save(testResult);
     }
 
-    /**
-     * 클라이언트 요청에 따른 testResult 조회
-     * @param requestType "1-2"일 경우 testId 1, 2의 최신 test_result 조회
-     *                   "1-1"일 경우 testId 1의 최신 2개 test_result 조회
-     * @param userId 사용자 ID
-     * @return DementiaTestResult 리스트
-     */
-    public List<DementiaTestResult> handleRequest(int requestType, int userId) {
-        if (requestType ==1 ) {
-            // 테스트 ID 1에 대해 최신 두 개의 결과 가져오기
-            List<DementiaTestResult> results = dementiaRepository.getLastTwoTestResults(userId);
-            return results.size() >= 2 ? results.subList(0, 2) : results;
-            }
-        if (requestType ==2) {
-            // 테스트 ID 1, 2에 대해 최신 결과 가져오기
-            return dementiaRepository.fetchDifferentTestTypeResults(userId);
+    public String generateAiTestAnalysis(Integer userId, int requestType) {
+        RequestType type = RequestType.fromValue(requestType);
+        RequestTypeHandler handler = requestTypeHandlerFactory.getHandler(type);
 
-        } else {
-            throw new IllegalArgumentException("잘못된 요청 타입입니다: " + requestType);
-        }
+        List<DementiaTestResult> testResults = handler.handleRequest(userId);
+
+        if(testResults.size() < 2)
+            throw new DementiaTestException(DementiaTestErrorCode.NOT_ENOUGH_TEST_RESULTS);
+
+        return handler.analyzeTestResults(userId, testResults);
     }
+
 }

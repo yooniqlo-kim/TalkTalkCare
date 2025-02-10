@@ -2,13 +2,15 @@ package com.talktalkcare.domain.dementia.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "ai_dementia_analysis")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AiDementiaAnalysis {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
