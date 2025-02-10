@@ -26,7 +26,7 @@ const KeyPad: React.FC = () => {
     <div className="page-container">
       <div className="logo-section">
         <img src="/images/logo.png" alt="톡톡케어" className="logo" />
-        <h1 className='font-bold'>톡톡케어</h1>
+        <h1>톡톡케어</h1>
       </div>
 
       <div className="main-container">
