@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../styles/components/GameList.css';
+import '../../styles/components/GameList.css';
 
 interface Game {
   id: string;

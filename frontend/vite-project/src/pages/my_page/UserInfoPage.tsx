@@ -1,5 +1,5 @@
 import React from 'react';
-import UserInfo from './UserInfo';
+import UserInfo from '../../components/my_page/UserInfo';
 import Header from '../Header';
 
 const UserInfoPage = () => {

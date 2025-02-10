@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "../../styles/components/Voice.css";
 import axios from 'axios';
-import SpeechToText from '../Voice';
+import SpeechToText from '../../components/TalkTalkAI/Voice';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const TalkTalk = () => {
