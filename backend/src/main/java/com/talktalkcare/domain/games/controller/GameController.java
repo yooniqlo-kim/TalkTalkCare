@@ -2,22 +2,20 @@ package com.talktalkcare.domain.games.controller;
 
 import com.talktalkcare.common.response.Api;
 import com.talktalkcare.domain.games.dto.GameRecordDto;
-import com.talktalkcare.domain.games.service.DailyGameService;
+import com.talktalkcare.domain.games.service.GameRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/game")
 @RequiredArgsConstructor
 public class GameController {
 
-    private final DailyGameService dailyGameService;
+    private final GameRecordService gameRecordService;
 
     @PostMapping("/send-game-result")
     public Api<String> saveTestResult(@RequestBody GameRecordDto dto) {
-        dailyGameService.saveGameResult(dto);
+        gameRecordService.saveGameResult(dto);
         return Api.OK("게임 결과 전송 완료");
     }
     /**

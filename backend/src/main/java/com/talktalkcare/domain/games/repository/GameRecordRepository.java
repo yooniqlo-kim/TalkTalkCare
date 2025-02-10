@@ -1,8 +1,12 @@
 package com.talktalkcare.domain.games.repository;
 
 import com.talktalkcare.domain.games.entity.DailyCategoryScore;
+import com.talktalkcare.domain.games.entity.GameList;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface DailyGameScore extends JpaRepository<DailyCategoryScore, Long> {
+import java.util.Optional;
+
+public interface GameRecordRepository extends JpaRepository<DailyCategoryScore, Long> {
+
 
 }

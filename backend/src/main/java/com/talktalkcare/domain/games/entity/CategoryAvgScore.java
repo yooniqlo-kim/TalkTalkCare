@@ -18,7 +18,6 @@ public class CategoryAvgScore {
     @Column(name = "user_id", nullable = false)
     private Integer id;
 
-
     @MapsId
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

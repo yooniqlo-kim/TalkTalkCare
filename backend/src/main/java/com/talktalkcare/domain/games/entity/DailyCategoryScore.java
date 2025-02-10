@@ -15,8 +15,12 @@ import java.time.Instant;
 public class DailyCategoryScore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "game_id", nullable = false)
+    @Column(name = "id", nullable = false)
     private Integer id;
+
+    @NotNull
+    @Column(name = "game_id", nullable = false)
+    private Integer gameId;
 
     @NotNull
     @Column(name = "user_id", nullable = false)
@@ -28,8 +32,7 @@ public class DailyCategoryScore {
     private Short score;
 
     @NotNull
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "played_at", nullable = false)
+    @Column(name = "played_at", nullable = false,columnDefinition = "TIMESTAMP")
     private Instant playedAt;
 
 }
