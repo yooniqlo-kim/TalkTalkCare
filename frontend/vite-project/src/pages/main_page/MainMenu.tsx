@@ -33,7 +33,7 @@ const MainMenu: React.FC = () => {
           <div className="menu-item-icon">
             <FileText size={40} />
           </div>
-          <p className="menu-item-text">치매 진단  테스트</p>
+          <p className="menu-item-text">치매 진단<br />테스트</p>
         </div>
 
         <div onClick={() => handleNavigation('/mypage')} className="menu-item">

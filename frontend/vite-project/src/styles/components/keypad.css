@@ -1,11 +1,20 @@
+/* 페이지 컨테이너의 전체적인 스타일 설정 */
 .page-container {
+  /* Flexbox를 사용하여 내부 요소들을 정렬 */
   display: flex;
+  /* 세로 방향으로 요소들을 배치 */
   flex-direction: column;
+  /* 가로축 중앙 정렬 */
   align-items: center;
-  justify-content: center;
+  /* 세로축 중앙 정렬 */
+  justify-content: baseline;
+  /* 뷰포트 높이의 100%로 설정하여 전체 화면 높이를 차지 */
   height: 100vh;
-  background-color: white; /* 연한 연두색 */
+  /* 배경색을 흰색으로 설정 */
+  background-color: white;
+  padding-top: 3%;
 }
+
 
 .logo-section {
   display: flex;
@@ -79,6 +88,11 @@
 
 .keypad-button:hover {
   background-color: #b3e59f;
+}
+
+.phone-icon, .contacts-icon {
+  width: 40px;
+  height: 45px;
 }
 
 .side-buttons {
