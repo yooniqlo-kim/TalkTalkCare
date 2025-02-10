@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -14,5 +17,19 @@ public class DailyCategoryScore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "game_id", nullable = false)
     private Integer id;
+
+    @NotNull
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
+
+    @NotNull
+    @ColumnDefault("0")
+    @Column(name = "score", nullable = false)
+    private Short score;
+
+    @NotNull
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "played_at", nullable = false)
+    private Instant playedAt;
 
 }
