@@ -12,11 +12,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DementiaAiDto {
-
-    //테스트 ai 요약본
     private int userId;
     private String summary;
-    private int analysisType;  // 테스트 타입
+    private int analysisType;
     private int analysisSeq;
 
 }

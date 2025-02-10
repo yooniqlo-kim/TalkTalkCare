@@ -1,9 +1,10 @@
 package com.talktalkcare.domain.dementia.service.handler;
 
-import com.talktalkcare.domain.dementia.dto.RequestType;
+import com.talktalkcare.domain.ai.dto.AiAnalysisRequest;
+import com.talktalkcare.domain.ai.service.AiAnalysisService;
+import com.talktalkcare.domain.dementia.dto.TestType;
 import com.talktalkcare.domain.dementia.entity.DementiaTestResult;
 import com.talktalkcare.domain.dementia.repository.DementiaRepository;
-import com.talktalkcare.domain.dementia.service.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,13 +12,13 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class LatestTwoSameTestHandler implements RequestTypeHandler {
+public class LatestTwoSameTestHandler implements TestTypeHandler {
     private final DementiaRepository dementiaRepository;
     private final AiAnalysisService aiAnalysisService;
 
     @Override
-    public RequestType getRequestType() {
-        return RequestType.LATEST_TWO_SAME_TEST;
+    public TestType getTestType() {
+        return TestType.LATEST_TWO_SAME_TEST;
     }
 
     @Override
@@ -26,30 +27,40 @@ public class LatestTwoSameTestHandler implements RequestTypeHandler {
         return results.size() >= 2 ? results.subList(0, 2) : results;
     }
 
-
     @Override
     public String analyzeTestResults(Integer userId, List<DementiaTestResult> testResults) {
         String prompt = generatePrompt();
-        String testResult = buildAnalysisInput(testResults);
+        String testResult = generateAnlaysisInput(testResults);
+        Integer value = getTestType().getValue();
 
-        int value = getRequestType().getValue();
+        AiAnalysisRequest request = AiAnalysisRequest.builder()
+                .userId(userId)
+                .prompt(prompt)
+                .inputData(testResult)
+                .analysisType(value)
+                .build();
 
-        return aiAnalysisService.analyzeTestResults(userId, prompt, testResult, value);
+        return aiAnalysisService.analyze(request);
     }
 
     @Override
     public String generatePrompt() {
-        return "유저의 치매 진단 테스트 결과를 분석할 거야."
-                + "유저의 최근과 과거의 자가 치매 진단 테스트 결과를 비교하여 변화와 개선점, 주의할 부분을 요약해줘."
-                + "모든 문항과 문항 번호를 나열하지 말고, 결론만 간결하게 3문장 이내로 알려줘."
-                + "\n테스트 문항:\n" + getTestQuestions();
+        return "You are a dementia diagnosis expert with 20 years of experience. "
+                + "Your task is to compare the user's most recent and previous self-assessment dementia test results. "
+                + "Identify changes, improvements, and areas of concern, and summarize the findings in **three sentences or less**."
+                + "\n\nThe following dementia test questions are part of the assessment:"
+                + "\n" + getTestQuestions()
+                + "\n\nEach test response consists of 0 (No) or 1 (Yes), where:"
+                + "\n- 0 means the respondent answered 'No' to the question."
+                + "\n- 1 means the respondent answered 'Yes' to the question."
+                + "\n\n**Respond in Korean only. Your response must be written in natural and fluent Korean.**";
     }
 
     @Override
-    public String buildAnalysisInput(List<DementiaTestResult> testResults) {
+    public String generateAnlaysisInput(List<DementiaTestResult> testResults) {
         return new StringBuilder()
-                .append("최근한 테스트 결과: ").append(testResults.get(0).getTestResult()).append("\n\n")
-                .append("이전 테스트 결과: ").append(testResults.get(1).getTestResult()).append("\n\n")
+                .append("Most Recent Test:\n").append(testResults.get(0).getTestResult()).append("\n\n")
+                .append("Previous Test:\n").append(testResults.get(1).getTestResult()).append("\n\n")
                 .toString();
     }
 

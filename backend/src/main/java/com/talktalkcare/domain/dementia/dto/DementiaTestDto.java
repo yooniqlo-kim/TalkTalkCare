@@ -12,9 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DementiaTestDto {
-
     private int userId;
-    private int testId;  // 테스트 타입
-    private String testResult; // 테스트 결과
-
+    private int testId;
+    private String testResult;
 }

@@ -1,12 +1,12 @@
 package com.talktalkcare.domain.dementia.service.handler;
 
-import com.talktalkcare.domain.dementia.dto.RequestType;
+import com.talktalkcare.domain.dementia.dto.TestType;
 import com.talktalkcare.domain.dementia.entity.DementiaTestResult;
 
 import java.util.List;
 
-public interface RequestTypeHandler {
-    RequestType getRequestType();
+public interface TestTypeHandler {
+    TestType getTestType();
 
     List<DementiaTestResult> handleRequest(Integer userId);
 
@@ -14,5 +14,5 @@ public interface RequestTypeHandler {
 
     String generatePrompt();
 
-    String buildAnalysisInput(List<DementiaTestResult> testResults);
+    String generateAnlaysisInput(List<DementiaTestResult> testResults);
 }
