@@ -1,9 +1,7 @@
 package com.talktalkcare.domain.games.entity;
 
-import com.talktalkcare.domain.users.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
@@ -12,21 +10,15 @@ import org.hibernate.annotations.ColumnDefault;
 @Setter
 @Entity
 @Table(name = "game_category_avg_score")
+@IdClass(CategoryAvgScoreId.class)  // 복합 기본키 클래스를 지정
 public class CategoryAvgScore {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
-    private Integer id;
+    private Integer userId;
 
-    @MapsId
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @MapsId
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
-    private CategoryList category;
+    @Id
+    @Column(name = "category_id")
+    private Integer categoryId;
 
     @NotNull
     @ColumnDefault("0")

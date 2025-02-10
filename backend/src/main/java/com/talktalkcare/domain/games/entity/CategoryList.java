@@ -15,8 +15,11 @@ import lombok.Setter;
 @Table(name = "game_category")
 public class CategoryList {
     @Id
+    @Column(name = "game_id", nullable = false)
+    private Integer gameId;
+
     @Column(name = "category_id", nullable = false)
-    private Integer id;
+    private Integer categoryId;
 
     @Size(max = 50)
     @NotNull
