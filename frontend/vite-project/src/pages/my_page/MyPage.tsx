@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'lucide-react';
-import PentagonGraph from './graph/PentagonGraph';
+import PentagonGraph from '../../components/my_page/graph/PentagonGraph';
 import '../../styles/components/MyPage.css';
 import Header from '../Header';
 const MyPage = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { User, Camera } from 'lucide-react';
 import '../../styles/components/UserInfo.css';
-import Header from '../Header';
+import Header from '../../pages/Header';
 interface UserInfoProps {
   userInfo: {
     name: string;

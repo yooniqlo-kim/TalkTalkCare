@@ -1,8 +1,8 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import '../../styles/components/Result.css';
-import SMCQResult from '../../components/layout/SMCQResult';
-import SDQResult from '../../components/layout/SDQResult';
+import SMCQResult from '../../components/dimentia/SMCQResult';
+import SDQResult from '../../components/dimentia/SDQResult';
 
 const ResultPage: React.FC = () => {
   const location = useLocation();

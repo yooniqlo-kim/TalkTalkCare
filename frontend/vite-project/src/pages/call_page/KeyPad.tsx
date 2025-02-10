@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import '../../styles/components/keypad.css';
 import phone from '../../assets/phoneicon.png';
 import side from '../../assets/side.png';
-import '../main_page/FriendList'
-import FriendList from '../main_page/FriendList';
-import CustomModal from '../../components/layout/CustomModal';
+import FriendList from '../../components/main_page/FriendList';
+import CustomModal from '../../components/CustomModal';
 
 const KeyPad: React.FC = () => {
   const navigate = useNavigate();

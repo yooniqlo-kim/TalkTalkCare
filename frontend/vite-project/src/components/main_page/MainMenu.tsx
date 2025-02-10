@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Phone, GamepadIcon, FileText, User } from 'lucide-react';
-import Header from '../Header';
+import Header from '../../pages/Header';
 import '../../styles/components/MenuItem.css';
 
 const MainMenu: React.FC = () => {
