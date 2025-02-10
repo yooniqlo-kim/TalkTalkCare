@@ -127,6 +127,10 @@ deploy-backend:
       SSH_HOST=${SSH_HOST}
       SSH_USER=${SSH_USER}
       SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
+
+      # Deepseek API 관련 설정
+      deepseek.api.base-url=${DEEPSEEK_API_URL}
+      deepseek.api.api-key=${DEEPSEEK_API_KEY}
       EOF
 
     - echo "Transferring files to EC2..."
