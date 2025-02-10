@@ -256,13 +256,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "../styles/components/Voice.css";
 import axios from 'axios';
+import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
 import talktalk from "../assets/talktalk.png";
-import talkbubble from "../assets/talkbubble.png"
+import talkbubble from "../assets/talkbubble.png";
 
 interface RobotImageProps {
   isListening: boolean;
   isWaiting: boolean;
 }
+
+// AWS Polly 클라이언트 설정
+const pollyClient = new PollyClient({
+  region: "ap-northeast-2",
+  credentials: {
+    accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID!,
+    secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY!
+  }
+});
 
 const RobotImage: React.FC<RobotImageProps> = ({ isListening, isWaiting }) => {
   return (
@@ -287,6 +297,81 @@ const RobotImage: React.FC<RobotImageProps> = ({ isListening, isWaiting }) => {
   );
 };
 
+const synthesizeSpeech = async (text: string) => {
+  try {
+    const command = new SynthesizeSpeechCommand({
+      Text: text,
+      OutputFormat: "mp3",
+      VoiceId: "Seoyeon",
+      Engine: "neural",
+      LanguageCode: "ko-KR"
+    });
+
+    const response = await pollyClient.send(command);
+
+    if (response.AudioStream) {
+      // ArrayBuffer로 변환
+      const arrayBuffer = await response.AudioStream.transformToByteArray();
+      
+      // Blob 생성
+      const blob = new Blob([arrayBuffer], { type: 'audio/mp3' });
+      const url = URL.createObjectURL(blob);
+      
+      // 오디오 재생 (사용자 상호작용 우회)
+      return new Promise<void>((resolve, reject) => {
+        const audio = new Audio(url);
+        
+        // 오디오 로드 완료 시 재생 시도
+        audio.addEventListener('canplaythrough', () => {
+          const playPromise = audio.play();
+          
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                // 재생 성공
+                audio.onended = () => {
+                  URL.revokeObjectURL(url);
+                  resolve();
+                };
+              })
+              .catch((error) => {
+                // 자동 재생 차단
+                console.warn('자동 재생 차단:', error);
+                // 폴백 메커니즘 (예: 브라우저 기본 TTS)
+                fallbackTextToSpeech(text)
+                  .then(resolve)
+                  .catch(reject);
+              });
+          }
+        });
+      });
+    }
+  } catch (error) {
+    console.error('Speech synthesis failed:', error);
+    // 폴백 메커니즘
+    return fallbackTextToSpeech(text);
+  }
+};
+
+
+// 폴백 음성 합성 메서드
+const fallbackTextToSpeech = async (text: string): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+
+      utterance.onend = () => resolve();
+      utterance.onerror = (error) => reject(error);
+
+      window.speechSynthesis.speak(utterance);
+    } else {
+      console.warn('음성 합성을 지원하지 않는 브라우저입니다.');
+      reject(new Error('음성 합성 미지원'));
+    }
+  });
+};
+
 const SpeechToText = () => {
   const [userId, setUserId] = useState<number>(() => {
     const storedUserId = localStorage.getItem('userId');
@@ -303,12 +388,10 @@ const SpeechToText = () => {
   const tempTranscriptRef = useRef<string>('');
   const transcriptsEndRef = useRef<HTMLDivElement>(null);
 
-  // 스크롤을 맨 아래로 이동하는 함수
   const scrollToBottom = () => {
     transcriptsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // 새 메시지 추가 시 스크롤 이동
   useEffect(() => {
     scrollToBottom();
   }, [savedTranscripts]);
@@ -320,9 +403,7 @@ const SpeechToText = () => {
   const startChat = async () => {
     try {
       const response = await axios.post(`http://localhost:8443/api/talktalk/start`, null, {
-        params: {
-          userId: userId
-        }
+        params: { userId }
       });
       
       if (response.data) {
@@ -339,7 +420,6 @@ const SpeechToText = () => {
       setIsWaiting(true);
       stopListening();
   
-      // 사용자 메시지 먼저 추가
       setSavedTranscripts(prev => [
         ...prev,
         { text, isUser: true }
@@ -358,12 +438,8 @@ const SpeechToText = () => {
           ...prev,
           { text: response.data.body, isUser: false }
         ]);
-
-        // AI 응답을 로컬 저장소에 저장
-        localStorage.setItem('aiResponse', response.data.body);
-
         // AI 응답을 음성으로 변환
-        convertTextToSpeech(response.data.body);
+        await synthesizeSpeech(response.data.body);
       }
   
     } catch (error) {
@@ -378,9 +454,7 @@ const SpeechToText = () => {
   const endChat = async () => {
     try {
       const response = await axios.post(`http://localhost:8443/api/talktalk/end`, null, {
-        params: {
-          userId: userId
-        }
+        params: { userId }
       });
       
       if (response.data) {
@@ -460,118 +534,44 @@ const SpeechToText = () => {
     setTranscript('');
   };
 
-  // 네이버 클로바 VOICE API를 사용하여 음성 변환
-  const getNaverToken = async () => {
-    const clientId = import.meta.env.VITE_NAVER_CLIENT_ID;
-    const clientSecret = import.meta.env.VITE_NAVER_CLIENT_SECRET;
-
-    try {
-        const response = await axios.post('https://api.ncloud-auth.com/oauth2.0/token', 
-            `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        });
-
-        return response.data.access_token;
-    } catch (error: any) {
-        console.error('네이버 토큰 발급 에러:', error);
-        // 네트워크 오류 처리
-        if (error.code === 'ERR_NETWORK') {
-            alert('네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인해주세요.');
-        } else {
-            alert('네이버 토큰 발급 중 오류가 발생했습니다.');
-        }
-        return null;
-    }
-};
-
-const convertTextToSpeech = async (text: string) => {
-  // 음성 합성을 지원하는지 확인
-  if ('speechSynthesis' in window) {
-    // 기존에 재생 중인 음성 중지
-    window.speechSynthesis.cancel();
-
-    // 새 음성 객체 생성
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    // 한국어 음성 설정
-    utterance.lang = 'ko-KR';
-    
-    // 음성 속성 조절 (선택사항)
-    utterance.rate = 1.0; // 말하기 속도 (0.1 ~ 10)
-    utterance.pitch = 1.0; // 음높이 (0 ~ 2)
-    utterance.volume = 1.0; // 볼륨 (0 ~ 1)
-
-    return new Promise<void>((resolve, reject) => {
-      // 재생 완료 시 resolve
-      utterance.onend = () => {
-        console.log('음성 재생 완료');
-        resolve();
-      };
-      
-      // 오류 발생 시 reject
-      utterance.onerror = (error) => {
-        console.error('음성 재생 오류:', error);
-        reject(error);
-      };
-
-      // 음성 재생
-      window.speechSynthesis.speak(utterance);
-    });
-  } else {
-    // 음성 합성을 지원하지 않는 브라우저
-    console.warn('이 브라우저는 음성 합성을 지원하지 않습니다.');
-    return Promise.reject(new Error('음성 합성 미지원'));
-  }
-};
-
   return (
-    <div className="overall-chat-container">
-      <div className="chat-header-container">
-        {/* 헤더 내용 */}
-        <h1>똑똑이와의 즐거운 대화~~!</h1>
+    <div className="chat-container">
+      <div className="speech-to-text-section">
+        <div className="speech-recognition-container">
+          <RobotImage isListening={isListening} isWaiting={isWaiting} />
+        </div>
       </div>
- 
-      <div className="chat-main-content">
-        <div className="speech-to-text-section">
-          {/* 로봇 이미지 섹션 */}
-          <div className="speech-recognition-container">
-            <RobotImage isListening={isListening} isWaiting={isWaiting} />
+
+      <div className="chat-content-section">
+        <div className="saved-transcripts">
+          <div className="transcripts-list">
+            {savedTranscripts.map((message, index) => (
+              <p 
+                key={index} 
+                className={`transcript-item ${message.isUser ? 'user-message' : 'ai-message'}`}
+              >
+                {message.text}
+              </p>
+            ))}
+            <div ref={transcriptsEndRef} />
           </div>
         </div>
- 
-        <div className="chat-content-section">
-          <div className="saved-transcripts">
-            <div className="transcripts-list">
-              {savedTranscripts.map((message, index) => (
-                <p 
-                  key={index} 
-                  className={`transcript-item ${message.isUser ? 'user-message' : 'ai-message'}`}
-                >
-                  {message.text}
-                </p>
-              ))}
-              <div ref={transcriptsEndRef} />
-            </div>
-          </div>
-          
-          <div className="controls">
-            <button 
-              onClick={stopListening} 
-              className="control-button"
-              disabled={isLoading}
-            >
-              마이크 끄기
-            </button>
-            <button 
-              onClick={clearTranscripts} 
-              className="clear-button"
-              disabled={isLoading}
-            >
-              기록 지우기
-            </button>
-          </div>
+        
+        <div className="controls">
+          <button 
+            onClick={stopListening} 
+            className="control-button"
+            disabled={isLoading}
+          >
+            마이크 끄기
+          </button>
+          <button 
+            onClick={clearTranscripts} 
+            className="clear-button"
+            disabled={isLoading}
+          >
+            기록 지우기
+          </button>
         </div>
       </div>
     </div>
