@@ -16,6 +16,7 @@ import SMCQ from '../pages/DimentiaTest/test_page/SMCQ.tsx';
 import SignUp from '../pages/user_page/SignUp.tsx';
 import Login from '../pages/user_page/LoginPage.tsx';
 import TalkTalkChat from '../pages/TalkTalkAi.tsx/TalkTalk.tsx';
+import OpenViduComponent from '../pages/call_page/openvidu.tsx';
 // import Login from '../pages/user_page/LoginPage.tsx';
 const Router = () => {
   return (
@@ -34,6 +35,7 @@ const Router = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/result" element={<Result />} />
           <Route path="/talktalk" element={<TalkTalkChat />} />
+          <Route path="/openvidu" element={<OpenViduComponent />} />
         </Route>
       </Routes>
     </BrowserRouter>
