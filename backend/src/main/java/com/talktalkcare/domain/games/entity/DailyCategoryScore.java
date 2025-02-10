@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -32,7 +33,7 @@ public class DailyCategoryScore {
     private Short score;
 
     @NotNull
-    @Column(name = "played_at", nullable = false,columnDefinition = "TIMESTAMP")
-    private Instant playedAt;
+    @Column(name = "played_at", nullable = false)
+    private LocalDateTime playedAt;
 
 }
