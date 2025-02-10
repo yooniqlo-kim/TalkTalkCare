@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name = "game_category_score_per_month")
-public class MonthlyCategoryScore {
+public class MonthlyGameResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
