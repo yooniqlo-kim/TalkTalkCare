@@ -2,6 +2,8 @@ package com.talktalkcare.domain.users.controller;
 
 import com.talktalkcare.common.response.Api;
 import com.talktalkcare.domain.users.dto.AddFriendReq;
+import com.talktalkcare.domain.users.dto.AddFriendStatusDto;
+import com.talktalkcare.domain.users.dto.DeleteFriendReq;
 import com.talktalkcare.domain.users.dto.FriendDto;
 import com.talktalkcare.domain.users.service.UserFriendService;
 import lombok.RequiredArgsConstructor;
@@ -23,19 +25,16 @@ public class UserFriendController {
     }
 
     // 친구 추가
-    @PostMapping("/add-friend")
+    @PostMapping("/add")
     public Api<Void> addFriend(@RequestBody AddFriendReq request) {
         userFriendService.addFriend(request);
         return Api.OK();
     }
 
     // 친구 삭제
-    @DeleteMapping("/{userId}/{friendId}")
-    public Api<Void> removeFriend(
-            @PathVariable Integer userId,
-            @PathVariable Integer friendId
-    ) {
-        userFriendService.removeFriend(userId, friendId);
+    @DeleteMapping("/delete")
+    public Api<Void> removeFriend(@RequestBody DeleteFriendReq request) {
+        userFriendService.removeFriend(request);
         return Api.OK();
     }
 
@@ -44,5 +43,27 @@ public class UserFriendController {
     public Api<FriendDto> getFriendStatus(@PathVariable Integer friendId) {
         FriendDto friend = userFriendService.getFriendStatus(friendId);
         return Api.OK(friend);
+    }
+
+    @GetMapping("/status/receive/{userId}")
+    public Api<List<AddFriendStatusDto>> getReceiveStatus(@PathVariable Integer userId) {
+        return Api.OK(userFriendService.getReceiveFriendRequests(userId));
+    }
+
+    @GetMapping("/status/send/{userId}")
+    public Api<List<AddFriendStatusDto>> getSendStatus(@PathVariable Integer userId) {
+        return Api.OK(userFriendService.getSendAddFriendRequests(userId));
+    }
+
+    @PostMapping("/request-add")
+    public Api<Void> addFriendRequest(@RequestBody AddFriendStatusDto request) {
+        userFriendService.addFriendRequsetSend(request);
+        return Api.OK();
+    }
+
+    @PostMapping("/reject-delete")
+    public Api<Void> deleteFriendRequest(@RequestBody AddFriendStatusDto request) {
+        userFriendService.rejectFriendRequsetSend(request);
+        return Api.OK();
     }
 }

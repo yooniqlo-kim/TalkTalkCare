@@ -35,7 +35,6 @@ public class UserController {
 
     @PostMapping("/logout")
     public Api<Void> logout(HttpServletResponse response) {
-        System.out.println("로그아웃================================");
         userService.deleteCookies(response);
         return Api.OK();
     }
