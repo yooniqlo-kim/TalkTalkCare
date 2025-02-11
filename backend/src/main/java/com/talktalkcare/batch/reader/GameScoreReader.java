@@ -1,5 +1,7 @@
 package com.talktalkcare.batch.reader;
 
+import com.talktalkcare.batch.error.BatchErrorCode;
+import com.talktalkcare.batch.exception.BatchException;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +31,7 @@ public class GameScoreReader extends JpaPagingItemReader<Object[]> {
         try {
             afterPropertiesSet();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize GameScoreReader", e);
+            throw new BatchException(BatchErrorCode.READ_GAME_SCORE_FAILED);
         }
     }
 }
