@@ -14,7 +14,7 @@ public class GameList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "game_id", nullable = false)
-    private Integer id;
+    private Integer gameId;
 
     @NotNull
     @Column(name = "category_id", nullable = false)
