@@ -5,6 +5,7 @@ import MainMenu from '../components/main_page/MainMenu'
 import Analytics from '../components/main_page/Analytics';
 import FriendList from '../components/main_page/FriendList';
 import '../styles/components/MainPage.css';
+import CardNews from '../components/main_page/Cardnews';
 
 const MainPage: React.FC = () => {
   const [showFriendList, setShowFriendList] = useState(false);
@@ -25,7 +26,8 @@ const MainPage: React.FC = () => {
         {/* 메뉴 카드 (일렬 정렬) */}
         <div className="menu-card">
           <MainMenu />
-          <Analytics />
+          {/* <Analytics /> */}
+          <CardNews/>
         </div>
       </div>
 

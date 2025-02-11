@@ -75,10 +75,6 @@ const KeyPad: React.FC = () => {
 
   return (
     <div className="page-container" tabIndex={0} onKeyDown={handleKeyDown}>
-      <div className="logo-section">
-        <img src="/images/logo.png" alt="톡톡케어" className="logo" />
-        <h1>톡톡케어</h1>
-      </div>
 
       <div className="main-container">
         <div className="input-display-container">
