@@ -1,10 +1,7 @@
 package com.talktalkcare.domain.games.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -14,20 +11,21 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class GameScorePerDay {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private Integer userId;
 
     @Column(name = "game_id", nullable = false)
-    private Long gameId;
+    private Integer gameId;
 
     @Column(name = "score", nullable = false)
-    private Integer score;
+    private Short score;
 
     @Column(name = "played_at", nullable = false)
     private LocalDateTime playedAt;
