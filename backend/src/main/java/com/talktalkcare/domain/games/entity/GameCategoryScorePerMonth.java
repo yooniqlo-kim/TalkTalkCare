@@ -16,16 +16,16 @@ public class GameCategoryScorePerMonth {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private Integer userId;
 
     @Column(name = "date", nullable = false)
     private String date; // YYYY-MM 형식
 
     @Column(name = "played_count", nullable = false)
-    private Integer playedCount;
+    private Short playedCount;
 
     @Column(name = "month_score", nullable = false)
     private Float monthScore;
