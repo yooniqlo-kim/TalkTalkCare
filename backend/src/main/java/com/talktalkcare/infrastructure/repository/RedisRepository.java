@@ -4,6 +4,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
+import java.util.Set;
+
 
 @Repository
 public class RedisRepository {
@@ -28,6 +30,10 @@ public class RedisRepository {
 
     public void delete(String redisKey) {
         redisTemplate.delete(redisKey);
+    }
+
+    public Set<String> keys(String pattern) {
+        return redisTemplate.keys(pattern);
     }
 
 }
