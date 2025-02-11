@@ -20,10 +20,10 @@ const Navbar: React.FC = () => {
         {/* 오른쪽 메뉴 */}
         <div className="navbar-menu">
           {/* 각 메뉴에 아이콘과 텍스트 추가 */}
-          <Link to="/talktalk" className="navbar-link">
+          {/* <Link to="/talktalk" className="navbar-link">
             <img src={talktalk_robot} alt="톡톡이" className="menu-icon" />
             <p className='text-md'>톡톡이</p>
-          </Link>
+          </Link> */}
           <Link to="/sign-up" className="navbar-link">
             <img src={signup_icon} alt="회원가입" className="menu-icon" />
             <p className='text-md'>회원가입</p>
@@ -32,10 +32,10 @@ const Navbar: React.FC = () => {
             <img src={login_icon} alt="로그인" className="menu-icon" />
             <p className='text-md'>로그인</p>
           </Link>
-          <Link to="/test" className="navbar-link">
+          {/* <Link to="/test" className="navbar-link">
             <img src={test_icon} alt="진단 테스트" className="menu-icon" />
             <p className='text-md leading-4'>진단<br />테스트</p>
-          </Link>
+          </Link> */}
           <Link to="/mypage" className="navbar-link">
             <img src={mypage_icon} alt="내 정보" className="menu-icon" />
             <p className='text-md'>내 정보</p>
