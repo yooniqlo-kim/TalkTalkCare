@@ -10,5 +10,7 @@ import lombok.NoArgsConstructor;
 public class SmsDto {
 
     String phoneNumber;
+
     String verificationCode;
+
 }
