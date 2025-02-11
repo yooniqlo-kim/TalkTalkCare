@@ -57,8 +57,17 @@ const KeyPad: React.FC = () => {
     setShowFriends((prev) => !prev); // 친구 목록 표시/숨기기 토글
   };
 
+  // 키 이벤트 처리 (handleKeyDown 추가)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key >= '0' && e.key <= '9') {
+      handleButtonClick(e.key); // 숫자키 입력 시 전화번호 추가
+    } else if (e.key === 'Backspace') {
+      handleClear(); // 백스페이스 키 입력 시 지우기
+    }
+  };
+
   return (
-    <div className="page-container" tabIndex={0}>
+    <div className="page-container" tabIndex={0} onKeyDown={handleKeyDown}>
       {/* 왼쪽 서비스 설명 텍스트 */}
       <div className="text-section">
         <h1>화상 전화</h1>
