@@ -21,8 +21,8 @@ public class DementiaController {
     }
 
     @GetMapping("/analysis")
-    public Api<String> getTestResults(@RequestParam Integer userId, @RequestParam int testType) {
-        return Api.OK(dementiaService.generateAiTestAnalysis(userId, testType));
+    public Api<String> getTestResults(@RequestParam Integer userId, @RequestParam int requestType) {
+        return Api.OK(dementiaService.generateAiTestAnalysis(userId, requestType));
     }
 
 }
