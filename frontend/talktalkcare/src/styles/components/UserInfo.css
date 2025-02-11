@@ -88,7 +88,7 @@
 
 .edit-button {
   background-color: #555050 !important;
-  color: black;
+  color: #214005;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 5px;
@@ -120,6 +120,6 @@
 }
 
 .signout-button:hover {
-  color: #c9302c;
+  color: #5e4746;
   text-decoration: underline;
 }

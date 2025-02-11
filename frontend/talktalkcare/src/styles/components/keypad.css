@@ -47,7 +47,7 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: black;
+  color: #214005;
 }
 
 .bottom-section {
@@ -112,5 +112,5 @@
 .phone-icon, .contacts-icon {
   font-size: 24px;
   margin-bottom: 5px;
-  color: black;
+  color: #214005;
 }

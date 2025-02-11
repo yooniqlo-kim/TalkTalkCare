@@ -58,10 +58,11 @@ const CardNews: React.FC = () => {
     />
 
     {/* 제목 및 설명 */}
-    <div className="absolute bottom-5 left-5 bg-amber-50 bg-opacity-50 text-black p-4 rounded-lg">
+    <div className="absolute bottom-5 left-5 bg-amber-50 bg-opacity-50 p-4 rounded-lg" style={{ color: "#214005" }}>
       <h2 className="text-xl font-bold">{images[currentIndex].title}</h2>
       <p className="text-sm">{images[currentIndex].description}</p>
     </div>
+
 
         {/* 이전 버튼 */}
         <button
