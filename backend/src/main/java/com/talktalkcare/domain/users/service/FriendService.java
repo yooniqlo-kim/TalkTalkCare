@@ -6,12 +6,12 @@ import com.talktalkcare.domain.users.dto.AddFriendStatusDto;
 import com.talktalkcare.domain.users.dto.DeleteFriendReq;
 import com.talktalkcare.domain.users.dto.FriendDto;
 import com.talktalkcare.domain.users.entity.AddFriendStatus;
+import com.talktalkcare.domain.users.entity.Friend;
 import com.talktalkcare.domain.users.entity.User;
-import com.talktalkcare.domain.users.entity.UserFriend;
 import com.talktalkcare.domain.users.error.UserErrorCode;
 import com.talktalkcare.domain.users.exception.UserException;
 import com.talktalkcare.domain.users.repository.AddFriendStatusRepository;
-import com.talktalkcare.domain.users.repository.UserFriendRepository;
+import com.talktalkcare.domain.users.repository.FriendRepository;
 import com.talktalkcare.domain.users.repository.UserRepository;
 import com.talktalkcare.infrastructure.repository.RedisRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +25,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UserFriendService {
+public class FriendService {
 
     private final RedisRepository redisRepository;
     private final UserRepository userRepository;
-    private final UserFriendRepository userFriendRepository;
+    private final FriendRepository friendRepository;
     private final AddFriendStatusRepository addFriendStatusRepository;
 
     private static final String USER_STATUS_PREFIX = "user:status:";
@@ -68,7 +68,7 @@ public class UserFriendService {
     @Transactional(readOnly = true)
     public List<FriendDto> getFriendsStatus(Integer userId) {
         List<FriendDto> friendsStatus = new ArrayList<>();
-        List<Integer> friendIds = userFriendRepository.findFriendIdsByUserId(userId);
+        List<Integer> friendIds = friendRepository.findFriendIdsByUserId(userId);
 
         for (Integer friendId : friendIds) {
             userRepository.findById(friendId).ifPresent(friend -> {
@@ -115,7 +115,7 @@ public class UserFriendService {
 
     @Transactional(readOnly = true)
     public List<Integer> getFriendIds(Integer userId) {
-        return userFriendRepository.findFriendIdsByUserId(userId);
+        return friendRepository.findFriendIdsByUserId(userId);
     }
 
     public void addFriendRequsetSend(AddFriendStatusDto addFriendStatusDto) {
@@ -142,13 +142,13 @@ public class UserFriendService {
         User Friend = userRepository.findByPhone(addFriendReq.getPhone())
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        userFriendRepository.save(new UserFriend(
+        friendRepository.save(new Friend(
                 addFriendReq.getUserId(),
                 Friend.getUserId(),
                 addFriendReq.getName()));
     }
 
     public void removeFriend(DeleteFriendReq deleteFriendReq) {
-        userFriendRepository.deleteByUserIdAndFriendId(deleteFriendReq.getUserId(), deleteFriendReq.getFriendId());
+        friendRepository.deleteByUserIdAndFriendId(deleteFriendReq.getUserId(), deleteFriendReq.getFriendId());
     }
 }

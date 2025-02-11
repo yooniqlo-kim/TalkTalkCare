@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Table(name = "friends")
-public class UserFriend {
+public class Friend {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +20,7 @@ public class UserFriend {
 
     private String friendName;
 
-    public UserFriend(Integer userId, Integer friendId, String friendName) {
+    public Friend(Integer userId, Integer friendId, String friendName) {
         this.userId = userId;
         this.friendId = friendId;
         this.friendName = friendName;
