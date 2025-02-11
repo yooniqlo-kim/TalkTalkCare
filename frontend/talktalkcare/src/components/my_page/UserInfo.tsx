@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { User, Camera } from 'lucide-react';
 import '../../styles/components/UserInfo.css';
-import Header from '../../pages/Header';
 interface UserInfoProps {
   userInfo: {
     name: string;
@@ -38,7 +37,6 @@ const UserInfo: React.FC<UserInfoProps> = ({ userInfo, onEdit }) => {
 
   return (
     <div className="user-info-container">
-      <Header />
       <div className="profile-header">
         <div 
           className="profile-image-container" 

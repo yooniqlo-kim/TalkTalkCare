@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Phone, GamepadIcon, FileText, User } from 'lucide-react';
-import Header from '../../pages/Header';
 import '../../styles/components/MenuItem.css';
 
 const MainMenu: React.FC = () => {
@@ -13,7 +12,6 @@ const MainMenu: React.FC = () => {
 
   return (
     <div className="menu">
-      <Header />
       <nav className="menu-grid">
         <div onClick={() => handleNavigation('/call')} className="menu-item">
           <div className="menu-item-icon">
@@ -40,7 +38,7 @@ const MainMenu: React.FC = () => {
           <div className="menu-item-icon">
             <User size={40} />
           </div>
-          <p className="menu-item-text">마이페이지</p>
+          <p className="menu-item-text">마이 페이지</p>
         </div>
       </nav>
     </div>
