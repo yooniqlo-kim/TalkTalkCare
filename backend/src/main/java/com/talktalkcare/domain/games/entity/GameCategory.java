@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "game_category")
-public class CategoryList {
+public class GameCategory {
     @Id
     @Column(name = "game_id", nullable = false)
     private Integer gameId;

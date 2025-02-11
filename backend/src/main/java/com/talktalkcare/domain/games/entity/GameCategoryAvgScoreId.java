@@ -3,16 +3,16 @@ package com.talktalkcare.domain.games.entity;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class CategoryAvgScoreId implements Serializable {
+public class GameCategoryAvgScoreId implements Serializable {
 
     private Integer userId;
     private Integer categoryId;
 
     // 기본 생성자
-    public CategoryAvgScoreId() {}
+    public GameCategoryAvgScoreId() {}
 
     // 생성자
-    public CategoryAvgScoreId(Integer userId, Integer categoryId) {
+    public GameCategoryAvgScoreId(Integer userId, Integer categoryId) {
         this.userId = userId;
         this.categoryId = categoryId;
     }
@@ -22,7 +22,7 @@ public class CategoryAvgScoreId implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CategoryAvgScoreId that = (CategoryAvgScoreId) o;
+        GameCategoryAvgScoreId that = (GameCategoryAvgScoreId) o;
         return Objects.equals(userId, that.userId) && Objects.equals(categoryId, that.categoryId);
     }
 
