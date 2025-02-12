@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/components/Navbar.css';
 import talktalk_robot from '../../assets/talktalk.png'; // 톡톡이 로봇 이미지
-import signup_icon from '../../assets/signup.png'; // 회원가입 아이콘
+import signup_icon from '../../assets/Signup.png'; // 회원가입 아이콘
 import login_icon from '../../assets/login.png'; // 로그인 아이콘
 import test_icon from '../../assets/test.png'; // 진단 테스트 아이콘
 import mypage_icon from '../../assets/mypage.png'; // 내 정보 아이콘
