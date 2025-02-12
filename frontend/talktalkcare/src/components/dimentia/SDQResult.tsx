@@ -10,6 +10,10 @@ interface LocationState {
     answers: string[];
 }
 
+interface ResultProps {
+    testId: number; // testId를 props로 받음
+}
+
 const Result: React.FC = () => {
     const location = useLocation();
     const state = location.state as LocationState;
