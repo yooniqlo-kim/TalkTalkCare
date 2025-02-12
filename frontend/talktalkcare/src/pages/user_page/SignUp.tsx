@@ -24,17 +24,7 @@ const SignUp = () => {
   const [isSmsVerificationSent, setIsSmsVerificationSent] = useState(false);
   const [isSmsVerified, setIsSmsVerified] = useState(false);
   const [passwordError, setPasswordError] = useState('');
-
-  // 단계별 안내 텍스트
-  const stepGuideTexts = {
-    1: '이름을 입력해주세요.',
-    2: '전화번호를 입력해주세요.',
-    3: 'SMS 인증을 진행해주세요.',
-    4: '아이디를 입력해주세요. (6자 이상)',
-    5: '비밀번호를 입력해주세요. (8자 이상)',
-    6: '생년월일을 입력해주세요.',
-    7: '모든 정보를 입력하셨습니다. 회원가입하기 버튼을 눌러주세요!'
-  };
+  const [isLoginIdDuplicate, setIsLoginIdDuplicate] = useState(false);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -49,6 +39,23 @@ const SignUp = () => {
         setPreviewImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // 아이디 중복 확인
+  const checkLoginId = async () => {
+    try {
+      const response = await axios.get(`/api/users/check-id/?userLoginId=${formData.loginId}`);
+      if (response.data.result.errorCode === 1001) {
+        setIsLoginIdDuplicate(true);
+        alert(response.data.result.msg);  // "이미 가입된 사용자입니다." 메시지 출력
+      } else {
+        setIsLoginIdDuplicate(false);
+        alert('사용 가능한 아이디입니다.');
+      }
+    } catch (error) {
+      console.error('아이디 중복 확인 오류:', error);
+      alert('아이디 중복 확인에 실패했습니다.');
     }
   };
 
@@ -80,33 +87,33 @@ const SignUp = () => {
     }
   };
 
-const validateCurrentStep = (currentStep: number): boolean => {
-  switch (currentStep) {
-    case 1:
-      return formData.name.length > 0;
-    case 2:
-      return /^\d{10,11}$/.test(formData.phoneNumber.replace(/-/g, ''));
-    case 3:
-      return isSmsVerified;
-    case 4:
-      return formData.loginId.length >= 6;
-    case 5:  // 비밀번호 검증
-      if (formData.password.length < 8) {
-        setPasswordError('비밀번호는 8자 이상이어야 합니다.');
-        return false;
-      }
-      if (formData.password !== formData.passwordConfirm) {
-        setPasswordError('비밀번호가 일치하지 않습니다');
-        return false;
-      }
-      setPasswordError('');
-      return true;
-    case 6:  // 생년월일 검증으로 수정
-      return formData.birthdate.length > 0;
-    default:
-      return true;
-  }
-};
+  const validateCurrentStep = (currentStep: number): boolean => {
+    switch (currentStep) {
+      case 1:
+        return formData.loginId.length >= 6 && !isLoginIdDuplicate;
+      case 2:
+        return formData.name.length > 0;
+      case 3:
+        return /^\d{10,11}$/.test(formData.phoneNumber.replace(/-/g, ''));
+      case 4:
+        return isSmsVerified;
+      case 5:  // 비밀번호 검증
+        if (formData.password.length < 8) {
+          setPasswordError('비밀번호는 8자 이상이어야 합니다.');
+          return false;
+        }
+        if (formData.password !== formData.passwordConfirm) {
+          setPasswordError('비밀번호가 일치하지 않습니다');
+          return false;
+        }
+        setPasswordError('');
+        return true;
+      case 6:  // 생년월일 검증
+        return formData.birthdate.length > 0;
+      default:
+        return true;
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -143,10 +150,6 @@ const validateCurrentStep = (currentStep: number): boolean => {
     <div className="signup-container">
       <div className="signup-content">
         <div className={`signup-form step-${step}`}>
-          <div className="step-guide">
-            {stepGuideTexts[step as keyof typeof stepGuideTexts]}
-          </div>
-   
           <div className="profile-upload">
             <div 
               className="profile-image-container" 
@@ -176,9 +179,40 @@ const validateCurrentStep = (currentStep: number): boolean => {
             />
             <p>프로필 사진 등록</p>
           </div>
-   
-          {/* 이름 입력 */}
+
+          {/* 아이디 입력 */}
           {step >= 1 && (
+            <div className="input-group">
+              <input
+                type="text"
+                name="loginId"
+                value={formData.loginId}
+                onChange={handleChange}
+                placeholder="아이디를 입력하세요 (6자 이상)"
+              />
+              {step === 1 && (
+                <div>
+                  <button 
+                    onClick={checkLoginId}
+                    className="next-button"
+                    disabled={formData.loginId.length < 6}
+                  >
+                    아이디 중복 확인
+                  </button>
+                  <button 
+                    onClick={() => handleNext(1)}
+                    className="next-button"
+                    disabled={formData.loginId.length < 6 || isLoginIdDuplicate}
+                  >
+                    다음
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 이름 입력 */}
+          {step >= 2 && (
             <div className="input-group">
               <input
                 type="text"
@@ -188,9 +222,9 @@ const validateCurrentStep = (currentStep: number): boolean => {
                 placeholder="이름을 입력하세요"
                 autoFocus
               />
-              {step === 1 && (
+              {step === 2 && (
                 <button 
-                  onClick={() => handleNext(1)}
+                  onClick={() => handleNext(2)}
                   className="next-button"
                   disabled={!formData.name}
                 >
@@ -201,7 +235,7 @@ const validateCurrentStep = (currentStep: number): boolean => {
           )}
    
           {/* 전화번호 및 SMS 인증 */}
-          {step >= 2 && (
+          {step >= 3 && (
             <div className="input-group">
               <input
                 type="tel"
@@ -211,7 +245,7 @@ const validateCurrentStep = (currentStep: number): boolean => {
                 placeholder="전화번호를 입력하세요 (- 제외)"
                 maxLength={11}
               />
-              {step === 2 && (
+              {step === 3 && (
                 <button 
                   onClick={requestSmsVerification}
                   className="next-button"
@@ -224,7 +258,7 @@ const validateCurrentStep = (currentStep: number): boolean => {
           )}
    
           {/* SMS 인증 */}
-          {step >= 3 && (
+          {step >= 4 && (
             <div className="input-group">
               <input
                 type="text"
@@ -233,7 +267,7 @@ const validateCurrentStep = (currentStep: number): boolean => {
                 onChange={handleChange}
                 placeholder="인증번호를 입력하세요"
               />
-              {step === 3 && (
+              {step === 4 && (
                 <button 
                   onClick={verifySmsCode}
                   className="next-button"
@@ -242,46 +276,23 @@ const validateCurrentStep = (currentStep: number): boolean => {
                 </button>
               )}
             </div>
-          )}
-   
-          {/* 아이디 입력 */}
-          {step >= 4 && (
+          )}   
+          {/* 비밀번호 입력 */}
+          {step >= 5 && (  // step >= 6을 step >= 5로 수정
             <div className="input-group">
               <input
-                type="text"
-                name="loginId"
-                value={formData.loginId}
+                type="password"
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
-                placeholder="아이디를 입력하세요 (6자 이상)"
+                placeholder="비밀번호를 입력하세요 (8자 이상)"
               />
-              {step === 4 && (
-                <button 
-                  onClick={() => handleNext(4)}
-                  className="next-button"
-                  disabled={formData.loginId.length < 6}
-                >
-                  다음
-                </button>
-              )}
-            </div>
-          )}
-   
-    {/* 비밀번호 입력 */}
-    {step >= 5 && (  // step >= 6을 step >= 5로 수정
-      <div className="input-group">
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="비밀번호를 입력하세요 (8자 이상)"
-        />
-        <input
-          type="password"
-          name="passwordConfirm"
-          value={formData.passwordConfirm || ''}
-          onChange={handleChange}
-          placeholder="비밀번호를 다시 입력하세요"
+              <input
+              type="password"
+              name="passwordConfirm"
+              value={formData.passwordConfirm || ''}
+              onChange={handleChange}
+              placeholder="비밀번호를 다시 입력하세요"
           className="mt-2"
         />
         {passwordError && <p className="error-message">{passwordError}</p>}
@@ -296,7 +307,6 @@ const validateCurrentStep = (currentStep: number): boolean => {
         )}
       </div>
     )}
-      
           {/* 생년월일 입력 */}
           {step >= 6 && (
             <div className="input-group">
