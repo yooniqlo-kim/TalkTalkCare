@@ -1,6 +1,14 @@
 // src/services/authService.ts
 import axios from 'axios';
 import { UserSignupRequest, SignupApiResponse, SmsVerificationRequest, LoginRequest } from '../types/user';
+import { AxiosResponse } from 'axios';
+
+interface ApiResponse<T = void> {
+  result: {
+    msg: string;
+  };
+  body?: T;
+}
 
 const BASE_URL = 'http://localhost:8080/api'; // 백엔드 API 기본 URL
 
@@ -97,14 +105,13 @@ export const authService = {
 
   login: async (loginData: LoginRequest) => {
     try {
-      // 전송하는 데이터 콘솔 로그 추가
       console.log('로그인 요청 데이터:', {
         userLoginId: loginData.userLoginId,
         password: loginData.password ? '(비밀번호 입력됨)' : '(비밀번호 없음)',
         autoLogin: loginData.autoLogin
       });
-  
-      const response = await axios.post(`${BASE_URL}/users/login`, {
+
+      const response = await axios.post<ApiResponse<{ userId: number; username: string; s3Filename: string }>>(`${BASE_URL}/users/login`, {
         userLoginId: loginData.userLoginId,
         password: loginData.password,
         autoLogin: loginData.autoLogin
@@ -113,16 +120,21 @@ export const authService = {
           'Content-Type': 'application/json'
         }
       });
-  
-      // 응답 데이터도 콘솔 로그 추가
+
       console.log('로그인 응답 데이터:', response.data);
-  
-      return response.data;
+
+      const { result, body } = response.data;
+
+      if (result && result.msg === 'success' && body) {
+        const { userId, username } = body;
+        localStorage.setItem('userId', String(userId));
+        localStorage.setItem('username', username);
+        return response.data;
+      } else {
+        throw new Error(`Login failed: ${result?.msg || 'Unknown error'}`);
+      }
     } catch (error) {
-      // 에러 발생 시 상세 정보 로깅
       console.error('로그인 실패:', error);
-      
-      // Axios 에러인 경우 추가 정보 로깅
       if (axios.isAxiosError(error)) {
         console.error('Axios 에러 상세 정보:', {
           response: error.response?.data,
@@ -130,7 +142,22 @@ export const authService = {
           headers: error.response?.headers
         });
       }
-  
+      throw error;
+    }
+  },
+
+  logout: async (): Promise<ApiResponse> => {
+    try {
+      const response: AxiosResponse<ApiResponse> = await axios.post(
+        `${BASE_URL}/users/logout`, 
+        {}, 
+        { 
+          withCredentials: true 
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Logout failed:', error);
       throw error;
     }
   }

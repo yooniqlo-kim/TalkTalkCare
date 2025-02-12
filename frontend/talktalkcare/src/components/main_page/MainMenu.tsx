@@ -24,7 +24,7 @@ const MainMenu: React.FC = () => {
           <div className="menu-item-icon">
             <GamepadIcon size={40} />
           </div>
-          <p className="menu-item-text">게임하기</p>
+          <p className="menu-item-text">치매 예방 게임</p>
         </div>
 
         <div onClick={() => handleNavigation('/test')} className="menu-item">
