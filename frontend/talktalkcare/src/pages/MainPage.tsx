@@ -5,7 +5,7 @@ import MainMenu from '../components/main_page/MainMenu'
 import Analytics from '../components/main_page/Analytics';
 import FriendList from '../components/main_page/FriendList';
 import '../styles/components/MainPage.css';
-import CardNews from '../components/main_page/Cardnews';
+import CardNews from '../components/main_page/CardNews';
 
 const MainPage: React.FC = () => {
   const [showFriendList, setShowFriendList] = useState(false);
