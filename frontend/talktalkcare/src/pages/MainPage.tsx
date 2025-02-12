@@ -1,44 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { List, LogOut } from 'lucide-react';
+import { List, LogOut } from 'lucide-react'; // LogOut 아이콘 추가
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
-import MainMenu from '../components/main_page/MainMenu';
+import MainMenu from '../components/main_page/MainMenu'
 import Analytics from '../components/main_page/Analytics';
 import FriendList from '../components/main_page/FriendList';
 import '../styles/components/MainPage.css';
+import CardNews from '../components/main_page/Cardnews';
+import { authService } from '../services/authService'; // authService import
 
 const MainPage: React.FC = () => {
   const [showFriendList, setShowFriendList] = useState(false);
   const navigate = useNavigate();
-  const [userId, setUserId] = useState<string | null>(localStorage.getItem('userId'));
-  const [username, setUsername] = useState<string | null>(localStorage.getItem('username'));
+  const userId = localStorage.getItem('userId');
   const wsUrl = "ws://localhost:8080/ws";
   const apiUrl = "http://localhost:8080/api";
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
-    const storedUsername = localStorage.getItem('username');
-
-    if (storedUserId) {
-      console.log('userId:', storedUserId);
-      setUserId(storedUserId);
-    } else {
+    if (!userId) {
       console.log('userId is not available.');
       navigate('/login');
+    } else {
+      console.log('userId:', userId);
     }
+  }, [userId, navigate]);
 
-    if (storedUsername) {
-      console.log('username:', storedUsername);
-      setUsername(storedUsername);
-    }
-  }, [navigate]);
-  
+  if (!userId) {
+    return null;
+  }
+
   const handleLogout = async () => {
     try {
       await authService.logout();
+      
+      // 로컬 스토리지 및 세션 관련 데이터 제거
       localStorage.removeItem('userId');
-      localStorage.removeItem('token');
+      localStorage.removeItem('token'); // 토큰이 있다면
       localStorage.removeItem('username');
+      // 로그인 페이지로 리다이렉트
       navigate('/login');
     } catch (error) {
       console.error('로그아웃 실패:', error);
@@ -46,23 +44,10 @@ const MainPage: React.FC = () => {
     }
   };
 
-  if (!userId) {
-    return null;
-  }
-
   return (
     <div className="main-page-container">
       <div className="main-page-content">
-        <div className="logout-button">
-          <button 
-            onClick={handleLogout} 
-            aria-label="로그아웃"
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <LogOut size={24} />
-          </button>
-        </div>
-
+        {/* 친구 목록 열기 버튼 */}
         {!showFriendList && (
           <div className="friend-list-toggle">
             <button onClick={() => setShowFriendList(true)} aria-label="친구 목록 열기">
@@ -71,9 +56,11 @@ const MainPage: React.FC = () => {
           </div>
         )}
 
+        {/* 메뉴 카드 (일렬 정렬) */}
         <div className="menu-card">
           <MainMenu />
-          <Analytics />
+          {/* <Analytics /> */}
+          <CardNews/>
         </div>
       </div>
 
@@ -84,7 +71,7 @@ const MainPage: React.FC = () => {
             onClose={() => setShowFriendList(false)}
             wsUrl={wsUrl}
             apiUrl={apiUrl}
-          />
+            />
         </div>
       )}
     </div>
