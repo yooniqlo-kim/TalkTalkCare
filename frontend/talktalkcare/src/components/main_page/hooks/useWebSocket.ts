@@ -17,7 +17,7 @@ export const useWebSocket = (onStatusUpdate: (updatedFriend: Friend) => void) =>
     if (!userId || reconnectAttempts.current >= maxReconnectAttempts) {
       return;
     }
-
+// 확인 필요요
     const wsConnection = `${WS_URL}/?userId=${userId}`;
     console.log(`🔄 WebSocket 연결 시도 (${reconnectAttempts.current + 1}/${maxReconnectAttempts}):`, wsConnection);
 
