@@ -6,6 +6,8 @@ import FriendItem from './UserListItem';
 import { Friend } from './friends';
 import '../../styles/components/FriendList.css';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 interface FriendListProps {
   onClose: () => void;
 }
@@ -39,7 +41,7 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch(`http://localhost:8080/api/friends/${userIdFromStorage}`, {
+      const response = await fetch(`${BASE_URL}/friends/${userIdFromStorage}`, {
         credentials: 'include'
       });
       const data = await response.json();

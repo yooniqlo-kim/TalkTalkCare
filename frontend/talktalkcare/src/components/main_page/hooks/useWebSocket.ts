@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Friend } from "../friends";
 
-const WS_URL = "ws://localhost:8080/talktalkcare";
+const WS_URL = import.meta.env.VITE_API_WS_URL;
 
 export const useWebSocket = (onStatusUpdate: (updatedFriend: Friend) => void) => {
   const userIdFromStorage = localStorage.getItem("userId");

@@ -46,24 +46,23 @@ const SignUp = () => {
   // 아이디 중복 확인
   const checkLoginId = async () => {
     try {
-      const [isLoginIdConfirmed, setIsLoginIdConfirmed] = useState<boolean>(false);
-      const isIdDuplicate  = await authService.checkIdDuplicate(formData.loginId);
-      console.log('아이디 중복 확인 응답:', isIdDuplicate );  // 응답 확인용
-      if (isIdDuplicate) {  // 아이디가 중복된 경우
-        setIsLoginIdDuplicate(true);
-        alert('이미 가입된 사용자입니다.');
-      } else {
-
-        setIsLoginIdConfirmed(true);
-        setIsLoginIdDuplicate(false);
-        handleNext(1); // 중복 확인 성공하면 다음 단계로 이동s
+      const isAvailable = await authService.checkIdDuplicate(formData.loginId);
+  
+      if (isAvailable) {
         alert('사용 가능한 아이디입니다.');
+        setIsLoginIdDuplicate(false);
+  
+        // ✅ 아이디 중복 확인 후 "이름 입력 단계(step 2)"로 이동
+        setStep(2);
+      } else {
+        alert('이미 가입된 사용자입니다.');
+        setIsLoginIdDuplicate(true);
       }
     } catch (error) {
-      console.error('아이디 중복 확인 오류:', error);
       alert('아이디 중복 확인에 실패했습니다.');
     }
   };
+  
 
   const requestSmsVerification = async () => {
     try {

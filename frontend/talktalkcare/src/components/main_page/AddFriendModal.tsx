@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 // import '../styles/components/AddFriendModal.css';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 interface AddFriendModalProps {
   onClose: () => void;
   onFriendAdded: () => Promise<void>;
@@ -32,7 +34,7 @@ const AddFriendModal: React.FC<AddFriendModalProps> = ({ onClose, onFriendAdded 
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('http://localhost:8080/api/friends/add', {
+      const response = await fetch(`${BASE_URL}/friends/add`, {
         method: 'POST',
         credentials: 'include',
         headers: {
