@@ -13,7 +13,7 @@ const MainPage: React.FC = () => {
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
   const wsUrl = import.meta.env.REACT_APP_WS_URL;
-  const apiUrl = import.meta.env.REACT_APP_API_URL;
+  const apiUrl = import.meta.env.REACT_API_APP__URL;
 
   useEffect(() => {
     if (!userId) {

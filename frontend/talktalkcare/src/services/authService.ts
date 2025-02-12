@@ -2,23 +2,18 @@
 import axios from 'axios';
 import { UserSignupRequest, SignupApiResponse, SmsVerificationRequest, LoginRequest } from '../types/user';
 import { AxiosResponse } from 'axios';
-
-interface ApiResponse<T = void> {
-  result: {
-    msg: string;
-  };
-  body?: T;
-}
+import { LogoutResponse } from '../types/user';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL; // 백엔드 API 기본 URL
 
 export const authService = {
   // 아이디 중복 확인 메서드 추가
-  checkIdDuplicate: async (loginId: string): Promise<boolean> => {
+  checkIdDuplicate: async (userLoginId: string): Promise<boolean> => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/users/check-id`, {
-        params: { loginId }
+      const response = await axios.get(`${BASE_URL}/users/check-id`, {
+        params: { userLoginId }
       });
+      console.log('아이디 중복 확인 응답:', response.data);
       return response.data.isDuplicate === false;
     } catch (error) {
       console.error('아이디 중복 확인 중 오류:', error);
@@ -105,13 +100,14 @@ export const authService = {
 
   login: async (loginData: LoginRequest) => {
     try {
+      // 전송하는 데이터 콘솔 로그 추가
       console.log('로그인 요청 데이터:', {
         userLoginId: loginData.userLoginId,
         password: loginData.password ? '(비밀번호 입력됨)' : '(비밀번호 없음)',
         autoLogin: loginData.autoLogin
       });
-
-      const response = await axios.post<ApiResponse<{ userId: number; username: string; s3Filename: string }>>(`${BASE_URL}/api/users/login`, {
+  
+      const response = await axios.post(`${BASE_URL}/api/users/login`, {
         userLoginId: loginData.userLoginId,
         password: loginData.password,
         autoLogin: loginData.autoLogin
@@ -120,21 +116,16 @@ export const authService = {
           'Content-Type': 'application/json'
         }
       });
-
+  
+      // 응답 데이터도 콘솔 로그 추가
       console.log('로그인 응답 데이터:', response.data);
-
-      const { result, body } = response.data;
-
-      if (result && result.msg === 'success' && body) {
-        const { userId, username } = body;
-        localStorage.setItem('userId', String(userId));
-        localStorage.setItem('username', username);
-        return response.data;
-      } else {
-        throw new Error(`Login failed: ${result?.msg || 'Unknown error'}`);
-      }
+  
+      return response.data;
     } catch (error) {
+      // 에러 발생 시 상세 정보 로깅
       console.error('로그인 실패:', error);
+      
+      // Axios 에러인 경우 추가 정보 로깅
       if (axios.isAxiosError(error)) {
         console.error('Axios 에러 상세 정보:', {
           response: error.response?.data,
@@ -146,9 +137,9 @@ export const authService = {
     }
   },
 
-  logout: async (): Promise<ApiResponse> => {
+  logout: async (): Promise<LogoutResponse> => {
     try {
-      const response: AxiosResponse<ApiResponse> = await axios.post(
+      const response: AxiosResponse<LogoutResponse> = await axios.post(
         `${BASE_URL}/api/users/logout`, 
         {}, 
         { 

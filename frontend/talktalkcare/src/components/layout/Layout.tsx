@@ -4,6 +4,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import ChatChat from './ChatChat';
 import { Link } from 'react-router-dom';
+import Footer from './Footerbar.tsx';
 
 const Layout = () => {
   const location = useLocation();
@@ -17,6 +18,7 @@ const Layout = () => {
           <ChatChat />
         </Link>
       )}
+      <Footer />
     </>
   );
 };
