@@ -62,12 +62,14 @@ const AddFriendModal: React.FC<AddFriendModalProps> = ({ onClose, onFriendAdded 
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h2>친구 추가</h2>
-          <button onClick={onClose} className="close-button">
-            <X size={24} />
+    <div className="fixed inset-0 flex items-center justify-center z-[9999]">
+     
+      <div className="bg-[#fffef8] rounded-lg shadow-xl w-96 p-6">
+        <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-bold text-center bg-[#CBE6C9] p-2 rounded-md">
+               친구 추가</h3>
+      <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+        <X size={24} />
           </button>
         </div>
 
@@ -110,9 +112,9 @@ const AddFriendModal: React.FC<AddFriendModalProps> = ({ onClose, onFriendAdded 
             <button 
               type="submit"
               disabled={isLoading}
-              className="submit-button"
+              className="px-4 py-2 text-[#214005] bg-[#F5FFEA] rounded-lg hover:bg-[#F5FFEA] disabled:bg-[#F5FFEA]"
             >
-              {isLoading ? '처리 중...' : '추가'}
+              {isLoading ? '처리중...' : '추가'}
             </button>
           </div>
         </form>

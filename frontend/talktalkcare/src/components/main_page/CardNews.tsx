@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import left_botton from '../../assets/left_botton.png';
-import right_botton from '../../assets/right_botton.png';
 
 const images = [
     { 
@@ -50,12 +48,12 @@ const CardNews: React.FC = () => {
 
   return (
     <div className="relative w-full max-w-[800px] mx-auto">
-    {/* 이미지 */}
-    <img 
-      src={images[currentIndex].image} 
-      alt={images[currentIndex].title} 
-      className="w-full h-auto object-cover"
-    />
+      {/* 이미지 */}
+      <img 
+        src={images[currentIndex].image} 
+        alt={images[currentIndex].title} 
+        className="w-full h-auto object-cover"
+      />
 
     {/* 제목 및 설명 */}
     <div className="absolute bottom-5 left-5 bg-amber-50 bg-opacity-50 p-4 rounded-lg" style={{ color: "#214005" }}>
@@ -63,22 +61,21 @@ const CardNews: React.FC = () => {
       <p className="text-sm">{images[currentIndex].description}</p>
     </div>
 
+      {/* 이전 버튼 */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 px-3 py-1 rounded-md text-4xl font-bold text-gray-700 bg-white bg-opacity-50 shadow-md transition-all duration-300 hover:bg-gray-300 hover:text-white active:bg-gray-500"
+      >
+        &#8249;
+      </button>
 
-        {/* 이전 버튼 */}
-        <button
-            onClick={prevSlide}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full hover:bg-emerald-100 active:bg-emerald-100"
-        >
-            <img src={left_botton} alt="이전" className="w-8 h-10" />
-        </button>
-
-        {/* 다음 버튼 */}
-        <button
-            onClick={nextSlide}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full hover:bg-emerald-100 active:bg-emerald-100"
-        >
-            <img src={right_botton} alt="다음" className="w-8 h-10" />
-        </button>
+      {/* 다음 버튼 */}
+      <button
+        onClick={nextSlide}
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 rounded-md text-4xl font-bold text-gray-700 bg-white bg-opacity-50 shadow-md transition-all duration-300 hover:bg-gray-300 hover:text-white active:bg-gray-500"
+      >
+        &#8250;
+      </button>
 
       {/* 인디케이터 (슬라이드 위치 표시) */}
       <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -86,8 +83,8 @@ const CardNews: React.FC = () => {
           <span
             key={index}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentIndex ? "bg-emerald-400" : "bg-emerald-100"
-            }`}
+              index === currentIndex ? "bg-gray-400" : "bg-gray-100"
+            }` }
           ></span>
         ))}
       </div>
