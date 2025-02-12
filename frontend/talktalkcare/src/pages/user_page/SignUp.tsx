@@ -45,12 +45,14 @@ const SignUp = () => {
   // 아이디 중복 확인
   const checkLoginId = async () => {
     try {
-      const response = await axios.get(`/api/users/check-id/?userLoginId=${formData.loginId}`);
-      if (response.data.result.errorCode === 1001) {
+      const isIdDuplicate  = await authService.checkIdDuplicate(formData.loginId);
+      console.log('아이디 중복 확인 응답:', isIdDuplicate );  // 응답 확인용
+      if (isIdDuplicate) {  // 아이디가 중복된 경우
         setIsLoginIdDuplicate(true);
-        alert(response.data.result.msg);  // "이미 가입된 사용자입니다." 메시지 출력
+        alert('이미 가입된 사용자입니다.');
       } else {
         setIsLoginIdDuplicate(false);
+        handleNext(1); // 중복 확인 성공하면 다음 단계로 이동s
         alert('사용 가능한 아이디입니다.');
       }
     } catch (error) {
@@ -198,13 +200,6 @@ const SignUp = () => {
                     disabled={formData.loginId.length < 6}
                   >
                     아이디 중복 확인
-                  </button>
-                  <button 
-                    onClick={() => handleNext(1)}
-                    className="next-button"
-                    disabled={formData.loginId.length < 6 || isLoginIdDuplicate}
-                  >
-                    다음
                   </button>
                 </div>
               )}

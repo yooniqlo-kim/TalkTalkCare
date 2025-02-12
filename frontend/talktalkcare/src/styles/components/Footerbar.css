@@ -3,7 +3,7 @@
     background-color: #f5ffea;
     color: #214005;
     text-align: center;
-    padding: 1rem 0;
+    padding: 10px 0; /* 패딩 값을 줄여서 푸터 높이를 낮춤 */
     font-size: 14px;
   }
   

@@ -6,11 +6,12 @@ const BASE_URL = 'http://localhost:8080/api'; // 백엔드 API 기본 URL
 
 export const authService = {
   // 아이디 중복 확인 메서드 추가
-  checkIdDuplicate: async (loginId: string): Promise<boolean> => {
+  checkIdDuplicate: async (userLoginId: string): Promise<boolean> => {
     try {
       const response = await axios.get(`${BASE_URL}/users/check-id`, {
-        params: { loginId }
+        params: { userLoginId }
       });
+      console.log('아이디 중복 확인 응답:', response.data);
       return response.data.isDuplicate === false;
     } catch (error) {
       console.error('아이디 중복 확인 중 오류:', error);
