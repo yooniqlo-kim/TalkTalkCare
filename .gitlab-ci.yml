@@ -129,8 +129,8 @@ deploy-backend:
       SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
 
       # OpenAI API 관련 설정
-      openai.api.base-url=${OPENAI_API_URL}
-      openai.api.api-key=${OPENAI_API_KEY}
+      OPENAI_API_URL=${OPENAI_API_URL}
+      OPENAI_API_KEY=${OPENAI_API_KEY}
       EOF
 
     - echo "Transferring files to EC2..."
