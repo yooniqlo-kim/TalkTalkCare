@@ -5,15 +5,15 @@ import MainMenu from '../components/main_page/MainMenu'
 import Analytics from '../components/main_page/Analytics';
 import FriendList from '../components/main_page/FriendList';
 import '../styles/components/MainPage.css';
-import CardNews from '../components/main_page/Cardnews';
+import CardNews from '../components/main_page/CardNews';
 import { authService } from '../services/authService'; // authService import
 
 const MainPage: React.FC = () => {
   const [showFriendList, setShowFriendList] = useState(false);
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
-  const wsUrl = "ws://localhost:8080/ws";
-  const apiUrl = "http://localhost:8080/api";
+  const wsUrl = import.meta.env.REACT_APP_WS_URL;
+  const apiUrl = import.meta.env.REACT_APP_API_URL;
 
   useEffect(() => {
     if (!userId) {
