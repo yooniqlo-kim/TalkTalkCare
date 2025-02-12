@@ -24,8 +24,8 @@ public class GameScoreScheduler {
         this.updateGameScoreJob = updateGameScoreJob;
     }
 
-//    @Scheduled(cron = "0 0 0 1 * ?") // 매월 1일 00:00 실행
-    @Scheduled(cron = "0 0/1 * * * ?") // 매 1분마다 실행 (테스트용)
+//    @Scheduled(cron = "0 0/1 * * * ?") // 매 1분마다 실행 (테스트용)
+    @Scheduled(cron = "0 0 0 1 * ?") // 매월 1일 00:00 실행
     public void runBatchJob() {
         try {
             JobParameters jobParameters = new JobParametersBuilder()
