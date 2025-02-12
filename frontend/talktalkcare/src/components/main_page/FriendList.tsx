@@ -99,7 +99,8 @@ const FriendList: React.FC<FriendListProps> = ({ userId, onClose }): JSX.Element
       <FriendItem key={friend.userId} friend={friend} />
     ));
   };
-  
+  const username = localStorage.getItem('username');
+  console.log(username)
   return (
     <div className="friend-list-container">
       <div className="friend-list-header">
