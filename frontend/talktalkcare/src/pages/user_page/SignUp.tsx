@@ -6,6 +6,7 @@ import { UserSignupRequest } from '../../types/user';
 import axios, { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+
 const SignUp = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
@@ -45,12 +46,15 @@ const SignUp = () => {
   // 아이디 중복 확인
   const checkLoginId = async () => {
     try {
+      const [isLoginIdConfirmed, setIsLoginIdConfirmed] = useState<boolean>(false);
       const isIdDuplicate  = await authService.checkIdDuplicate(formData.loginId);
       console.log('아이디 중복 확인 응답:', isIdDuplicate );  // 응답 확인용
       if (isIdDuplicate) {  // 아이디가 중복된 경우
         setIsLoginIdDuplicate(true);
         alert('이미 가입된 사용자입니다.');
       } else {
+
+        setIsLoginIdConfirmed(true);
         setIsLoginIdDuplicate(false);
         handleNext(1); // 중복 확인 성공하면 다음 단계로 이동s
         alert('사용 가능한 아이디입니다.');
@@ -66,7 +70,7 @@ const SignUp = () => {
       await authService.sendSmsVerification(formData.phoneNumber);
       setIsSmsVerificationSent(true);
       alert('인증번호가 전송되었습니다.');
-      setStep(3);
+      setStep(4);
     } catch (error) {
       alert('SMS 인증번호 요청에 실패했습니다.');
     }
@@ -77,7 +81,7 @@ const SignUp = () => {
       await authService.verifySmsCode(formData.phoneNumber, smsVerificationCode);
       setIsSmsVerified(true);
       alert('SMS 인증이 완료되었습니다.');
-      setStep(4);
+      setStep(5);
     } catch (error) {
       alert('SMS 인증번호가 일치하지 않습니다.');
     }
@@ -184,27 +188,28 @@ const SignUp = () => {
 
           {/* 아이디 입력 */}
           {step >= 1 && (
-            <div className="input-group">
-              <input
-                type="text"
-                name="loginId"
-                value={formData.loginId}
-                onChange={handleChange}
-                placeholder="아이디를 입력하세요 (6자 이상)"
-              />
-              {step === 1 && (
-                <div>
-                  <button 
-                    onClick={checkLoginId}
-                    className="next-button"
-                    disabled={formData.loginId.length < 6}
-                  >
-                    아이디 중복 확인
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+          <div className="input-group">
+            <input
+              type="text"
+              name="loginId"
+              value={formData.loginId}
+              onChange={handleChange}
+              placeholder="아이디를 입력하세요 (6자 이상)"
+              // disabled={isLoginIdConfirmed}
+            />
+            {step === 1 && (
+              <div>
+                <button 
+                  onClick={checkLoginId}
+                  className="next-button"
+                  disabled={formData.loginId.length < 6}
+                >
+                  아이디 중복 확인
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
           {/* 이름 입력 */}
           {step >= 2 && (
