@@ -70,7 +70,7 @@ const KeyPad: React.FC = () => {
     <div className="page-container" tabIndex={0} onKeyDown={handleKeyDown}>
       {/* 왼쪽 서비스 설명 텍스트 */}
       <div className="text-section">
-        <h1>화상 전화</h1>
+        <p className='call-title'>화상 전화</p>
         <ol>
           <li>전화하고 싶은 사람의 번호를 입력합니다.</li>
           <li>상대방이 톡톡케어 회원이어야 합니다.</li>

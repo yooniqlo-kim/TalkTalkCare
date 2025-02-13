@@ -37,7 +37,7 @@ const Router = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/result" element={<Result />} />
           <Route path="/talktalk" element={<TalkTalkChat />} />
-          <Route path="/openvidu" element={<OpenViduComponent />} />
+          <Route path="/videocall" element={<OpenViduComponent />} />
           <Route path="/talktalk" element={<Layout><ChatChat /></Layout>} />        </Route>
       </Routes>
     </BrowserRouter>
