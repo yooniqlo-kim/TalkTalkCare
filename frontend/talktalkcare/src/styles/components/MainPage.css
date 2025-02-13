@@ -19,7 +19,7 @@
 
 .menu-card {
   width: 730px;
-  height: 630px;
+  height: auto;
   justify-content: center;
   align-items: center;
   padding-top: 55px;

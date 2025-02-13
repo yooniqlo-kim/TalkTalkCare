@@ -5,6 +5,7 @@
     text-align: center;
     padding: 10px 0; /* 패딩 값을 줄여서 푸터 높이를 낮춤 */
     font-size: 14px;
+    margin-top: 20px;
   }
   
   .footer-content {

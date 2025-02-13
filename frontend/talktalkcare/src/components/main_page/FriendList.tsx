@@ -18,6 +18,8 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  
+
 
   const handleStatusUpdate = (updatedFriend: Friend) => {
     console.log('👥 친구 상태 업데이트:', updatedFriend);
@@ -113,8 +115,8 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
           <ArrowLeft size={24} />
         </button>
         <h2 className="friend-list-title">
-          친구목록 {isConnected ? '(온라인)' : '(오프라인)'}
-        </h2>
+          친구목록
+        </h2> 
         <button
           onClick={() => setShowAddModal(true)}
           className="friend-list-add-button"
@@ -135,6 +137,7 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
 
       <div className="friend-list-content">
         {renderContent()}
+        {/* {isConnected ? '(온라인)' : '(오프라인)'} */}
       </div>
 
       {showAddModal && (
