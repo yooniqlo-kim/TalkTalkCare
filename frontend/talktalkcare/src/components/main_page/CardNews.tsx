@@ -49,6 +49,7 @@ const CardNews: React.FC<{ isFriendListOpen: boolean }> = ({ isFriendListOpen })
   };
 
   return (
+<<<<<<< HEAD
     <div className={`card-news-container ${isFriendListOpen ? 'compressed' : ''}`}>
       <div className="relative w-full max-w-[800px] mx-auto">
         {/* 이미지 */}
@@ -58,6 +59,16 @@ const CardNews: React.FC<{ isFriendListOpen: boolean }> = ({ isFriendListOpen })
           className="news-image w-full h-auto object-cover"
           style={{ border: "1px solid black"}}
         />
+=======
+    <div className="relative w-full max-w-[800px] mx-auto">
+      {/* 이미지 */}
+      <img 
+        src={images[currentIndex].image} 
+        alt={images[currentIndex].title} 
+        className="w-full h-auto object-cover"
+        // style={{ border: "1px solid black"}}
+      />
+>>>>>>> 1b6f27ca628b5614d0b66942bc488fa96c4d933b
 
       {/* 제목 및 설명 */}
       <div className="news-text absolute bottom-5 left-5 bg-amber-50 bg-opacity-50 p-4 rounded-lg" style={{ color: "#214005" }}>
