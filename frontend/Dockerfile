@@ -28,7 +28,7 @@ RUN echo "VITE_API_WS_URL=$VITE_API_WS_URL" >> .env.production
 RUN echo "VITE_AWS_ACCESS_KEY_ID=$VITE_AWS_ACCESS_KEY_ID" >> .env.production
 RUN echo "VITE_AWS_SECRET_ACCESS_KEY=$VITE_AWS_SECRET_ACCESS_KEY" >> .env.production
 RUN echo "VITE_AWS_REGION=$VITE_AWS_REGION" >> .env.production
-RUN npm run build
+RUN npm run build -- --mode production
 
 # Step 2: Nginx에서 정적 파일 서빙
 FROM nginx:alpine
