@@ -1,13 +1,13 @@
 .user-info-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 3rem;
-  background-color: #F5FFEA;
+  width: 100%; 
+  padding: 1.5rem 3rem; 
+  max-width: 800px;
   min-height: 500px;
-  text-align: center; /* 전체 텍스트 가운데 정렬 */
+  margin: 0 auto;
+  margin-top: 50px;
+  background-color: #F5FFEA;
+  border-radius: 1rem;
 }
-
 .profile-header {
   display: flex;
   flex-direction: column;
@@ -111,7 +111,7 @@
 .signout-button {
   background: none;
   border: none;
-  color: #d9534f;
+  color: #dab7b6;
   font-size: inherit;
   font-family: inherit;
   font-weight: inherit;
