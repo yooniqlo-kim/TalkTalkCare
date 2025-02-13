@@ -1,5 +1,8 @@
-/* ✅ 뉴스 카드 크기 조정 */
 .card-news-container {
+    position: relative; /* 부모 컨테이너 기준으로 위치 설정 */
+    width: 100%; /* 기본 크기 설정 */
+    max-width: 900px; /* 적절한 크기로 제한 */
+    overflow: hidden; /* 컨테이너 밖으로 넘치는 요소 숨김 */
     transition: all 0.3s ease-in-out;
 }
   

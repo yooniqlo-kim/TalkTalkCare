@@ -49,7 +49,7 @@ const CardNews: React.FC<{ isFriendListOpen: boolean }> = ({ isFriendListOpen })
   };
 
   return (
-    <div className="relative w-full max-w-[800px] mx-auto">
+    <div className={`card-news-container ${isFriendListOpen ? 'compressed' : ''}`}>
       {/* 이미지 */}
       <img 
         src={images[currentIndex].image} 
