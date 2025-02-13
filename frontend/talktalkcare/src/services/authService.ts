@@ -10,7 +10,7 @@ export const authService = {
   // 아이디 중복 확인 API 호출
   checkIdDuplicate: async (userLoginId: string): Promise<boolean> => {
     try {
-      const response = await axios.get(`${BASE_URL}/users/check-id`, {
+      const response = await axios.get(`https://www.talktalkcare.com/api/users/check-id`, {
         params: { userLoginId }
       });
 
