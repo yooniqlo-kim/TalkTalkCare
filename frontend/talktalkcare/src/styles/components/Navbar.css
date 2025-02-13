@@ -1,4 +1,5 @@
 .navbar {
+  position: sticky;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -7,10 +8,12 @@
 }
 
 .navbar-left {
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.3s ease;
+  margin-left: 200px;
   width: 100%; /* 가로 크기 100%로 설정 */
   max-width: 200px; /* max-width로 최대 너비 제한 */
 }
@@ -35,7 +38,13 @@
   transition: background-color 0.3s;
 }
 
+.text-md {
+  min-width: 90px;
+}
+
 .navbar-menu {
+  position: absolute;
+  left: 900px;
   display: flex;
   justify-content: flex-end;
   align-items: center;

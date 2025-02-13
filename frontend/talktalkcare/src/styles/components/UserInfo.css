@@ -1,18 +1,23 @@
-.user-info-container {
-  width: 100%; 
-  padding: 1.5rem 3rem; 
-  max-width: 800px;
-  min-height: 500px;
-  margin: 0 auto;
-  margin-top: 50px;
-  background-color: #F5FFEA;
-  border-radius: 1rem;
+.page-container {
+ width: auto;
+ height: auto;
 }
+
+.user-info-container {
+  width: 600px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 3rem;
+  background-color: #F5FFEA;
+  height: 700px;
+  border-radius: 20px;
+  text-align: center; /* 전체 텍스트 가운데 정렬 */
+}
+
 .profile-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
 }
 
 .profile-image-container {
@@ -45,10 +50,11 @@
   display: flex;
   flex-direction: column;
   text-align: left; /* 전체 텍스트 왼쪽 정렬 */
+  height: 470px;
 }
 
 .info-rows {
-  flex: 1;
+  line-height: 18px;
 }
 
 .info-row {
@@ -81,8 +87,6 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 10px;
-  padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.3);
 }
 
