@@ -1,45 +1,67 @@
-// contexts/AuthContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
+import React from 'react';
+import { authService } from '../services/authService';
 
 interface AuthContextType {
   isLoggedIn: boolean;
   setIsLoggedIn: (isLoggedIn: boolean) => void;
+  userName: string;
+  setUserName: (userName: string) => void;
+  logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  isLoggedIn: false,
+  setIsLoggedIn: () => {},
+  userName: '',
+  setUserName: () => {},
+  logout: () => {}
+});
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // useState의 초기값을 함수로 설정
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    return Boolean(localStorage.getItem('userId'));
+    // 새로고침해도 유지되도록 localStorage 활용
+    return !!localStorage.getItem('token');
   });
 
-  // 상태 변경 감지용 useEffect
-  useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (userId && !isLoggedIn) {
-      setIsLoggedIn(true);
-    } else if (!userId && isLoggedIn) {
-      setIsLoggedIn(false);
-    }
-  }, [isLoggedIn]);
+  const [userName, setUserName] = useState<string>(() => {
+    return localStorage.getItem('name') || '';
+  });
 
-  const value = {
-    isLoggedIn,
-    setIsLoggedIn,
+  const logout = async () => {
+    try {
+      // 실제 로그아웃 API 호출
+      await authService.logout();
+
+      // 로컬 스토리지 초기화
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('name');
+      localStorage.removeItem('profile-image');
+
+      // 상태 업데이트
+      setIsLoggedIn(false);
+      setUserName('');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ 
+      isLoggedIn, 
+      setIsLoggedIn, 
+      userName, 
+      setUserName,
+      logout 
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export { AuthContext };

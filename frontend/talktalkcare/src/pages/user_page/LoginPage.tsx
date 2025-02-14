@@ -8,7 +8,7 @@ import { useAuth } from '../../contexts/AuthContext'; // 추가
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { setIsLoggedIn } = useAuth();
+  const { setIsLoggedIn, setUserName } = useAuth(); // setUserName 추가
   const [formData, setFormData] = useState({
     userLoginId: '',
     password: '',
@@ -27,17 +27,18 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       const response = await authService.login(formData);
-      console.log('전체 응답:', response);
       
       if (response.result.msg === 'success') {
-        // 먼저 localStorage 설정
+        // localStorage에 정보 저장
         localStorage.setItem('userId', response.body.userId);
         localStorage.setItem('name', response.body.username);
         localStorage.setItem('profile-image', response.body.s3Filename);
-        
+        localStorage.setItem('token', response.body.token);
+  
         // AuthContext 상태 업데이트
         setIsLoggedIn(true);
-        
+        setUserName(response.body.username);
+     
         alert('로그인 성공!');
         navigate('/', { replace: true });
       } else {

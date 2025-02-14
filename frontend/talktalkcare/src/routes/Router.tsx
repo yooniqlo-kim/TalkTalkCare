@@ -21,12 +21,12 @@ import OpenViduComponent from '../pages/call_page/openvidu.tsx';
 import ChatChat from '../components/layout/ChatChat.tsx';
 import { FriendListProvider } from '../contexts/FriendListContext.tsx'; // FriendListProvider 임포트
 import ProfileEdit from '../pages/user_page/UserUpdate.tsx';
-import { AuthProvider } from '../contexts/AuthContext'; // AuthProvider 임포트
+import { AuthProvider } from '../contexts/AuthContext';
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider> {/* AuthProvider 추가 */}
+      <AuthProvider>
         <FriendListProvider>
           <Routes>
             <Route element={<Layout />}>
@@ -52,5 +52,4 @@ function App() {
     </BrowserRouter>
   );
 }
-
 export default App;

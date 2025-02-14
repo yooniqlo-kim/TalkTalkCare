@@ -10,7 +10,6 @@ import { useAuth } from '../../contexts/AuthContext';
 const Layout = () => {
   const location = useLocation();
   const isMainPage = location.pathname === '/';
-  const { isLoggedIn } = useAuth();
   const { isFriendListOpen } = useFriendList();
 
   return (
