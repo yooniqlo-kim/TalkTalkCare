@@ -1,3 +1,4 @@
+// FriendList.tsx
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
@@ -5,6 +6,8 @@ import AddFriendModal from './AddFriendModal';
 import FriendItem from './UserListItem';
 import { Friend } from './friends';
 import '../../styles/components/FriendList.css';
+import { Link } from 'react-router-dom';
+import talktalkImage from '../../assets/talktalk.png'; // 이미지 import
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -98,8 +101,8 @@ const FriendList: React.FC<FriendListProps> = ({
           <ArrowLeft size={24} />
         </button>
         <h2 className="friend-list-title">
-          친구목록 {isConnected ? '(온라인)' : '(오프라인)'}
-        </h2>
+          친구목록
+        </h2> 
         <button
           onClick={() => setShowAddModal(true)}
           className="friend-list-add-button"
@@ -118,8 +121,28 @@ const FriendList: React.FC<FriendListProps> = ({
         />
       </div>
 
+      <Link to="/talktalk" className="friend-item profile-item">
+        <div className="profile-image-container">
+          <img 
+            src={talktalkImage} 
+            alt="톡톡이" 
+            className="profile-image"
+          />
+          {/* <div className="status-dot" /> */}
+        </div>
+        <div className="profile-info">
+          <div className="profile-name">내 친구 톡톡이</div>
+          {/* <div className="profile-status">
+            <span>온라인</span>
+            <span> · </span>
+            <span>AI 챗봇</span>
+          </div> */}
+        </div>
+      </Link>
+
       <div className="friend-list-content">
         {renderContent()}
+        {/* {isConnected ? '(온라인)' : '(오프라인)'} */}
       </div>
 
       {showAddModal && (
