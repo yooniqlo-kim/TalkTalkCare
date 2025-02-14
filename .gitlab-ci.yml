@@ -45,14 +45,7 @@ build-backend:
 build-frontend:
   stage: build
   script:
-    - cd frontend
-    - docker build \
-        --build-arg VITE_API_BASE_URL=${VITE_API_BASE_URL} \
-        --build-arg VITE_API_WS_URL=${VITE_API_WS_URL} \
-        --build-arg VITE_AWS_ACCESS_KEY_ID=${VITE_AWS_ACCESS_KEY_ID} \
-        --build-arg VITE_AWS_SECRET_ACCESS_KEY=${VITE_AWS_SECRET_ACCESS_KEY} \
-        --build-arg VITE_AWS_REGION=${VITE_AWS_REGION} \
-        -t eoslovy/talktalkcare-nginx:latest .
+    - cd frontend && docker build --build-arg VITE_API_BASE_URL=${VITE_API_BASE_URL} --build-arg VITE_API_WS_URL=${VITE_API_WS_URL} --build-arg VITE_AWS_ACCESS_KEY_ID=${VITE_AWS_ACCESS_KEY_ID} --build-arg VITE_AWS_SECRET_ACCESS_KEY=${VITE_AWS_SECRET_ACCESS_KEY} --build-arg VITE_AWS_REGION=${VITE_AWS_REGION} -t eoslovy/talktalkcare-nginx:latest .
     - docker push eoslovy/talktalkcare-nginx:latest
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
