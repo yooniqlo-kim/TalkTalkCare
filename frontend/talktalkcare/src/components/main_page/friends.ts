@@ -1,11 +1,11 @@
 export interface Friend {
   userId: number;
   name: string;
+  s3Filename: string;
   phone: string;
-  s3Filename?: string;
   status: 'ONLINE' | 'OFFLINE';
-  lastActiveTime: string;
   displayStatus: string;
+  lastActiveTime?: string;
 }
 
 export interface FriendStatusUpdate {

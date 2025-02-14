@@ -1,54 +1,63 @@
 package com.talktalkcare.domain.users.dto;
 
 import com.talktalkcare.domain.users.entity.User;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.ToString;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@ToString
 public class FriendDto {
-    private Integer userId;
-    private String name;
-    private String s3Filename;
-    private String phone;
-    private String status;  // "ONLINE" or "OFFLINE"
+    private final Integer userId;
+    private final String name;
+    private final String s3Filename;
+    private final String phone;
+    private String status;
     private LocalDateTime lastActiveTime;
     private String displayStatus;
 
-    public static FriendDto from(Integer userId, String name, String s3Filename, String phone,
-                                 boolean isOnline, LocalDateTime lastActiveTime) {
+    @Builder
+    public FriendDto(Integer userId, String name, String s3Filename, String phone, 
+                    String status, LocalDateTime lastActiveTime, String displayStatus) {
+        this.userId = userId;
+        this.name = name;
+        this.s3Filename = s3Filename;
+        this.phone = phone;
+        this.status = status;
+        this.lastActiveTime = lastActiveTime;
+        this.displayStatus = displayStatus;
+    }
+
+    public static FriendDto from(Integer userId, String name, String s3Filename, 
+                               String phone, boolean isOnline, LocalDateTime lastActiveTime) {
         String status = isOnline ? "ONLINE" : "OFFLINE";
-        String displayStatus = createDisplayStatus(lastActiveTime, isOnline);
-        return new FriendDto(
-                userId,
-                name,
-                s3Filename,
-                phone,
-                status,
-                lastActiveTime,
-                displayStatus
-        );
+        String displayStatus = isOnline ? "온라인" : "오프라인";
+        return FriendDto.builder()
+                .userId(userId)
+                .name(name)
+                .s3Filename(s3Filename)
+                .phone(phone)
+                .status(status)
+                .lastActiveTime(lastActiveTime)
+                .displayStatus(displayStatus)
+                .build();
     }
 
     public static FriendDto fromUser(User user, boolean isOnline, LocalDateTime lastActiveTime) {
         String status = isOnline ? "ONLINE" : "OFFLINE";
-        String displayStatus = createDisplayStatus(lastActiveTime, isOnline);
-        return new FriendDto(
-                user.getUserId(),
-                user.getName(),
-                user.getS3FileName(),
-                user.getPhone(),
-                status,
-                lastActiveTime,
-                displayStatus
-        );
+        String displayStatus = isOnline ? "온라인" : "오프라인";
+        return FriendDto.builder()
+                .userId(user.getUserId())
+                .name(user.getName())
+                .s3Filename(user.getS3FileName())
+                .phone(user.getPhone())
+                .status(status)
+                .lastActiveTime(lastActiveTime)
+                .displayStatus(displayStatus)
+                .build();
     }
 
     private static String createDisplayStatus(LocalDateTime lastActiveTime, boolean isOnline) {
@@ -82,15 +91,13 @@ public class FriendDto {
         return duration.toDays() + "일 전";
     }
 
-    // 상태 업데이트 메서드
     public void updateStatus(boolean isOnline, LocalDateTime lastActiveTime) {
         this.status = isOnline ? "ONLINE" : "OFFLINE";
         this.lastActiveTime = lastActiveTime;
-        this.displayStatus = createDisplayStatus(lastActiveTime, isOnline);
+        this.displayStatus = isOnline ? "온라인" : "오프라인";
     }
 
-    // 프로필 이미지 업데이트 메서드
-    public void updateProfileImage(String s3Filename) {
-        this.s3Filename = s3Filename;
-    }
+//    public void updateProfileImage(String s3Filename) {
+//        this.s3Filename = s3Filename;
+//    }
 }

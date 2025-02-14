@@ -57,6 +57,10 @@ export const useWebSocket = (
       ws.current.onmessage = (event) => {
         console.log("📨 웹소켓 메시지 수신:", event.data);
         const data = JSON.parse(event.data);
+        if (data.message && data.message.includes("화상통화")) {
+          console.log('화상통화 요청')
+        }
+
         onStatusUpdate(data);
       };
 

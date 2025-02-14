@@ -65,41 +65,42 @@ const GamePage: React.FC<GamePageProps> = ({
 
   return (
     <div className="game-page">
-      <div className="game-header">
-        <div className="header-content">
-          {/* 게임이 시작되었을 때만 시간 표시 */}
-          {gameStarted && (
-            <div className="time-display">
-              남은 시간: {currentTime}초
-            </div>
-          )}
-        </div>
-        <div className="game-controls">
-          {/* 게임이 시작되었을 때만 버튼 표시 */}
-          {gameStarted && onRestart && (
-            <button className="control-button restart" onClick={handleRestart}>
-              다시 시작
-            </button>
-          )}
-          {gameStarted && (
-            <button className="control-button exit" onClick={handleExit}>
-              나가기
-            </button>
-          )}
-        </div>
-      </div>
       {gameStarted && (
-        <div className="time-progress-container">
-          <div 
-            className="time-progress-bar"
-            style={{ width: `${timePercentage}%` }}
-          />
-        </div>
+        <>
+          <div className="game-header">
+            <div className="header-content">
+              {/* 게임이 시작되었을 때만 시간 표시 */}
+              <div className="time-display">
+                남은 시간: {currentTime}초
+              </div>
+            </div>
+            <div className="game-controls">
+              {/* 게임이 시작되었을 때만 버튼 표시 */}
+              {onRestart && (
+                <button className="control-button restart" onClick={handleRestart}>
+                  다시 시작
+                </button>
+              )}
+              <button className="control-button exit" onClick={handleExit}>
+                나가기
+              </button>
+            </div>
+          </div>
+          
+          <div className="time-progress-container">
+            <div 
+              className="time-progress-bar"
+              style={{ width: `${timePercentage}%` }}
+            />
+          </div>
+        </>
       )}
+      
       <div className="game-content">
         {children}
       </div>
     </div>
+
   );
 };
 

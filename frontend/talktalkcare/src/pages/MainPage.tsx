@@ -6,11 +6,16 @@ import FriendList from '../components/main_page/FriendList';
 import '../styles/components/MainPage.css';
 import CardNews from '../components/main_page/CardNews';
 import { authService } from '../services/authService'; // authService import
+import { useWebSocket } from '../contexts/WebSocketContext';
+import { Friend } from '../types/friend';  // 타입 임포트 추가
 import { useFriendList } from '../contexts/FriendListContext' // ✅ 추가
 import LoadingModal from '../components/LoadingModal'; // 🔥 로딩 모달 추가
 
 
 const MainPage: React.FC = () => {
+  const [showFriendList, setShowFriendList] = useState(false);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const { isConnected, onFriendStatusUpdate } = useWebSocket();
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
   const wsUrl = import.meta.env.VITE_API_WS_URL;
@@ -41,9 +46,89 @@ const MainPage: React.FC = () => {
   //     }
   //   };
 
+<<<<<<< HEAD
   //   fetchFriends();
   // }, []);
     
+=======
+  // 초기 친구 목록 로드
+  const loadFriends = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await fetch(`${apiUrl}/friends/${userId}`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.result?.msg === 'success') {
+        setFriends(data.body || []);
+      }
+    } catch (error) {
+      console.error('친구 목록 로드 실패:', error);
+    }
+  };
+
+  // 초기 로드
+  useEffect(() => {
+    loadFriends();
+  }, []);
+
+  const handleFriendUpdate = (updatedFriends: Friend[]) => {
+    console.log('상태 업데이트 시도:', updatedFriends);
+    if (Array.isArray(updatedFriends) && updatedFriends.length > 0) {
+      setFriends(prev => {
+        const updatedList = [...prev];
+        updatedFriends.forEach(updatedFriend => {
+          const index = updatedList.findIndex(f => f.userId === updatedFriend.userId);
+          if (index !== -1) {
+            // 기존 데이터 구조 유지하면서 업데이트
+            updatedList[index] = {
+              ...updatedList[index],
+              status: updatedFriend.status,
+              displayStatus: updatedFriend.displayStatus,
+              // lastActiveTime은 null로 유지
+            };
+          } else {
+            // 새로운 친구 추가 시에는 서버 형식에 맞춤
+            updatedList.push({
+              ...updatedFriend,
+              lastActiveTime: null
+            });
+          }
+        });
+        return updatedList;
+      });
+      console.log('친구 목록 업데이트 완료');
+    }
+  };
+
+  // WebSocket 업데이트 리스너 설정
+  useEffect(() => {
+    console.log('WebSocket 업데이트 리스너 설정 시작');
+    
+    if (onFriendStatusUpdate) {
+      console.log('🎯 콜백 함수 등록');
+      onFriendStatusUpdate(handleFriendUpdate);
+    }
+
+    return () => {
+      console.log('🧹 WebSocket 리스너 정리');
+      if (onFriendStatusUpdate) {
+        onFriendStatusUpdate(undefined);
+      }
+    };
+  }, [onFriendStatusUpdate]);
+
+  // friends 상태가 변경될 때마다 로그
+  useEffect(() => {
+    console.log('🔄 친구 목록 상태 실제 변경됨:', friends);
+  }, [friends]);
+
+  if (!userId) {
+    return null;
+  }
+  
+>>>>>>> 3b1ba781044583b6d24aa0071d81e02b8e0dcd3d
   const handleLogout = async () => {
     try {
       await authService.logout();
@@ -87,6 +172,9 @@ const MainPage: React.FC = () => {
           {isLoading && <LoadingModal />}
 
           <FriendList
+            friends={friends}
+            setFriends={setFriends}
+            // onClose={() => setShowFriendList(false)}
             userId={parseInt(userId)}
             onClose={() => setIsFriendListOpen(false)}
             wsUrl={wsUrl}

@@ -13,6 +13,8 @@ import com.talktalkcare.infrastructure.repository.RedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,24 +28,27 @@ public class FriendService {
     private final RedisRepository redisRepository;
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
+    private static final Logger log = LoggerFactory.getLogger(FriendService.class);
 
     private static final String USER_STATUS_PREFIX = "user:status:";
     private static final String USER_LAST_ACTIVE_PREFIX = "user:lastActive:";
 
     public void setUserOnline(Integer userId) {
+        log.info("사용자 {} 온라인 상태로 설정", userId);
         redisRepository.save(USER_STATUS_PREFIX + userId, "ONLINE");
         updateLastActiveTime(userId);
     }
 
     public void setUserOffline(Integer userId) {
+        log.info("사용자 {} 오프라인 상태로 설정", userId);
         redisRepository.save(USER_STATUS_PREFIX + userId, "OFFLINE");
         updateLastActiveTime(userId);
     }
 
     @Transactional(readOnly = true)
     public boolean isUserOnline(Integer userId) {
-        Object status = redisRepository.find(USER_STATUS_PREFIX + userId);
-        return "ONLINE".equals(status);
+        // Map에서 세션 존재 여부로 온라인 상태 확인
+        return UserStatusWebSocketHandler.isUserConnected(userId);
     }
 
     public void updateLastActiveTime(Integer userId) {
@@ -62,27 +67,33 @@ public class FriendService {
 
     @Transactional(readOnly = true)
     public List<FriendDto> getFriendsStatus(Integer userId) {
+        log.info("getFriendsStatus 호출 - userId: {}", userId);
+        
         List<FriendDto> friendsStatus = new ArrayList<>();
-        List<Integer> friendIds = friendRepository.findFriendIdsByUserId(userId);
+        List<Friend> friends = friendRepository.findAllByUserId(userId);
+        
+        log.info("조회된 친구 목록: {}", friends);
 
-        for (Integer friendId : friendIds) {
-            userRepository.findById(friendId).ifPresent(friend -> {
-                boolean isOnline = isUserOnline(friendId);
-                LocalDateTime lastActiveTime = getLastActiveTime(friendId);
+        for (Friend friend : friends) {
+            userRepository.findById(friend.getFriendId()).ifPresent(friendUser -> {
+                boolean isOnline = isUserOnline(friend.getFriendId());
+                LocalDateTime lastActiveTime = getLastActiveTime(friend.getFriendId());
 
                 FriendDto friendDto = FriendDto.from(
-                        friendId,
-                        friend.getName(),
-                        friend.getS3FileName(),
-                        friend.getPhone(),
+                        friend.getFriendId(),
+                        friend.getFriendName(),
+                        friendUser.getS3FileName(),
+                        friendUser.getPhone(),
                         isOnline,
                         lastActiveTime
                 );
 
                 friendsStatus.add(friendDto);
+                log.info("친구 정보 추가: {}", friendDto);
             });
         }
 
+        log.info("최종 반환되는 친구 목록: {}", friendsStatus);
         return friendsStatus;
     }
 
