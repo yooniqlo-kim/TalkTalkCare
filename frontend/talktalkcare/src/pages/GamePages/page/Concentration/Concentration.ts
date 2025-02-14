@@ -1,7 +1,7 @@
 import ConcentrationGame1 from './ColorWordGame';
 
 export default [
-  { id: '1',
+  { id: 'concentration-1',
     name: '색깔 단어 읽기',
      description: '색깔 단어의 의미나 보이는 색상을 맞추세요!',
     icon: '🎨',
