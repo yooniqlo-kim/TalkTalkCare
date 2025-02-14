@@ -41,7 +41,7 @@ const RobotImage: React.FC<RobotImageProps> = ({ isListening, isWaiting }) => {
       <img
         src={talktalk}
         alt="AI 로봇"
-        className={`robot-image ${isListening ? 'listening' : ''}`}
+        className={`robot-image ${isListening ? '' : 'listening'}`}
       />
     </div>
   );

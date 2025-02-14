@@ -20,6 +20,8 @@ import OpenViduComponent from '../pages/call_page/openvidu.tsx';
 // import Login from '../pages/user_page/LoginPage.tsx';
 import ChatChat from '../components/layout/ChatChat.tsx';
 import { FriendListProvider } from '../contexts/FriendListContext.tsx'; // FriendListProvider 임포트
+import ProfileEdit from '../pages/user_page/UserUpdate.tsx';
+
 function App() {
   return (
     <BrowserRouter>
@@ -40,6 +42,7 @@ function App() {
             <Route path="/talktalk" element={<TalkTalkChat />} />
             <Route path="/openvidu" element={<OpenViduComponent />} />
             <Route path="/chat" element={<ChatChat />} />
+            <Route path="/update" element={<ProfileEdit />} />
           </Route>
         </Routes>
       </FriendListProvider>

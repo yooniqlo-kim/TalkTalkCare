@@ -1,3 +1,4 @@
+// FriendList.tsx
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { useWebSocket } from './hooks/useWebSocket';
@@ -6,13 +7,9 @@ import FriendItem from './UserListItem';
 import { Friend } from './friends';
 import '../../styles/components/FriendList.css';
 import { Link } from 'react-router-dom';
+import talktalkImage from '../../assets/talktalk.png'; // 이미지 import
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-const chatbotInfo = {
-  id: 'chatbot',
-  name: '톡톡이이',
-};
 
 interface FriendListProps {
   onClose: () => void;
@@ -109,10 +106,6 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
 
     return (
       <>
-        {/* 챗봇 항목 추가 */}
-        <button key="chatbot" className="friend-item" onClick={() => window.location.href = '/talktalk'}>
-          <span>{chatbotInfo.name}</span>
-        </button>
         {filteredFriends.map(friend => (
           <FriendItem key={friend.userId} friend={friend} />
         ))}
@@ -121,7 +114,6 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
   };
 
   return (
-    
     <div className="friend-list-container">
       <div className="friend-list-header">
         <button onClick={onClose} className="friend-list-back-button">
@@ -147,22 +139,23 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
           className="friend-list-search-input"
         />
       </div>
-      <Link to="/talktalk" className="profile-item">
+
+      <Link to="/talktalk" className="friend-item profile-item">
         <div className="profile-image-container">
           <img 
-            src="/path-to-talktalk-image.png" 
+            src={talktalkImage} 
             alt="톡톡이" 
-            className="profile-image" 
+            className="profile-image"
           />
-          <div className="status-dot" />
+          {/* <div className="status-dot" /> */}
         </div>
         <div className="profile-info">
-          <div className="profile-name">톡톡이</div>
-          <div className="profile-status">
+          <div className="profile-name">내 친구 톡톡이</div>
+          {/* <div className="profile-status">
             <span>온라인</span>
             <span> · </span>
             <span>AI 챗봇</span>
-          </div>
+          </div> */}
         </div>
       </Link>
 
