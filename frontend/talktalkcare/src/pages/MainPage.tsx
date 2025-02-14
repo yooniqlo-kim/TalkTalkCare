@@ -46,11 +46,6 @@ const MainPage: React.FC = () => {
   //     }
   //   };
 
-<<<<<<< HEAD
-  //   fetchFriends();
-  // }, []);
-    
-=======
   // 초기 친구 목록 로드
   const loadFriends = async () => {
     if (!userId) return;
@@ -128,7 +123,6 @@ const MainPage: React.FC = () => {
     return null;
   }
   
->>>>>>> 3b1ba781044583b6d24aa0071d81e02b8e0dcd3d
   const handleLogout = async () => {
     try {
       await authService.logout();
