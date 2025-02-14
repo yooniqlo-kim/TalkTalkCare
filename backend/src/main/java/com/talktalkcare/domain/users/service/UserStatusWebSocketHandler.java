@@ -1,7 +1,15 @@
 package com.talktalkcare.domain.users.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.talktalkcare.domain.call.dto.CallInvitationDto;
 import com.talktalkcare.domain.users.dto.FriendDto;
+import com.talktalkcare.domain.users.entity.Friend;
+import com.talktalkcare.domain.users.entity.User;
+import com.talktalkcare.domain.users.repository.FriendRepository;
+import com.talktalkcare.domain.users.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -101,23 +109,23 @@ public class UserStatusWebSocketHandler extends TextWebSocketHandler {
                     if (friendSession != null && friendSession.isOpen()) {
                         // 각 사용자별로 저장된 친구 이름으로 상태 업데이트
                         Friend friendRelation = friendRepository.findAllByUserId(friendId)
-                            .stream()
-                            .filter(f -> f.getFriendId().equals(userId))
-                            .findFirst()
-                            .orElse(null);
+                                .stream()
+                                .filter(f -> f.getFriendId().equals(userId))
+                                .findFirst()
+                                .orElse(null);
 
                         if (friendRelation != null) {
                             FriendDto updatedStatus = FriendDto.from(
-                                userId,
-                                friendRelation.getFriendName(),  // 저장된 친구 이름 사용
-                                userRepository.findById(userId).map(User::getS3FileName).orElse(null),
-                                userRepository.findById(userId).map(User::getPhone).orElse(null),
-                                isOnline,
-                                LocalDateTime.now()
+                                    userId,
+                                    friendRelation.getFriendName(),  // 저장된 친구 이름 사용
+                                    userRepository.findById(userId).map(User::getS3FileName).orElse(null),
+                                    userRepository.findById(userId).map(User::getPhone).orElse(null),
+                                    isOnline,
+                                    LocalDateTime.now()
                             );
 
                             friendSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(
-                                Collections.singletonList(updatedStatus)
+                                    Collections.singletonList(updatedStatus)
                             )));
                         }
                     }
@@ -133,15 +141,15 @@ public class UserStatusWebSocketHandler extends TextWebSocketHandler {
         if (friendsStatus != null) {
             // 각 친구의 실제 현재 상태 확인
             friendsStatus = friendsStatus.stream()
-                .filter(friend -> friend != null)
-                .map(friend -> {
-                    boolean isOnline = friendService.isUserOnline(friend.getUserId());  // sessions.containsKey 대신 Redis 상태 확인
-                    if (isOnline) {
-                        friend.updateStatus(true, LocalDateTime.now());
-                    }
-                    return friend;
-                })
-                .collect(Collectors.toList());
+                    .filter(friend -> friend != null)
+                    .map(friend -> {
+                        boolean isOnline = friendService.isUserOnline(friend.getUserId());  // sessions.containsKey 대신 Redis 상태 확인
+                        if (isOnline) {
+                            friend.updateStatus(true, LocalDateTime.now());
+                        }
+                        return friend;
+                    })
+                    .collect(Collectors.toList());
 
             if (session.isOpen()) {
                 session.sendMessage(new TextMessage(objectMapper.writeValueAsString(friendsStatus)));
