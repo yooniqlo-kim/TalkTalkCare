@@ -66,3 +66,11 @@
   flex-direction: column;
   min-height: 100vh;
 }
+
+.friend-list-container.hidden {
+  display: none;
+}
+
+.friend-list-container.visible {
+  display: block;
+}
