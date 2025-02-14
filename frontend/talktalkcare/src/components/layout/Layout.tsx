@@ -15,7 +15,7 @@ const Layout = () => {
 
   return (
     <>
-      <Navbar isLoggedIn={isLoggedIn} />
+      <Navbar /> {/* isLoggedIn props 제거 */}
       <Outlet />
       {isMainPage && !isFriendListOpen && !isLoggedIn && ( 
         <Link to="/talktalk">

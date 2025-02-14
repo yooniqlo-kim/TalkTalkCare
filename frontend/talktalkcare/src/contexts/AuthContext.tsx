@@ -9,22 +9,28 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    // localStorage에서 로그인 상태 확인
-    return !!localStorage.getItem('userId');
+  // useState의 초기값을 함수로 설정
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return Boolean(localStorage.getItem('userId'));
   });
 
+  // 상태 변경 감지용 useEffect
   useEffect(() => {
-    // 로그인 상태가 변경될 때마다 localStorage 업데이트
-    if (isLoggedIn) {
-      localStorage.setItem('isLoggedIn', 'true');
-    } else {
-      localStorage.removeItem('isLoggedIn');
+    const userId = localStorage.getItem('userId');
+    if (userId && !isLoggedIn) {
+      setIsLoggedIn(true);
+    } else if (!userId && isLoggedIn) {
+      setIsLoggedIn(false);
     }
   }, [isLoggedIn]);
 
+  const value = {
+    isLoggedIn,
+    setIsLoggedIn,
+  };
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

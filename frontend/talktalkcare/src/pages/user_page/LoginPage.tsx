@@ -6,16 +6,14 @@ import axios, { AxiosError } from 'axios';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { useAuth } from '../../contexts/AuthContext'; // 추가
 
-const Login = () => {
-  // const { setIsLoggedIn } = useAuth(); // 추가
+const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { isConnected, setIsLoggedIn } = useWebSocketContext();
+  const { setIsLoggedIn } = useAuth();
   const [formData, setFormData] = useState({
     userLoginId: '',
     password: '',
     autoLogin: false
   });
-  const [autoLogin, setAutoLogin] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -32,24 +30,20 @@ const Login = () => {
       console.log('전체 응답:', response);
       
       if (response.result.msg === 'success') {
-        // 로컬 스토리지에 사용자 정보 저장
+        // 먼저 localStorage 설정
         localStorage.setItem('userId', response.body.userId);
-        localStorage.setItem('token', response.body.userId);
         localStorage.setItem('name', response.body.username);
         localStorage.setItem('profile-image', response.body.s3Filename);
         
-        // 로그인 상태 업데이트하여 웹소켓 연결 트리거
+        // AuthContext 상태 업데이트
         setIsLoggedIn(true);
         
-        // 로그인 성공 메시지
         alert('로그인 성공!');
-        
-        // 메인 페이지로 이동
-        navigate('/');
+        navigate('/', { replace: true });
       } else {
         alert(response.result.msg || '로그인에 실패했습니다.');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('로그인 실패:', error);
       alert('로그인 중 오류가 발생했습니다.');
     }
@@ -58,9 +52,7 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-form">
-        {/* 로그인 입력 폼 */}
         <form onSubmit={handleLogin}>
-          {/* 아이디 입력 */}
           <div className="input-group">
             <input
               type="text"
@@ -71,7 +63,6 @@ const Login = () => {
             />
           </div>
 
-          {/* 비밀번호 입력 */}
           <div className="input-group">
             <input
               type="password"
@@ -82,30 +73,27 @@ const Login = () => {
             />
           </div>
 
-          {/* 자동 로그인 체크박스 */}
           <div className="auto-login">
             <label>
-            <input
-              type="checkbox"
-              name="autoLogin"
-              checked={formData.autoLogin}
-              onChange={handleChange}
-            />             
+              <input
+                type="checkbox"
+                name="autoLogin"
+                checked={formData.autoLogin}
+                onChange={handleChange}
+              />
               <span>자동 로그인</span>
             </label>
           </div>
 
-          {/* 로그인 버튼 */}
           <button 
             type="submit" 
             className="login-button"
             disabled={!formData.userLoginId || !formData.password}
           >
             로그인
-          </button> 
+          </button>
         </form>
 
-        {/* 하단 링크들 */}
         <div className="bottom-links">
           <span onClick={() => navigate('/find-id')}>아이디 찾기</span>
           <span className="divider">|</span>

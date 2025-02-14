@@ -11,14 +11,20 @@ interface NavbarProps {
   isLoggedIn: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ isLoggedIn }) => {
+const Navbar: React.FC = () => {  // NavbarProps 제거
   const navigate = useNavigate();
-  const { setIsLoggedIn } = useAuth(); // isLoggedIn은 props로 받으므로 제거
+  const { isLoggedIn, setIsLoggedIn } = useAuth();  // isLoggedIn을 props 대신 context에서 직접 가져오기
 
-  const handleLogout = () => {
-    localStorage.removeItem('userId');
-    setIsLoggedIn(false);
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem('userId');
+      localStorage.removeItem('name');
+      localStorage.removeItem('profile-image');
+      setIsLoggedIn(false);
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
   };
 
   return (
