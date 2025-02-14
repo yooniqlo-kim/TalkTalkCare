@@ -145,9 +145,9 @@
   transition: background-color 0.3s;
 } */
 
-button:hover {
+/* button:hover {
   background-color: #6a1b9a;
-}
+} */
 
 .instructions {
   width: 100%;
@@ -169,14 +169,8 @@ button:hover {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.instructions button:hover {
-  background-color: #6a1b9a;
-  transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
-
 .rewards {
   display: flex;
   justify-content: center;
@@ -275,9 +269,6 @@ button:hover {
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s;
-}
-.completion-buttons button:hover {
-  background-color: #6a1b9a;
 }
 
 @keyframes popIn {
