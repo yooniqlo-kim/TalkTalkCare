@@ -6,21 +6,27 @@ import signup_icon from '../../assets/Signup.png';
 import login_icon from '../../assets/login.png';
 import mypage_icon from '../../assets/mypage.png';
 import logout_icon from '../../assets/logout.png';
+import { authService } from '../../services/authService'; // 이렇게 수정
 
-interface NavbarProps {
-  isLoggedIn: boolean;
-}
-
-const Navbar: React.FC = () => {  // NavbarProps 제거
+const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, setIsLoggedIn } = useAuth();  // isLoggedIn을 props 대신 context에서 직접 가져오기
+  const { isLoggedIn, setIsLoggedIn, userName } = useAuth();
 
   const handleLogout = async () => {
     try {
+      // authService의 logout 메서드 호출
+      await authService.logout();
+
+      // localStorage 초기화
       localStorage.removeItem('userId');
       localStorage.removeItem('name');
       localStorage.removeItem('profile-image');
+      localStorage.removeItem('token');
+
+      // AuthContext 상태 업데이트
       setIsLoggedIn(false);
+
+      // 메인 페이지로 이동
       navigate('/', { replace: true });
     } catch (error) {
       console.error('로그아웃 실패:', error);
@@ -38,10 +44,15 @@ const Navbar: React.FC = () => {  // NavbarProps 제거
         <div className="navbar-menu">
           {isLoggedIn ? (
             <>
-              <Link to="/mypage" className="navbar-link">
-                <img src={mypage_icon} alt="내 정보" className="menu-icon" />
-                <p className='text-md'>내 정보</p>
-              </Link>
+              <p className="text-md mr-2">
+                <p style={{color:'green'}}>{userName} <span style={{color:'black'}}>님</span><br /> <span style={{color:'black'}}>반갑습니다!</span></p>
+              </p>
+              <div className="navbar-link" style={{ display: 'flex', alignItems: 'center' }}>
+                <Link to="/mypage" className="navbar-link">
+                  <img src={mypage_icon} alt="내 정보" className="menu-icon" />
+                  <p className='text-md'>내 정보</p>
+                </Link>
+              </div>
               <button onClick={handleLogout} className="navbar-link">
                 <img src={logout_icon} alt="로그아웃" className="menu-icon" />
                 <p className='text-md'>로그아웃</p>
