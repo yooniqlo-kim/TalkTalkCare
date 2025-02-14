@@ -82,15 +82,10 @@
   justify-content: center;
 }
 
-.game-info h3 {
+.game-info {
   margin: 0 0 0.5rem 0;
   font-size: 1.2rem;
-}
-
-.game-info p {
-  margin: 0;
   color: #666;
-  font-size: 0.9rem;
 }
 
 .game-content-wrapper {
