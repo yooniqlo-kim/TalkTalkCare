@@ -5,6 +5,7 @@ import concentrationGames from './page/Concentration/Concentration.ts';
 import thinkingGames from './page/Thinking/Thinking.ts';
 import quicknessGames from './page/Quickness/Quickness.ts';
 import memoryGames from './page/Memory/Memory.ts';
+import GamePage from './GamePage';
 
 interface Game {
   id: string;
@@ -16,7 +17,7 @@ interface Game {
 
 const GameListPage = () => {
   const [selectedSkill, setSelectedSkill] = useState<string>('all');
-  const [activeGame, setActiveGame] = useState<Game | null>(null); // 선택된 게임 객체 저장
+  const [activeGame, setActiveGame] = useState<Game | null>(null);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
 
   // 모든 게임 리스트
@@ -30,6 +31,7 @@ const GameListPage = () => {
 
   const skills = ['사고력', '집중력', '기억력', '순발력', '논리력'];
 
+  // 선택된 skill에 맞는 게임만 필터링
   useEffect(() => {
     const filtered = selectedSkill === 'all'
       ? games
@@ -96,9 +98,14 @@ const GameListPage = () => {
                   className="game-card"
                   onClick={() => handleGameClick(game)}
                 >
-                  <div className="game-icon">{game.icon}</div>
+                  {/* 아이콘 + 게임 이름 */}
+                  <div className="game-icon-container">
+                    <div className="game-icon">{game.icon}</div>
+                    <div className="game-name">{game.name}</div>
+                  </div>
+
+                  {/* 게임 설명 */}
                   <div className="game-info">
-                    <h3>{game.name}</h3>
                     <p>{game.description}</p>
                   </div>
                 </div>
