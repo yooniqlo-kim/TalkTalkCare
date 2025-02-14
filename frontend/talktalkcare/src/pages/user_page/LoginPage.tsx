@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import '../../styles/components/Login.css';
 import axios, { AxiosError } from 'axios';
-import { useWebSocketContext } from '../../contexts/WebSocketContext';
+import { useWebSocket } from '../../contexts/WebSocketContext';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { isConnected, setIsLoggedIn } = useWebSocketContext();
+  const { isConnected, setIsLoggedIn } = useWebSocket();
   const [formData, setFormData] = useState({
     userLoginId: '',
     password: '',
