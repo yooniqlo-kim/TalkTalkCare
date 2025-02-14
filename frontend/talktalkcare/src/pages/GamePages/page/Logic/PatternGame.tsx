@@ -154,7 +154,7 @@ const PatternGame: React.FC = () => {
   return (
     <GamePage 
       title="숫자 패턴 찾기"
-      timeLimit={timeLeft ?? undefined}
+      // timeLimit={timeLeft ?? undefined}
       onRestart={() => {
         setGameStarted(false);
         setScore(0);

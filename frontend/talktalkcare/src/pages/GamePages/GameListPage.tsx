@@ -5,7 +5,7 @@ import concentrationGames from './page/Concentration/Concentration.ts';
 import thinkingGames from './page/Thinking/Thinking.ts';
 import quicknessGames from './page/Quickness/Quickness.ts';
 import memoryGames from './page/Memory/Memory.ts';
-import GamePage from './GamePage';
+import GamePage from './page/GamePage.tsx';
 
 interface Game {
   id: string;
