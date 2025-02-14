@@ -16,18 +16,18 @@ const MainPage: React.FC = () => {
   const { isFriendListOpen, setIsFriendListOpen } = useFriendList(); // ✅ context 사용
 
 
-  useEffect(() => {
-    if (!userId) {
-      console.log('userId is not available.');
-      navigate('/login');
-    } else {
-      console.log('userId:', userId);
-    }
-  }, [userId, navigate]);
+  // useEffect(() => {
+    // if (!userId) {
+    //   console.log('userId is not available.');
+    //   navigate('/login');
+    // } else {
+  //     console.log('userId:', userId);
+  //   }
+  // }, [userId, navigate]);
 
-  if (!userId) {
-    return null;
-  }
+  // if (!userId) {
+  //   return null;
+  // }
   
   const handleLogout = async () => {
     try {
