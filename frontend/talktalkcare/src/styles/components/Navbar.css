@@ -45,7 +45,7 @@
 
 .navbar-menu {
   position: absolute;
-  left: 900px;
+  left:900px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
