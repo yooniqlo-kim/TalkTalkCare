@@ -26,27 +26,29 @@ import { AuthProvider } from '../contexts/AuthContext'; // AuthProvider 임포�
 function App() {
   return (
     <BrowserRouter>
-      <FriendListProvider> {/* ✅ FriendListProvider로 감싸기 */}
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<MainPage />} />
-            <Route path="/call" element={<KeyPad />} />
-            <Route path="/game" element={<GameListPage />} />
-            <Route path="/test" element={<Test />} />
-            <Route path="/mypage" element={<MyPage />} />
-            <Route path="/userinfopage" element={<UserInfoPage />} />
-            <Route path="/sdq" element={<SDQ />} />
-            <Route path="/smcq" element={<SMCQ />} />
-            <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/result" element={<Result />} />
-            <Route path="/talktalk" element={<TalkTalkChat />} />
-            <Route path="/videocall" element={<OpenViduComponent />} />
-            <Route path="/chat" element={<ChatChat />} />
-            <Route path="/update" element={<ProfileEdit />} />
-          </Route>
-        </Routes>
-      </FriendListProvider>
+      <AuthProvider> {/* AuthProvider 추가 */}
+        <FriendListProvider>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/call" element={<KeyPad />} />
+              <Route path="/game" element={<GameListPage />} />
+              <Route path="/test" element={<Test />} />
+              <Route path="/mypage" element={<MyPage />} />
+              <Route path="/userinfopage" element={<UserInfoPage />} />
+              <Route path="/sdq" element={<SDQ />} />
+              <Route path="/smcq" element={<SMCQ />} />
+              <Route path="/sign-up" element={<SignUp />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/result" element={<Result />} />
+              <Route path="/talktalk" element={<TalkTalkChat />} />
+              <Route path="/videocall" element={<OpenViduComponent />} />
+              <Route path="/chat" element={<ChatChat />} />
+              <Route path="/update" element={<ProfileEdit />} />
+            </Route>
+          </Routes>
+        </FriendListProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
