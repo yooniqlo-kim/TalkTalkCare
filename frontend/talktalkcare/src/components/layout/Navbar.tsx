@@ -38,7 +38,7 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn }) => {
               </Link>
               <button onClick={handleLogout} className="navbar-link">
                 <img src={logout_icon} alt="로그아웃" className="menu-icon" />
-                <p className='text-md' style={{ marginLeft: '4px' }}>로그아웃</p>
+                <p className='text-md'>로그아웃</p>
               </button>
             </>
           ) : (

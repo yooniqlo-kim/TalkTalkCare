@@ -3,6 +3,7 @@ package com.talktalkcare.domain.users.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talktalkcare.domain.users.dto.FriendDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UserStatusWebSocketHandler extends TextWebSocketHandler {
 
     private final FriendService friendService;
@@ -22,45 +24,44 @@ public class UserStatusWebSocketHandler extends TextWebSocketHandler {
     private final Map<Integer, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Integer userId = extractUserId(session);
-        sessions.put(userId, session);
-        friendService.setUserOnline(userId);
-        broadcastStatusChange(userId, true);
-    }
-
-    @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        Integer userId = extractUserId(session);
-        List<FriendDto> friendsStatus = friendService.getFriendsStatus(userId);
-        session.sendMessage(new TextMessage(objectMapper.writeValueAsString(friendsStatus)));
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        Integer userId = extractUserId(session);
-        sessions.remove(userId);
-        friendService.setUserOffline(userId);
-        broadcastStatusChange(userId, false);
-    }
-
-    private void broadcastStatusChange(Integer userId, boolean isOnline) {
-        List<Integer> friendIds = friendService.getFriendIds(userId);
-        for (Integer friendId : friendIds) {
-            WebSocketSession friendSession = sessions.get(friendId);
-            if (friendSession != null && friendSession.isOpen()) {
-                try {
-                    FriendDto statusUpdate = friendService.getFriendStatus(userId);
-                    friendSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(statusUpdate)));
-                } catch (Exception e) {
-                    // 로그 처리
-                }
+        if (userId != null) {
+            if (!sessions.containsKey(userId)) {
+                sessions.put(userId, session);
+                log.info("WebSocket 연결 성공 - userId: {}", userId);
             }
         }
     }
 
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        try {
+            Integer userId = extractUserId(session);
+            List<FriendDto> friendsStatus = friendService.getFriendsStatus(userId);
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(friendsStatus)));
+            log.info("메시지 처리 성공 - userId: {}", userId);
+        } catch (Exception e) {
+            log.error("메시지 처리 중 에러 발생", e);
+        }
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        Integer userId = extractUserId(session);
+        if (userId != null) {
+            sessions.remove(userId);
+            log.info("WebSocket 연결 종료 - userId: {}", userId);
+        }
+    }
+
     private Integer extractUserId(WebSocketSession session) {
-        String query = session.getUri().getQuery();
-        return Integer.parseInt(query.split("=")[1]);
+        try {
+            String query = session.getUri().getQuery();
+            return Integer.valueOf(query.split("=")[1]);
+        } catch (Exception e) {
+            log.error("userId 추출 중 에러 발생", e);
+            return null;
+        }
     }
 }

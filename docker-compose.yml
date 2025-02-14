@@ -145,6 +145,11 @@ services:
       - AWS_SECRET_KEY=${AWS_SECRET_KEY}
       - AWS_REGION=${AWS_REGION}
       - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      - VITE_API_WS_URL=${VITE_API_WS_URL}
+      - VITE_AWS_ACCESS_KEY_ID=${VITE_AWS_ACCESS_KEY_ID}
+      - VITE_AWS_SECRET_ACCESS_KEY=${VITE_AWS_SECRET_ACCESS_KEY}
+      - VITE_AWS_REGION=${VITE_AWS_REGION}
     depends_on:
       mysql:
         condition: service_healthy
@@ -160,6 +165,20 @@ services:
   nginx:
     image: eoslovy/talktalkcare-nginx:latest
     container_name: nginx
+    build:
+      context: .
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+        - VITE_API_WS_URL=${VITE_API_WS_URL}
+        - VITE_AWS_ACCESS_KEY_ID=${VITE_AWS_ACCESS_KEY_ID}
+        - VITE_AWS_SECRET_ACCESS_KEY=${VITE_AWS_SECRET_ACCESS_KEY}
+        - VITE_AWS_REGION=${VITE_AWS_REGION}
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      - VITE_API_WS_URL=${VITE_API_WS_URL}
+      - VITE_AWS_ACCESS_KEY_ID=${VITE_AWS_ACCESS_KEY_ID}
+      - VITE_AWS_SECRET_ACCESS_KEY=${VITE_AWS_SECRET_ACCESS_KEY}
+      - VITE_AWS_REGION=${VITE_AWS_REGION}
     ports:
       - "80:80"
       - "443:443"

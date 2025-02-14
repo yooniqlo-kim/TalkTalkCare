@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import '../../styles/components/Login.css';
 import axios, { AxiosError } from 'axios';
+import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { useAuth } from '../../contexts/AuthContext'; // 추가
 
 const Login = () => {
-  const { setIsLoggedIn } = useAuth(); // 추가
+  // const { setIsLoggedIn } = useAuth(); // 추가
   const navigate = useNavigate();
+  const { isConnected, setIsLoggedIn } = useWebSocketContext();
   const [formData, setFormData] = useState({
     userLoginId: '',
     password: '',
@@ -27,17 +29,22 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await authService.login(formData);
-      console.log('전체 응답:', response); // 추가 로깅
+      console.log('전체 응답:', response);
       
       if (response.result.msg === 'success') {
-        // 토큰 저장 등의 추가 로직 필요
-
-        
+        // 로컬 스토리지에 사용자 정보 저장
         localStorage.setItem('userId', response.body.userId);
+        localStorage.setItem('token', response.body.userId);
         localStorage.setItem('name', response.body.username);
         localStorage.setItem('profile-image', response.body.s3Filename);
-        setIsLoggedIn(true); // 추가: 전역 로그인 상태 업데이트
+        
+        // 로그인 상태 업데이트하여 웹소켓 연결 트리거
+        setIsLoggedIn(true);
+        
+        // 로그인 성공 메시지
         alert('로그인 성공!');
+        
+        // 메인 페이지로 이동
         navigate('/');
       } else {
         alert(response.result.msg || '로그인에 실패했습니다.');
