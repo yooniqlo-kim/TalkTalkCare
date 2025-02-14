@@ -1,3 +1,4 @@
+// FriendList.tsx
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { useWebSocket } from './hooks/useWebSocket';
@@ -5,6 +6,8 @@ import AddFriendModal from './AddFriendModal';
 import FriendItem from './UserListItem';
 import { Friend } from './friends';
 import '../../styles/components/FriendList.css';
+import { Link } from 'react-router-dom';
+import talktalkImage from '../../assets/talktalk.png'; // 이미지 import
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -18,8 +21,6 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  
-
 
   const handleStatusUpdate = (updatedFriend: Friend) => {
     console.log('👥 친구 상태 업데이트:', updatedFriend);
@@ -103,9 +104,13 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
       return <div className="empty-message">검색 결과가 없습니다</div>;
     }
 
-    return filteredFriends.map(friend => (
-      <FriendItem key={friend.userId} friend={friend} />
-    ));
+    return (
+      <>
+        {filteredFriends.map(friend => (
+          <FriendItem key={friend.userId} friend={friend} />
+        ))}
+      </>
+    );
   };
 
   return (
@@ -134,6 +139,25 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
           className="friend-list-search-input"
         />
       </div>
+
+      <Link to="/talktalk" className="friend-item profile-item">
+        <div className="profile-image-container">
+          <img 
+            src={talktalkImage} 
+            alt="톡톡이" 
+            className="profile-image"
+          />
+          {/* <div className="status-dot" /> */}
+        </div>
+        <div className="profile-info">
+          <div className="profile-name">내 친구 톡톡이</div>
+          {/* <div className="profile-status">
+            <span>온라인</span>
+            <span> · </span>
+            <span>AI 챗봇</span>
+          </div> */}
+        </div>
+      </Link>
 
       <div className="friend-list-content">
         {renderContent()}
