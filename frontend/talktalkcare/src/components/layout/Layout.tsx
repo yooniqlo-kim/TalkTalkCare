@@ -17,7 +17,7 @@ const Layout = () => {
     <>
       <Navbar /> {/* isLoggedIn props 제거 */}
       <Outlet />
-      {isMainPage && !isFriendListOpen && !isLoggedIn && ( 
+      {isMainPage && !isFriendListOpen && ( 
         <Link to="/talktalk">
           <ChatChat />
         </Link>

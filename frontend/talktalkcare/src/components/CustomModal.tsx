@@ -48,8 +48,8 @@ const styles = {
   closeButton: {
     marginTop: "20px",
     padding: "10px 20px",
-    backgroundColor: "#007BFF",
-    color: "#fff",
+    backgroundColor: "#c8e6c9",
+    color: "#214005",
     border: "none",
     borderRadius: "4px",
     cursor: "pointer",
