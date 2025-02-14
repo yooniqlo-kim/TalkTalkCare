@@ -56,3 +56,11 @@
 .friend-list-container {
   margin-right: 200px;
 }
+
+.friend-list-container.hidden {
+  display: none;
+}
+
+.friend-list-container.visible {
+  display: block;
+}

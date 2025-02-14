@@ -13,22 +13,22 @@ const FriendItem: React.FC<FriendItemProps> = ({ friend, onRemove }): JSX.Elemen
     <div className="friend-item">
       <div className="friend-item-avatar-container">
         <img 
-          src={friend.s3Filename || 'api/placeholder/40/40'} 
+          src={friend.s3Filename || '/default-avatar.png'} 
           alt={friend.name}
           className="friend-item-avatar" 
         />
         <div 
-          className={`friend-item-status-dot ${
-            friend.status === 'ONLINE' 
-              ? 'online' 
-              : 'offline'
-          }`}
+          className={`friend-item-status-dot ${friend.status.toLowerCase()}`}
+          title={friend.status === 'ONLINE' ? '온라인' : friend.displayStatus}
         />
       </div>
       <div className="friend-item-content">
         <h3 className="friend-item-name">{friend.name}</h3>
         <div className="friend-item-status">
-          {friend.status === 'ONLINE' ? '온라인' : `오프라인 · ${friend.displayStatus}`}
+          {friend.status === 'ONLINE' 
+            ? '온라인' 
+            : `오프라인 · ${friend.displayStatus}`
+          }
         </div>
         <div className="friend-item-details">
           <span>{friend.phone}</span>

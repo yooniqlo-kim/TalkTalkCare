@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
-import { useWebSocket } from './hooks/useWebSocket';
+import { useWebSocket } from '../../contexts/WebSocketContext';
 import AddFriendModal from './AddFriendModal';
 import FriendItem from './UserListItem';
 import { Friend } from './friends';
@@ -10,25 +10,20 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface FriendListProps {
   onClose: () => void;
+  friends: Friend[];
+  setFriends: React.Dispatch<React.SetStateAction<Friend[]>>;
 }
 
-const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
-  const [friends, setFriends] = useState<Friend[]>([]);
+const FriendList: React.FC<FriendListProps> = ({ 
+  onClose, 
+  friends,
+  setFriends
+}): JSX.Element => {
   const [showAddModal, setShowAddModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const handleStatusUpdate = (updatedFriend: Friend) => {
-    console.log('👥 친구 상태 업데이트:', updatedFriend);
-    setFriends(prev => prev.map(friend => 
-      friend.userId === updatedFriend.userId
-        ? { ...friend, ...updatedFriend }
-        : friend
-    ));
-  };
-
-  const { isConnected, connectionState } = useWebSocket(handleStatusUpdate);
+  const { isConnected } = useWebSocket();
 
   const loadFriends = async () => {
     const userIdFromStorage = localStorage.getItem("userId");
@@ -62,52 +57,42 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    const connectionStatus = (() => {
-      switch (connectionState) {
-        case WebSocket.CONNECTING:
-          return '연결 중';
-        case WebSocket.OPEN:
-          return '연결됨';
-        case WebSocket.CLOSING:
-          return '연결 종료 중';
-        case WebSocket.CLOSED:
-          return '연결 종료됨';
-        default:
-          return '알 수 없음';
-      }
-    })();
-    
-    console.log('🔌 WebSocket 연결 상태:', connectionStatus);
-  }, [connectionState]);
-
-  const filteredFriends = friends.filter(friend => 
-    friend.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    console.log('FriendList에 전달된 friends:', friends);
+  }, [friends]);
 
   const renderContent = () => {
-    if (isLoading) {
-      return <div className="loading-message">로딩 중...</div>;
-    }
-
     if (error) {
-      return <div className="error-message">{error}</div>;
+      return <div className="friend-list-error">{error}</div>;
     }
 
-    if (friends.length === 0) {
-      return <div className="empty-message">현재 친구가 없습니다.</div>;
+    if (isLoading) {
+      return <div className="friend-list-loading">로딩 중...</div>;
     }
+
+    const filteredFriends = friends.filter(friend => 
+      friend.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     if (filteredFriends.length === 0) {
-      return <div className="empty-message">검색 결과가 없습니다</div>;
+      return <div className="friend-list-empty">
+        {searchTerm ? '검색 결과가 없습니다.' : '친구 목록이 비어있습니다.'}
+      </div>;
     }
 
-    return filteredFriends.map(friend => (
-      <FriendItem key={friend.userId} friend={friend} />
-    ));
+    return (
+      <div className="friend-items-container">
+        {filteredFriends.map(friend => (
+          <FriendItem
+            key={friend.userId}
+            friend={friend}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
-    <div className="friend-list-container">
+    <div className="friend-list-wrapper">
       <div className="friend-list-header">
         <button onClick={onClose} className="friend-list-back-button">
           <ArrowLeft size={24} />
@@ -140,7 +125,10 @@ const FriendList: React.FC<FriendListProps> = ({ onClose }): JSX.Element => {
       {showAddModal && (
         <AddFriendModal
           onClose={() => setShowAddModal(false)}
-          onFriendAdded={loadFriends}
+          onFriendAdded={() => {
+            console.log('친구 추가됨');
+            loadFriends();
+          }}
         />
       )}
     </div>
