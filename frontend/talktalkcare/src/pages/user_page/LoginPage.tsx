@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import '../../styles/components/Login.css';
 import axios, { AxiosError } from 'axios';
+import { useAuth } from '../../contexts/AuthContext'; // 추가
 
 const Login = () => {
+  const { setIsLoggedIn } = useAuth(); // 추가
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userLoginId: '',
@@ -14,10 +16,10 @@ const Login = () => {
   const [autoLogin, setAutoLogin] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -31,16 +33,18 @@ const Login = () => {
         // 토큰 저장 등의 추가 로직 필요
 
         
-        localStorage.setItem('token', response.body.userId); // 예시
+        localStorage.setItem('userId', response.body.userId);
         localStorage.setItem('name', response.body.username);
         localStorage.setItem('profile-image', response.body.s3Filename);
+        setIsLoggedIn(true); // 추가: 전역 로그인 상태 업데이트
         alert('로그인 성공!');
         navigate('/');
       } else {
         alert(response.result.msg || '로그인에 실패했습니다.');
       }
     } catch (error: any) {
-      // 에러 처리 로직
+      console.error('로그인 실패:', error);
+      alert('로그인 중 오류가 발생했습니다.');
     }
   };
 
@@ -74,11 +78,12 @@ const Login = () => {
           {/* 자동 로그인 체크박스 */}
           <div className="auto-login">
             <label>
-              <input
-                type="checkbox"
-                checked={autoLogin}
-                onChange={(e) => setAutoLogin(e.target.checked)}
-              />
+            <input
+              type="checkbox"
+              name="autoLogin"
+              checked={formData.autoLogin}
+              onChange={handleChange}
+            />             
               <span>자동 로그인</span>
             </label>
           </div>

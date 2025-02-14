@@ -21,31 +21,34 @@ import OpenViduComponent from '../pages/call_page/openvidu.tsx';
 import ChatChat from '../components/layout/ChatChat.tsx';
 import { FriendListProvider } from '../contexts/FriendListContext.tsx'; // FriendListProvider 임포트
 import ProfileEdit from '../pages/user_page/UserUpdate.tsx';
+import { AuthProvider } from '../contexts/AuthContext'; // AuthProvider 임포트
 
 function App() {
   return (
     <BrowserRouter>
-      <FriendListProvider> {/* ✅ FriendListProvider로 감싸기 */}
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<MainPage />} />
-            <Route path="/call" element={<KeyPad />} />
-            <Route path="/game" element={<GameListPage />} />
-            <Route path="/test" element={<Test />} />
-            <Route path="/mypage" element={<MyPage />} />
-            <Route path="/userinfopage" element={<UserInfoPage />} />
-            <Route path="/sdq" element={<SDQ />} />
-            <Route path="/smcq" element={<SMCQ />} />
-            <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/result" element={<Result />} />
-            <Route path="/talktalk" element={<TalkTalkChat />} />
-            <Route path="/openvidu" element={<OpenViduComponent />} />
-            <Route path="/chat" element={<ChatChat />} />
-            <Route path="/update" element={<ProfileEdit />} />
-          </Route>
-        </Routes>
-      </FriendListProvider>
+      <AuthProvider> {/* AuthProvider 추가 */}
+        <FriendListProvider>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/call" element={<KeyPad />} />
+              <Route path="/game" element={<GameListPage />} />
+              <Route path="/test" element={<Test />} />
+              <Route path="/mypage" element={<MyPage />} />
+              <Route path="/userinfopage" element={<UserInfoPage />} />
+              <Route path="/sdq" element={<SDQ />} />
+              <Route path="/smcq" element={<SMCQ />} />
+              <Route path="/sign-up" element={<SignUp />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/result" element={<Result />} />
+              <Route path="/talktalk" element={<TalkTalkChat />} />
+              <Route path="/openvidu" element={<OpenViduComponent />} />
+              <Route path="/chat" element={<ChatChat />} />
+              <Route path="/update" element={<ProfileEdit />} />
+            </Route>
+          </Routes>
+        </FriendListProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
