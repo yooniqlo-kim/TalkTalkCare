@@ -6,13 +6,15 @@ import FriendList from '../components/main_page/FriendList';
 import '../styles/components/MainPage.css';
 import CardNews from '../components/main_page/CardNews';
 import { authService } from '../services/authService'; // authService import
+import { useFriendList } from '../contexts/FriendListContext' // ✅ 추가
 
 const MainPage: React.FC = () => {
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
   const wsUrl = import.meta.env.VITE_API_WS_URL;
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
-  const [isFriendListOpen, setIsFriendListOpen] = useState(false); // 친구목록 열림 여부를 전역 상태로 관리하기 위한 모달
+  const { isFriendListOpen, setIsFriendListOpen } = useFriendList(); // ✅ context 사용
+
 
   useEffect(() => {
     if (!userId) {
@@ -26,7 +28,7 @@ const MainPage: React.FC = () => {
   if (!userId) {
     return null;
   }
-  console.log('ㅎㅇㅇ')
+
   const handleLogout = async () => {
     try {
       await authService.logout();
