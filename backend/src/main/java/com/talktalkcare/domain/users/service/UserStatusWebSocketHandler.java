@@ -1,7 +1,9 @@
 package com.talktalkcare.domain.users.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.talktalkcare.domain.call.dto.CallInvitationDto;
 import com.talktalkcare.domain.users.dto.FriendDto;
+import com.talktalkcare.domain.users.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -17,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class UserStatusWebSocketHandler extends TextWebSocketHandler {
+public class UserStatusWebSocketHandler extends TextWebSocketHandler{
 
     private final FriendService friendService;
     private final ObjectMapper objectMapper;
@@ -63,5 +65,16 @@ public class UserStatusWebSocketHandler extends TextWebSocketHandler {
             log.error("userId 추출 중 에러 발생", e);
             return null;
         }
+    }
+
+    public void sendNotification(User receiver, CallInvitationDto invitation) {
+        WebSocketSession session = sessions.get(receiver.getUserId());
+        try {
+            String payload = objectMapper.writeValueAsString(invitation);
+            session.sendMessage(new TextMessage(payload));
+        } catch (Exception e) {
+
+        }
+
     }
 }
