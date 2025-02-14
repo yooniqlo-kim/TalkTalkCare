@@ -31,7 +31,9 @@ const GamePage: React.FC<GamePageProps> = ({
       onRestart();
     }
   };
-
+  const handleExit = () => {
+    navigate('/game-list');  // 목록 페이지로 이동
+  };
   useEffect(() => {
     if (gameStarted && currentTime > 0) {
       const interval = setInterval(() => {
@@ -63,7 +65,7 @@ const GamePage: React.FC<GamePageProps> = ({
     <div className="game-page">
       <div className="game-header">
         <div className="header-content">
-          <h2>{title}</h2>
+          {/* <h2>{title}</h2> */}
           {gameStarted && (
             <div className="time-display">
               남은 시간: {currentTime}초
@@ -76,7 +78,7 @@ const GamePage: React.FC<GamePageProps> = ({
               다시 시작
             </button>
           )}
-          <button className="control-button exit" onClick={() => navigate('/')}>
+          <button className="control-button exit" onClick={() => navigate('/game')}>
             나가기
           </button>
         </div>

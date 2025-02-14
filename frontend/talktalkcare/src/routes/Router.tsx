@@ -42,7 +42,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/result" element={<Result />} />
               <Route path="/talktalk" element={<TalkTalkChat />} />
-              <Route path="/openvidu" element={<OpenViduComponent />} />
+              <Route path="/videocall" element={<OpenViduComponent />} />
               <Route path="/chat" element={<ChatChat />} />
               <Route path="/update" element={<ProfileEdit />} />
             </Route>
