@@ -8,7 +8,7 @@ import { useWebSocket } from '../../contexts/WebSocketContext';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { setIsLoggedIn, setUserName } = useAuth(); // setUserName 추가
+  const { setUserName } = useAuth(); // setUserName 추가
   const { isConnected, setIsLoggedIn } = useWebSocket();
   const [formData, setFormData] = useState({
     userLoginId: '',
