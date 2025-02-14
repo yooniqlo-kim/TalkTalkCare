@@ -28,7 +28,7 @@ const MainPage: React.FC = () => {
   if (!userId) {
     return null;
   }
-
+  
   const handleLogout = async () => {
     try {
       await authService.logout();

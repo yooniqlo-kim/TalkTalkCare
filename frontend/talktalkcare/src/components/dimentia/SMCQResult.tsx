@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import '../../styles/components/result.css';
+import '../../styles/components/Result.css';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 console.log(import.meta.env.VITE_API_BASE_URL);

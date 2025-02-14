@@ -63,7 +63,7 @@ const GamePage: React.FC<GamePageProps> = ({
     <div className="game-page">
       <div className="game-header">
         <div className="header-content">
-          <h2>{title}</h2>
+          {/* <h2>{title}</h2> */}
           {gameStarted && (
             <div className="time-display">
               남은 시간: {currentTime}초

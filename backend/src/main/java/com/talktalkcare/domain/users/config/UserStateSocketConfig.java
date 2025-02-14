@@ -18,7 +18,6 @@ public class UserStateSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry
                 .addHandler(userStatusWebSocketHandler, "/talktalkcare")
-                .setAllowedOrigins("http://localhost:5173", "http://localhost:3000");
+                .setAllowedOrigins("*");
     }
-
 }
