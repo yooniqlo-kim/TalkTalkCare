@@ -6,6 +6,8 @@ import side from '../../assets/side.png';
 import FriendList from '../../components/main_page/FriendList';
 import CustomModal from '../../components/CustomModal';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const KeyPad: React.FC = () => {
   const navigate = useNavigate();
   const [input, setInput] = useState<string>('');
@@ -43,11 +45,42 @@ const KeyPad: React.FC = () => {
   };
 
   // 화상통화로 연결
-  const handleCall = () => {
-    if (input.length > 0) {
-      navigate('/videocall');
-    } else {
+  const handleCall = async () => {
+    const digits = input.replace(/[^0-9]/g, '');
+    if (!digits) {
       setModalMessage('전화번호를 입력해주세요.');
+      setIsModalOpen(true);
+      return;
+    }
+    if (!digits.startsWith('010') || digits.length !== 11) {
+      setModalMessage('유효한 전화번호를 입력해주세요.');
+      setIsModalOpen(true);
+      return;
+    }
+
+    const userId = localStorage.getItem('userId');
+
+    try {
+      const response = await fetch(`${BASE_URL}/call/request`, { 
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ callerId: userId, receiverPhone: digits }),
+        credentials: 'include'
+      });
+      const data = await response.json();
+
+      if (data.result.msg !== 'success') {
+        setModalMessage(data.result.msg);
+        setIsModalOpen(true);
+      } else {
+        setModalMessage("호출 알림을 보냈습니다. 상대방의 응답을 기다려주세요.");
+        setIsModalOpen(true);
+        // navigate('/videocall');
+      }
+    } catch (error) {
+      setModalMessage('일시적인 서버 오류가 발생했습니다.');
       setIsModalOpen(true);
     }
   };
