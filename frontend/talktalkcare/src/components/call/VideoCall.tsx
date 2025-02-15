@@ -19,33 +19,36 @@ const VideoCall: React.FC = () => {
   useEffect(() => {
     const join = async () => {
       try {
-        // 만약 이미 openviduService.joinSession()으로 접속되어 있다면,
-        // 세션 정보를 가져오는 방법(예: 서비스 내부에 저장된 session)을 활용할 수도 있습니다.
-        // 여기서는 새로 접속하는 예시로 처리합니다.
         const { session: sess, publisher: pub } = await openviduService.joinSession(sessionId);
         setSession(sess);
         setPublisher(pub);
-        setMainStreamManager(pub); // 초기 메인 스트림은 자신의 퍼블리셔
-
-        // 상대방 스트림(구독자) 이벤트 처리
+        setMainStreamManager(pub); // 초기 메인 스트림 설정
+  
+        // 📌 🔥 상대방 스트림 추가 수정
         sess.on('streamCreated', (event) => {
           const subscriber = sess.subscribe(event.stream, undefined);
+          console.log("✅ 상대방 스트림 추가됨:", event.stream.streamId);
+  
           setSubscribers((prev) => [...prev, subscriber]);
         });
+  
+        // 📌 🔥 상대방이 세션에서 나갔을 때 처리
         sess.on('streamDestroyed', (event) => {
+          console.log("❌ 상대방 스트림 종료:", event.stream.streamId);
           setSubscribers((prev) =>
             prev.filter((sub) => sub.stream.streamId !== event.stream.streamId)
           );
         });
+  
       } catch (error) {
         console.error('세션 접속 실패:', error);
         alert('세션 접속에 실패했습니다.');
         navigate('/'); // 실패 시 홈으로 이동
       }
     };
-
+  
     join();
-
+  
     return () => {
       if (session) {
         session.disconnect();
@@ -115,6 +118,8 @@ const VideoCall: React.FC = () => {
               <p>나</p>
             </div>
           )}
+
+          {/* 📌 🔥 상대방 비디오 추가 */}
           {subscribers.map((sub, idx) => (
             <div
               key={idx}
