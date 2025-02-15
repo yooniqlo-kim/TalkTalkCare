@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';  // ✅ useNavigate 추가
 import { Friend } from '../components/main_page/friends';
 import CallNotificationModal from '../components/CallNotificationModal';
 import openviduService from '../services/openviduService';
@@ -19,13 +19,15 @@ interface WebSocketContextType {
   isConnected: boolean;
   setIsLoggedIn: (value: boolean) => void;
   onFriendStatusUpdate?: (friends: Friend[]) => void;
+  acceptCall: () => void;
+  rejectCall: () => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();  // ✅ useNavigate() 추가
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const navigate = useNavigate(); // useNavigate 훅 추가
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const friendStatusCallbackRef = useRef<((friends: Friend[]) => void) | undefined>();
@@ -45,8 +47,6 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const userId = localStorage.getItem('userId');
     if (!userId) return;
 
-    
-
     const connectWebSocket = () => {
       if (reconnectAttempts.current >= maxReconnectAttempts) {
         console.log('최대 재연결 시도 횟수 도달');
@@ -55,7 +55,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       try {
         const websocket = new WebSocket(`${WS_URL}?userId=${userId}`);
-        
+
         websocket.onopen = () => {
           console.log('✅ WebSocket 연결됨');
           setIsConnected(true);
@@ -65,13 +65,13 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         websocket.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            
+
             // 화상통화 요청 처리
             if (data.message && data.message.includes("화상통화")) {
               setCallInvitation(data);
             }
 
-            // 친구 상태 업데이트트
+            // 친구 상태 업데이트
             if (friendStatusCallbackRef.current && Array.isArray(data)) {
               friendStatusCallbackRef.current(data);
             }
@@ -108,20 +108,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         ws.close(1000, "정상 종료");
       }
     };
-  }, [isLoggedIn]); // friendStatusCallback 제거
+  }, [isLoggedIn]);
 
-  // 화상통화 요청 수락 시 동작 (필요한 로직 추가)
-  // receiver가 호출 요청을 수락할 때: OpenVidu 세션에 접속한 후 videocall 페이지로 이동
+  // 🔥 수정: navigateTo prop 제거하고 useNavigate() 직접 사용
   const handleAcceptCall = async () => {
     if (callInvitation) {
       console.log('화상통화 수락:', callInvitation);
       try {
-        // receiver가 caller가 생성한 세션에 접속 (토큰이 내부에서 생성됨)
         await openviduService.joinSession(callInvitation.openviduSessionId);
-        // sessionId를 localStorage에 저장 (VideoCall에서 사용)
         localStorage.setItem('currentSessionId', callInvitation.openviduSessionId);
-        // 호출 수락 후 videocall 화면으로 이동
-        navigate('/videocall');
+        navigate('/videocall');  // ✅ 직접 navigate 사용
       } catch (error) {
         console.error('Receiver 세션 접속 실패:', error);
       }
@@ -129,10 +125,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  // 화상통화 요청 거절 시 동작
   const handleRejectCall = () => {
     console.log('화상통화 거절:', callInvitation);
-    // 예: 거절 메시지 전송 등
     setCallInvitation(null);
   };
 
@@ -141,13 +135,14 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setIsLoggedIn,
     onFriendStatusUpdate: useCallback((callback?: (friends: Friend[]) => void) => {
       friendStatusCallbackRef.current = callback;
-    }, [])
+    }, []),
+    acceptCall: handleAcceptCall,
+    rejectCall: handleRejectCall,
   };
 
   return (
     <WebSocketContext.Provider value={contextValue}>
       {children}
-      {/* 화상통화 요청이 있을 경우 모달을 렌더링 */}
       {callInvitation && (
         <CallNotificationModal 
           title="화상통화 요청"
