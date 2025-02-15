@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Session, Publisher, Subscriber, StreamManager } from 'openvidu-browser';
 import openviduService from '../../services/openviduService';
 import { useNavigate } from 'react-router-dom';
-import "../../styles/components/VideoCall.css";
+import "/src/styles/components/VideoCall.css";
 
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
