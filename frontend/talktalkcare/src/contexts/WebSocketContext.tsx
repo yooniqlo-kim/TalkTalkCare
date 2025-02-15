@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Friend } from '../components/main_page/friends';
 import CallNotificationModal from '../components/CallNotificationModal';
 import openviduService from '../services/openviduService';
@@ -24,6 +25,7 @@ const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const navigate = useNavigate(); // useNavigate 훅 추가
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const friendStatusCallbackRef = useRef<((friends: Friend[]) => void) | undefined>();
@@ -116,7 +118,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       try {
         // receiver가 caller가 생성한 세션에 접속 (토큰이 내부에서 생성됨)
         await openviduService.joinSession(callInvitation.openviduSessionId);
-        // 호출 수락 후 videocall 화면으로 이동 (라우팅은 필요에 따라 변경)
+        // sessionId를 localStorage에 저장 (VideoCall에서 사용)
+        localStorage.setItem('currentSessionId', callInvitation.openviduSessionId);
+        // 호출 수락 후 videocall 화면으로 이동
+        navigate('/videocall');
       } catch (error) {
         console.error('Receiver 세션 접속 실패:', error);
       }

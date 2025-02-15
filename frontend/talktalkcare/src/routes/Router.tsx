@@ -16,7 +16,7 @@ import SMCQ from '../pages/DimentiaTest/test_page/SMCQ.tsx';
 import SignUp from '../pages/user_page/SignUp.tsx';
 import Login from '../pages/user_page/LoginPage.tsx';
 import TalkTalkChat from '../pages/TalkTalkAi.tsx/TalkTalk.tsx';
-import OpenViduComponent from '../pages/call_page/openvidu.tsx';
+import VideoCall from '../components/call/VideoCall';
 // import Login from '../pages/user_page/LoginPage.tsx';
 import ChatChat from '../components/layout/ChatChat.tsx';
 import { FriendListProvider } from '../contexts/FriendListContext.tsx'; // FriendListProvider 임포트
@@ -42,7 +42,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/result" element={<Result />} />
               <Route path="/talktalk" element={<TalkTalkChat />} />
-              <Route path="/videocall" element={<OpenViduComponent />} />
+              <Route path="/videocall" element={<VideoCall />} />
               <Route path="/chat" element={<ChatChat />} />
               <Route path="/update" element={<ProfileEdit />} />
             </Route>

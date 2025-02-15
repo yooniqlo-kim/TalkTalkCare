@@ -1,0 +1,65 @@
+/* src/components/call/videocall.css */
+.videocall-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .videocall-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #333;
+    color: #fff;
+    padding: 10px;
+  }
+  
+  .control-buttons button {
+    margin-left: 10px;
+    padding: 8px 12px;
+    font-size: 1rem;
+  }
+  
+  .videocall-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #000;
+  }
+  
+  .main-video {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .main-video video {
+    width: 80%;
+    max-height: 80%;
+    border: 2px solid #fff;
+    border-radius: 8px;
+  }
+  
+  .thumbnails {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    background: #222;
+  }
+  
+  .thumbnail {
+    margin: 0 5px;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  .thumbnail video {
+    width: 120px;
+    height: 90px;
+    border: 1px solid #fff;
+    border-radius: 4px;
+  }
+  
