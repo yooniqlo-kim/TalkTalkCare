@@ -1,7 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { Friend } from '../components/main_page/friends';
+import CallNotificationModal from '../components/CallNotificationModal';
 
 const WS_URL = import.meta.env.VITE_API_WS_URL;
+
+interface CallInvitationDto {
+  callerId: number;
+  callerName: string;
+  receiverId: number;
+  receiverName: string;
+  message: string;
+  openviduSessionId: string;
+}
 
 interface WebSocketContextType {
   isConnected: boolean;
@@ -18,6 +28,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const friendStatusCallbackRef = useRef<((friends: Friend[]) => void) | undefined>();
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 3;
+
+  const [callInvitation, setCallInvitation] = useState<CallInvitationDto | null>(null);
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
@@ -48,6 +60,12 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         websocket.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
+            
+            //화상통화 요청 처리
+            if (data.message && data.message.includes("화상통화")) {
+              setCallInvitation(data);
+            }
+
             if (friendStatusCallbackRef.current && Array.isArray(data)) {
               friendStatusCallbackRef.current(data);
             }
@@ -86,6 +104,20 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
   }, [isLoggedIn]); // friendStatusCallback 제거
 
+  // 화상통화 요청 수락 시 동작 (필요한 로직 추가)
+  const handleAcceptCall = () => {
+    console.log('화상통화 수락:', callInvitation);
+    // 예: 수락 메시지 전송, 페이지 이동 등
+    setCallInvitation(null);
+  };
+
+  // 화상통화 요청 거절 시 동작
+  const handleRejectCall = () => {
+    console.log('화상통화 거절:', callInvitation);
+    // 예: 거절 메시지 전송 등
+    setCallInvitation(null);
+  };
+
   const contextValue = {
     isConnected,
     setIsLoggedIn,
@@ -97,6 +129,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   return (
     <WebSocketContext.Provider value={contextValue}>
       {children}
+      {/* 화상통화 요청이 있을 경우 모달을 렌더링 */}
+      {callInvitation && (
+        <CallNotificationModal 
+          title="화상통화 요청"
+          message={`${callInvitation.callerName}님께서 ${callInvitation.receiverName}에게 화상통화 요청을 보냈습니다. 수락하시겠습니까?`}
+          isOpen={true}
+          onAccept={handleAcceptCall}
+          onReject={handleRejectCall}
+        />
+      )}
     </WebSocketContext.Provider>
   );
 };
