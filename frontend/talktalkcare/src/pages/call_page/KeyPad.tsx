@@ -5,6 +5,7 @@ import phone from '../../assets/phoneicon.png';
 import side from '../../assets/side.png';
 import FriendList from '../../components/main_page/FriendList';
 import CustomModal from '../../components/CustomModal';
+import openviduService from '../../services/openviduService';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -14,6 +15,7 @@ const KeyPad: React.FC = () => {
   const [showFriends, setShowFriends] = useState<boolean>(false); // 친구 목록 표시 여부 상태
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>("");
+  const [sessionId, setSessionId] = useState<string>('');
 
   // 전화번호 포맷팅 함수
   const formatPhoneNumber = (value: string): string => {
@@ -60,13 +62,17 @@ const KeyPad: React.FC = () => {
 
     const userId = localStorage.getItem('userId');
 
+    // 호출마다 고유 세션 ID 생성 (caller가 미리 OpenVidu 세션에 접속)
+    const newSessionId = `session-${Date.now()}`;
+    setSessionId(newSessionId);
+
     try {
       const response = await fetch(`${BASE_URL}/call/request`, { 
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ callerId: userId, receiverPhone: digits }),
+        body: JSON.stringify({ callerId: userId, receiverPhone: digits,  openviduSessionId: newSessionId }),
         credentials: 'include'
       });
       const data = await response.json();
@@ -77,6 +83,9 @@ const KeyPad: React.FC = () => {
       } else {
         setModalMessage("호출 알림을 보냈습니다. 상대방의 응답을 기다려주세요.");
         setIsModalOpen(true);
+
+        await openviduService.joinSession(newSessionId);
+
         // navigate('/videocall');
       }
     } catch (error) {

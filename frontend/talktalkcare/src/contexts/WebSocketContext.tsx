@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { Friend } from '../components/main_page/friends';
 import CallNotificationModal from '../components/CallNotificationModal';
+import openviduService from '../services/openviduService';
 
 const WS_URL = import.meta.env.VITE_API_WS_URL;
 
-interface CallInvitationDto {
+export interface CallInvitationDto {
   callerId: number;
   callerName: string;
   receiverId: number;
@@ -42,6 +43,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const userId = localStorage.getItem('userId');
     if (!userId) return;
 
+    
+
     const connectWebSocket = () => {
       if (reconnectAttempts.current >= maxReconnectAttempts) {
         console.log('최대 재연결 시도 횟수 도달');
@@ -61,11 +64,12 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           try {
             const data = JSON.parse(event.data);
             
-            //화상통화 요청 처리
+            // 화상통화 요청 처리
             if (data.message && data.message.includes("화상통화")) {
               setCallInvitation(data);
             }
 
+            // 친구 상태 업데이트트
             if (friendStatusCallbackRef.current && Array.isArray(data)) {
               friendStatusCallbackRef.current(data);
             }
@@ -105,10 +109,19 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [isLoggedIn]); // friendStatusCallback 제거
 
   // 화상통화 요청 수락 시 동작 (필요한 로직 추가)
-  const handleAcceptCall = () => {
-    console.log('화상통화 수락:', callInvitation);
-    // 예: 수락 메시지 전송, 페이지 이동 등
-    setCallInvitation(null);
+  // receiver가 호출 요청을 수락할 때: OpenVidu 세션에 접속한 후 videocall 페이지로 이동
+  const handleAcceptCall = async () => {
+    if (callInvitation) {
+      console.log('화상통화 수락:', callInvitation);
+      try {
+        // receiver가 caller가 생성한 세션에 접속 (토큰이 내부에서 생성됨)
+        await openviduService.joinSession(callInvitation.openviduSessionId);
+        // 호출 수락 후 videocall 화면으로 이동 (라우팅은 필요에 따라 변경)
+      } catch (error) {
+        console.error('Receiver 세션 접속 실패:', error);
+      }
+      setCallInvitation(null);
+    }
   };
 
   // 화상통화 요청 거절 시 동작
