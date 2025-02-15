@@ -32,6 +32,8 @@ public class CallService {
         String receiverPhone = callDto.getReceiverPhone();
         User receiver = userService.getUserIdByPhone(receiverPhone);
 
+        String sessionid = callDto.getOpenviduSessionId();
+
         if(!friendService.isUserOnline(receiver.getUserId())) {
             throw new UserException(UserErrorCode.USER_OFFLINE);
         }
@@ -41,6 +43,7 @@ public class CallService {
         invitation.setCallerName(caller.getName());
         invitation.setReceiverName(receiver.getName());
         invitation.setMessage("화상통화 요청이 도착했습니다.");
+        invitation.setOpenviduSessionId(sessionid);
 
         userStatusWebSocketHandler.sendNotification(receiver, invitation);
     }
