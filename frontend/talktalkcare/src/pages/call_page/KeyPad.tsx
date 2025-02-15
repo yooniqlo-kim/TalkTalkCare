@@ -86,7 +86,7 @@ const KeyPad: React.FC = () => {
 
         await openviduService.joinSession(newSessionId);
 
-        // navigate('/videocall');
+        navigate('/videocall');
       }
     } catch (error) {
       setModalMessage('일시적인 서버 오류가 발생했습니다.');
