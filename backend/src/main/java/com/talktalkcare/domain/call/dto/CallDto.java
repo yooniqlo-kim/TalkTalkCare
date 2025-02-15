@@ -13,4 +13,5 @@ public class CallDto {
     private Integer callerId;
     private Integer receiverId;
     private String receiverPhone;
+    private String openviduSessionId;
 }
