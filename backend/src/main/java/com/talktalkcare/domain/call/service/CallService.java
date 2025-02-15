@@ -22,7 +22,6 @@ public class CallService {
 
     private final UserService userService;
     private final FriendService friendService;
-    private final OpenViduService openViduService;
     private final UserStatusWebSocketHandler userStatusWebSocketHandler;
 
     public void callFriend(CallDto callDto) {
