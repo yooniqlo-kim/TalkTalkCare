@@ -6,13 +6,11 @@ import { X } from 'lucide-react';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface AddFriendModalProps {
-  userId: number;
   onClose: () => void;
   onFriendAdded: () => void;
 }
 
 const AddFriendModal: React.FC<AddFriendModalProps> = ({ 
-  userId,
   onClose, 
   onFriendAdded 
 }): JSX.Element => {
@@ -21,6 +19,8 @@ const AddFriendModal: React.FC<AddFriendModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const userId = localStorage.getItem('userId');
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone.trim()) {
