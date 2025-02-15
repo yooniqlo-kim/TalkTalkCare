@@ -65,6 +65,7 @@ const KeyPad: React.FC = () => {
     // 호출마다 고유 세션 ID 생성 (caller가 미리 OpenVidu 세션에 접속)
     const newSessionId = `session-${Date.now()}`;
     setSessionId(newSessionId);
+    localStorage.setItem('currentSessionId', newSessionId); // 📌 세션 ID 저장
 
     try {
       const response = await fetch(`${BASE_URL}/call/request`, { 
