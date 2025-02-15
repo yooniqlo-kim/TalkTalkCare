@@ -15,5 +15,4 @@ public class CallInvitationDto {
     private Integer receiverId;
     private String receiverName;
     private String message;
-    private String openviduSessionId;
 }

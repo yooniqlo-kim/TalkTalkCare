@@ -34,6 +34,8 @@ public class UserStatusWebSocketHandler extends TextWebSocketHandler {
 
     private final FriendService friendService;
     private final ObjectMapper objectMapper;
+    private final FriendRepository friendRepository;
+    private final UserRepository userRepository;
 
     // static으로 선언된 sessions map
     private static final Map<Integer, WebSocketSession> sessions = new ConcurrentHashMap<>();
@@ -50,9 +52,6 @@ public class UserStatusWebSocketHandler extends TextWebSocketHandler {
     public static Map<Integer, WebSocketSession> getAllSessions() {
         return Collections.unmodifiableMap(sessions);
     }
-
-    private final FriendRepository friendRepository;
-    private final UserRepository userRepository;
 
     @PostConstruct
     public void init() {
