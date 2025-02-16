@@ -186,14 +186,14 @@ const PathFindingGame: React.FC = () => {
     >
       {!gameStarted ? (
         <div className="instructions">
-          <h3>게임 방법</h3>
-          <p>1. 톡톡이가 움직이는 방향을 잘 기억하세요.</p>
-          <p>2. 순서대로 방향키를 눌러 톡톡이의 움직임을 따라하세요.</p>
-          <p>3. 레벨이 올라갈수록 기억해야 할 방향이 늘어납니다.</p>
-          <button onClick={() => setGameStarted(true)}>게임 시작</button>
+          <h3 className='instructions-title'>게임 방법</h3>
+          <p className='instructions-content'>1. 톡톡이가 움직이는 방향을 잘 기억하세요.
+          <br />2. 순서대로 방향키를 눌러 톡톡이의 움직임을 따라하세요.
+          <br />3. 레벨이 올라갈수록 기억해야 할 방향이 늘어납니다.</p>
+          <button onClick={() => setGameStarted(true)} className='instructions-button'>게임 시작</button>
         </div>
       ) : (
-        <div className="game-content">
+        <div className="">
           <div className="game-info">
             <div className="score">점수: {score}</div>
             <div className="level">레벨: {level}</div>

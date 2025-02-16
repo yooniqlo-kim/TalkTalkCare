@@ -109,13 +109,6 @@
   max-width: 400px;
 }
 
-.instructions {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
 .game-over {
   background-color: #f8d7da;
   color: #721c24;
@@ -123,22 +116,6 @@
   border-radius: 10px;
   margin-bottom: 20px;
 }
-
-/* button {
-  padding: 10px 20px;
-  font-size: 1.2em;
-  background-color: #4a148c;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-} */
-
-/* button:hover {
-  background-color: #6a1b9a; 
-  transform: translateY(-2px);
-} */
 
 /* 반응형 디자인 */
 @media (max-width: 500px) {

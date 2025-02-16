@@ -33,7 +33,7 @@ const GamePage: React.FC<GamePageProps> = ({
   };
   
   const handleExit = () => {
-    navigate('/game-list');  // 목록 페이지로 이동
+    navigate('/game');  // 목록 페이지로 이동
   };
 
   useEffect(() => {
@@ -67,7 +67,7 @@ const GamePage: React.FC<GamePageProps> = ({
     <div className="game-page">
       {gameStarted && (
         <>
-          <div className="game-header">
+          <div className="small-game-header">
             <div className="header-content">
               {/* 게임이 시작되었을 때만 시간 표시 */}
               <div className="time-display">
@@ -77,11 +77,11 @@ const GamePage: React.FC<GamePageProps> = ({
             <div className="game-controls">
               {/* 게임이 시작되었을 때만 버튼 표시 */}
               {onRestart && (
-                <button className="control-button restart" onClick={handleRestart}>
+                <button className="game-control-button restart" onClick={handleRestart}>
                   다시 시작
                 </button>
               )}
-              <button className="control-button exit" onClick={handleExit}>
+              <button className="game-control-button exit" onClick={handleExit}>
                 나가기
               </button>
             </div>

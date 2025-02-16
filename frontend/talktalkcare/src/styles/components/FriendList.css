@@ -8,6 +8,7 @@
   padding: 1rem;
   background-color: white;
   margin-top: 70px;
+  z-index: 1000;
 }
 
 .friend-list-header {
@@ -26,10 +27,17 @@
 }
 
 .friend-list-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-grow: 1;
   text-align: center;
-  font-size: 1.125rem;
+  font-size: 2rem;
   font-weight: bold;
+  background-color: #c8e6c9;
+  border-radius: 20px;
+  height: 70px;
+  margin-bottom: 15px;
 }
 
 .friend-list-add-button {

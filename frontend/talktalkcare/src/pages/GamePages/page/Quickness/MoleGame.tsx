@@ -100,10 +100,10 @@ const MoleGame: React.FC = () => {
       <div className="mole-game">
         {!gameStarted ? (
           <div className="instructions">
-            <h3>게임 방법</h3>
-            <p>1. 두더지를 클릭해서 점수를 얻으세요!</p>
-            <p>2. 제한 시간 안에 최대한 많은 점수를 얻으세요.</p>
-            <button onClick={() => setGameStarted(true)}>게임 시작</button>
+            <h3 className='instructions-title'>게임 방법</h3>
+            <p className='instructions-content'>1. 두더지를 클릭해서 점수를 얻으세요!
+            <br />2. 제한 시간 안에 최대한 많은 점수를 얻으세요.</p>
+            <button onClick={() => setGameStarted(true)} className='instructions-button'>게임 시작</button>
           </div>
         ) : (
           <>

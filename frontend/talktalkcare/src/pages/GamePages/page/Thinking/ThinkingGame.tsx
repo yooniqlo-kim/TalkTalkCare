@@ -134,11 +134,11 @@ const ThinkingGame: React.FC = () => {
   </div>
 ) : (
   <div className="instructions">
-    <h3>게임 방법</h3>
-    <p>1. 화면에 표시되는 가위바위보 이미지를 보세요.</p>
-    <p>2. 주어진 조건에 맞는 선택을 하세요.</p>
-    <p>3. 올바른 선택을 하면 점수가 올라갑니다.</p>
-    <button onClick={generateQuestion}>게임 시작</button>
+    <h3 className='instructions-title'>게임 방법</h3>
+    <p className='instructions-content'>1. 화면에 표시되는 가위바위보 이미지를 보세요.
+    <br />2. 주어진 조건에 맞는 선택을 하세요.
+    <br />3. 올바른 선택을 하면 점수가 올라갑니다.</p>
+    <button onClick={generateQuestion} className='instructions-button'>게임 시작</button>
   </div>
 )}
     </GamePage>

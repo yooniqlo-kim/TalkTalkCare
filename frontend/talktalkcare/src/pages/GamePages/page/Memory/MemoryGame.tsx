@@ -222,11 +222,11 @@ const MemoryGame: React.FC = () => {
       <div className="memory-game">
         {!gameStarted ? (
           <div className="instructions">
-            <h3>게임 방법</h3>
-            <p>1. 처음 10초 동안 모든 카드를 확인하세요.</p>
-            <p>2. 카드가 뒤집히면 짝을 맞춰주세요.</p>
-            <p>3. 최대한 적은 횟수로 모든 카드의 짝을 찾으세요!</p>
-            <button onClick={startGame}>게임 시작</button>
+            <h3 className='instructions-title'>게임 방법</h3>
+            <p className='.instructions-content'>1. 처음 10초 동안 모든 카드를 확인하세요.
+            <br />2. 카드가 뒤집히면 짝을 맞춰주세요.
+            <br />3. 최대한 적은 횟수로 모든 카드의 짝을 찾으세요!</p>
+            <button onClick={startGame} className='instructions-button'>게임 시작</button>
           </div>
         ) : (
           <div className="game-board">

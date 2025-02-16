@@ -140,15 +140,15 @@ const SequenceMemoryGame: React.FC = () => {
     >
       {!gameStarted ? (
         <div className="instructions">
-          <h3>게임 방법</h3>
+          <h3 className='instructions-title'>게임 방법</h3>
           <p>1. 점등되는 색상의 순서를 잘 기억하세요.</p>
           <p>2. 같은 순서대로 색상을 클릭하세요.</p>
           <p>3. 레벨이 올라갈수록 기억해야 할 순서가 길어집니다.</p>
           <p>4. 소리를 켜면 더 쉽게 기억할 수 있습니다.</p>
-          <button onClick={() => setGameStarted(true)}>게임 시작</button>
+          <button onClick={() => setGameStarted(true)} className='instructions-button'>게임 시작</button>
         </div>
       ) : (
-        <div className="game-content">
+        <div className="">
           <div className="game-info">
             <div className="score">점수: {score}</div>
             <div className="level">레벨: {level}</div>

@@ -165,16 +165,15 @@ const PatternGame: React.FC = () => {
         <div className="instructions">
           <h3 className="instructions-title">게임 방법</h3>
           <div className="instructions-content">
-            <p>1. 숫자들 사이에는 일정한 패턴이나 규칙(더하기, 빼기, 곱하기 등)이 있습니다.</p>
-            <p>2. 주어진 숫자들 사이 빈칸에 들어갈 숫자를 찾아 입력하세요.</p>
-          
+            <p>1. 숫자들 사이에는 일정한 패턴이나 규칙(더하기, 빼기, 곱하기 등)이 있습니다.
+            <br />2. 주어진 숫자들 사이 빈칸에 들어갈 숫자를 찾아 입력하세요.</p>
           </div>
-          <button onClick={() => setGameStarted(true)}>게임 시작</button>
+          <button onClick={() => setGameStarted(true)} className='instructions-button'>게임 시작</button>
           {message && <div className="final-score">{message}</div>}
         </div>
       ) : (
-        <div className="game-content">
-          <div className="game-info">
+        <div className="">
+          <div className="">
             <div className="score">점수: {score}</div>
             <div className="level">레벨: {level}</div>
             <div className="timer">남은 시간: {timeLeft}초</div>

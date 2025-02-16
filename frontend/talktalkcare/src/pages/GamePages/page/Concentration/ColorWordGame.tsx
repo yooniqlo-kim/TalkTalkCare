@@ -119,15 +119,15 @@ const ColorWordGame: React.FC = () => {
     >
       {!gameStarted ? (
         <div className="instructions">
-          <h3>게임 방법</h3>
-          <p>1. 화면에 나타나는 색깔 단어를 보세요.</p>
-          <p>2. 문제가 요구하는 색상(단어가 의미하는 색상 또는 보이는 색상)을 선택하세요.</p>
-          <p>3. 올바른 선택을 하면 점수가 올라갑니다.</p>
-          <button onClick={generateQuestion}>게임 시작</button>
+          <h3 className='instructions-title'>게임 방법</h3>
+          <p className='.instructions-content'>1. 화면에 나타나는 색깔 단어를 보세요.
+          <br />2. 문제가 요구하는 색상(단어가 의미하는 색상 또는 보이는 색상)을 선택하세요.
+          <br />3. 올바른 선택을 하면 점수가 올라갑니다.</p>
+          <button onClick={generateQuestion} className='instructions-button'>게임 시작</button>
           {message && <div className="final-score">{message}</div>}
         </div>
       ) : (
-        <div className="game-content">
+        <div className="">
           <div className="game-info">
             <div className="score">점수: {score}</div>
             <div className="level">레벨: {level}</div>
