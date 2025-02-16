@@ -8,45 +8,47 @@ import '../../styles/components/VideoCall.css';
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
 
-  // session과 publisher는 useRef로 관리하여 재렌더링과 클린업 문제 방지
+  // 클래스 컴포넌트처럼 session과 publisher를 재생성 없이 유지
   const sessionRef = useRef<Session | null>(null);
   const publisherRef = useRef<Publisher | null>(null);
-
+  
+  // 구독자 배열은 state로 관리
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  // 메인 비디오로 보여줄 StreamManager (초기엔 publisher)
   const [mainStreamManager, setMainStreamManager] = useState<StreamManager | null>(null);
   const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(true);
 
-  // localStorage에 저장된 sessionId 사용 (caller 또는 receiver 모두 동일 sessionId 사용)
+  // caller 또는 receiver가 사용하는 sessionId (localStorage에 저장된 값 사용)
   const sessionId = localStorage.getItem('currentSessionId') || 'default-session';
 
   useEffect(() => {
-    let isMounted = true; // 비동기 처리 중 언마운트 방지
-
-    const join = async () => {
+    let mounted = true;
+    const joinSession = async () => {
       try {
+        // 이전 세션이 있으면 leave 처리 (테스트 시에는 클래스 컴포넌트처럼 한 번만 생성)
+        if (sessionRef.current) {
+          sessionRef.current.disconnect();
+        }
+
+        // openviduService.joinSession은 내부적으로 세션 초기화, 토큰 발급, publisher 생성 후 publish를 수행함
         const { session, publisher } = await openviduService.joinSession(sessionId);
-        if (!isMounted) return;
+        if (!mounted) return;
         sessionRef.current = session;
         publisherRef.current = publisher;
-        setMainStreamManager(publisher); // 기본 메인 스트림은 자신의 퍼블리셔
+        setMainStreamManager(publisher);
 
-        // 내부 예외 처리: OpenVidu SDK 에러 로깅
-        session.on('exception', (error) => {
-          console.error('OpenVidu exception:', error);
-        });
-
-        // 신규 스트림이 생기면 subscribe (streamCreated)
+        // 신규 스트림 subscribe
         session.on('streamCreated', (event) => {
           try {
             const subscriber = session.subscribe(event.stream, undefined);
             console.log('✅ 신규 스트림 추가됨:', event.stream.streamId);
             setSubscribers((prev) => [...prev, subscriber]);
-          } catch (err) {
-            console.error('신규 스트림 구독 중 에러:', err);
+          } catch (error) {
+            console.error('신규 스트림 구독 중 에러:', error);
           }
         });
 
-        // 스트림 종료 시 해당 subscriber 제거 (streamDestroyed)
+        // 스트림 종료 시 해당 구독자 제거
         session.on('streamDestroyed', (event) => {
           console.log('❌ 스트림 종료:', event.stream.streamId);
           setSubscribers((prev) =>
@@ -54,7 +56,7 @@ const VideoCall: React.FC = () => {
           );
         });
 
-        // 연결 종료(참가자 퇴장) 이벤트 처리 (connectionDestroyed)
+        // (필요시) connectionDestroyed 이벤트도 등록
         session.on('connectionDestroyed', (event) => {
           try {
             const destroyedId = event.connection.connectionId;
@@ -62,10 +64,11 @@ const VideoCall: React.FC = () => {
             setSubscribers((prev) =>
               prev.filter((sub) => sub.stream?.connection?.connectionId !== destroyedId)
             );
-          } catch (err) {
-            console.error('connectionDestroyed 처리 중 에러:', err);
+          } catch (error) {
+            console.error('connectionDestroyed 처리 중 에러:', error);
           }
         });
+
       } catch (error) {
         console.error('세션 접속 실패:', error);
         alert('세션 접속에 실패했습니다.');
@@ -73,16 +76,16 @@ const VideoCall: React.FC = () => {
       }
     };
 
-    join();
+    joinSession();
 
-    // 컴포넌트 언마운트 시 세션 disconnect (한번만 수행)
+    // 언마운트 시 세션 disconnect (한 번만 실행)
     return () => {
-      isMounted = false;
+      mounted = false;
       if (sessionRef.current) {
         try {
           sessionRef.current.disconnect();
-        } catch (e) {
-          console.error('세션 종료 중 에러:', e);
+        } catch (error) {
+          console.error('세션 종료 중 에러:', error);
         }
       }
     };
@@ -92,8 +95,8 @@ const VideoCall: React.FC = () => {
     if (sessionRef.current) {
       try {
         sessionRef.current.disconnect();
-      } catch (e) {
-        console.error('세션 종료 중 에러:', e);
+      } catch (error) {
+        console.error('세션 종료 중 에러:', error);
       }
       localStorage.removeItem('currentSessionId');
       navigate('/');

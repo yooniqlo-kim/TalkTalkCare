@@ -78,12 +78,13 @@ const KeyPad: React.FC = () => {
       });
       const data = await response.json();
 
+      // receiver가 오프라인이거나 가입된 사용자가 아니라면
       if (data.result.msg !== 'success') {
         setModalMessage(data.result.msg);
         setIsModalOpen(true);
 
         localStorage.removeItem('currentSessionId');
-      } else {
+      } else { // receiver가 온라인이라면 receiver에게 웹소켓을 통해 메세지 보냄
         setModalMessage("호출 알림을 보냈습니다. 상대방의 응답을 기다려주세요.");
         setIsModalOpen(true);
         // await openviduService.joinSession(newSessionId);
