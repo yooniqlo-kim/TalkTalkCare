@@ -11,10 +11,7 @@ class OpenviduService {
       this.OV.enableProdMode();
     }
   
-    /**
-     * caller나 receiver가 OpenVidu 세션에 접속합니다.
-     * caller는 호출 요청 시 미리 세션에 접속하고, receiver는 호출 수락 후 동일한 세션에 접속합니다.
-     */
+
     async joinSession(sessionId: string): Promise<{ session: Session; publisher: Publisher }> {
       // 만약 기존 세션이 있다면 종료
       if (this.session) {

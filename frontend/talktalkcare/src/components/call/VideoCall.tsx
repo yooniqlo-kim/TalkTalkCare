@@ -24,7 +24,12 @@ const VideoCall: React.FC = () => {
         setPublisher(pub);
         setMainStreamManager(pub); // 기본 메인 스트림은 자신의 퍼블리셔
 
-        // 신규 스트림 구독 (streamCreated)
+        // 내부 예외 처리: OpenVidu에서 발생하는 예외 로깅
+        sess.on('exception', (error) => {
+          console.error('OpenVidu exception:', error);
+        });
+
+        // 신규 스트림 subscribe (streamCreated)
         sess.on('streamCreated', (event) => {
           try {
             const subscriber = sess.subscribe(event.stream, undefined);
@@ -35,7 +40,7 @@ const VideoCall: React.FC = () => {
           }
         });
 
-        // 스트림 종료 처리 (streamDestroyed)
+        // 스트림 종료 시 subscriber 제거 (streamDestroyed)
         sess.on('streamDestroyed', (event) => {
           console.log("❌ 스트림 종료:", event.stream.streamId);
           setSubscribers((prev) =>
@@ -43,7 +48,7 @@ const VideoCall: React.FC = () => {
           );
         });
 
-        // 연결 종료(참가자 퇴장) 이벤트 처리
+        // 연결 종료 시 subscriber 제거 (connectionDestroyed)
         sess.on('connectionDestroyed', (event) => {
           try {
             const destroyedId = event.connection.connectionId;
@@ -56,32 +61,31 @@ const VideoCall: React.FC = () => {
           }
         });
 
-        // 세션 연결 후 잠시 지연 후 이미 존재하는 remoteConnections 구독
-        setTimeout(() => {
-          try {
-            if (sess.remoteConnections) {
-              Object.values(sess.remoteConnections).forEach((connection: any) => {
-                // 자신의 연결은 제외하고, stream이 존재하는 경우에만 처리
-                if (
-                  connection.connectionId !== sess.connection.connectionId &&
-                  connection.stream
-                ) {
-                  // 이미 구독된 연결인지 체크
-                  const alreadySubscribed = subscribers.some(
-                    (sub) => sub.stream?.connection?.connectionId === connection.connectionId
-                  );
-                  if (!alreadySubscribed) {
-                    const subscriber = sess.subscribe(connection.stream, undefined);
-                    console.log("✅ 기존 스트림 구독됨:", connection.stream.streamId);
-                    setSubscribers((prev) => [...prev, subscriber]);
-                  }
-                }
-              });
-            }
-          } catch (err) {
-            console.error("기존 remoteConnections 구독 중 에러:", err);
-          }
-        }, 500);
+        // 만약 정말 필요하다면 (race condition 방지를 위해)
+        // setTimeout(() => {
+        //   try {
+        //     if (sess.remoteConnections) {
+        //       Object.values(sess.remoteConnections).forEach((connection: any) => {
+        //         if (
+        //           connection.connectionId !== sess.connection.connectionId &&
+        //           connection.stream
+        //         ) {
+        //           const alreadySubscribed = subscribers.some(
+        //             (sub) => sub.stream?.connection?.connectionId === connection.connectionId
+        //           );
+        //           if (!alreadySubscribed) {
+        //             const subscriber = sess.subscribe(connection.stream, undefined);
+        //             console.log("✅ 기존 스트림 구독됨:", connection.stream.streamId);
+        //             setSubscribers((prev) => [...prev, subscriber]);
+        //           }
+        //         }
+        //       });
+        //     }
+        //   } catch (err) {
+        //     console.error("기존 remoteConnections 구독 중 에러:", err);
+        //   }
+        // }, 500);
+        
       } catch (error) {
         console.error('세션 접속 실패:', error);
         alert('세션 접속에 실패했습니다.');
@@ -93,14 +97,22 @@ const VideoCall: React.FC = () => {
 
     return () => {
       if (session) {
-        session.disconnect();
+        try {
+          session.disconnect();
+        } catch (e) {
+          console.error("세션 종료 중 에러:", e);
+        }
       }
     };
   }, [sessionId, navigate]);
 
   const handleLeaveSession = () => {
     if (session) {
-      session.disconnect();
+      try {
+        session.disconnect();
+      } catch (e) {
+        console.error("세션 종료 중 에러:", e);
+      }
       localStorage.removeItem('currentSessionId');
       navigate('/');
     }

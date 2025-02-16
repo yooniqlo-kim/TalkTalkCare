@@ -81,6 +81,8 @@ const KeyPad: React.FC = () => {
       if (data.result.msg !== 'success') {
         setModalMessage(data.result.msg);
         setIsModalOpen(true);
+
+        localStorage.removeItem('currentSessionId');
       } else {
         setModalMessage("호출 알림을 보냈습니다. 상대방의 응답을 기다려주세요.");
         setIsModalOpen(true);
