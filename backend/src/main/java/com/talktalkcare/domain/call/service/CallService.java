@@ -56,4 +56,18 @@ public class CallService {
         userStatusWebSocketHandler.sendNotification(callerId, invitation);
     }
 
+    public void rejectCall(CallDto callDto) {
+        Integer callerId = callDto.getCallerId();
+        String receiverName = callDto.getReceiverName();
+        String openviduSessionId = callDto.getOpenviduSessionId();
+
+        CallInvitationDto invitation = new CallInvitationDto();
+        invitation.setCallerId(callerId);
+        invitation.setReceiverName(receiverName);
+        invitation.setMessage("요청을 거절하였습니다");
+        invitation.setOpenviduSessionId(openviduSessionId);
+
+        userStatusWebSocketHandler.sendNotification(callerId, invitation);
+    }
+
 }

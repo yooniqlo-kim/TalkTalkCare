@@ -32,4 +32,11 @@ public class CallController {
         return Api.OK();
     }
 
+    @PostMapping("/reject")
+    public Api<Void> rejectCall(@RequestBody CallDto callDto) {
+        callService.rejectCall(callDto);
+
+        return Api.OK();
+    }
+
 }
