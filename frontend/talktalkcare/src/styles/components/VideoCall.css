@@ -1,14 +1,14 @@
-/* 전체 컨테이너: footer는 별도로 있으므로, VideoCall 영역은 100vh에서 footer 높이를 뺀다. */
+/* 전체 컨테이너 */
 .videocall-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 80px); /* footer 높이가 80px이라 가정 */
-  overflow: hidden;
+  /* Footer가 있으므로 전체 높이를 조금 줄이거나,
+     calc(100vh - 푸터높이) 형태로 조절 가능 */
+  height: calc(100vh - 80px); /* 예: Footer 높이가 대략 80px이라 가정 */
 }
 
-/* 상단 헤더: 고정 높이 60px */
+/* 상단 헤더 */
 .videocall-header {
-  flex: 0 0 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,45 +17,51 @@
   padding: 10px;
 }
 
-/* 본문: header 밑의 영역, 남은 공간을 모두 사용 */
+.control-buttons button {
+  margin-left: 10px;
+  padding: 8px 12px;
+  font-size: 1rem;
+}
+
+/* 본문: 좌우 2분할 */
 .videocall-content {
   flex: 1;
   display: flex;
-  overflow: hidden;
 }
 
-/* 왼쪽: 화상통화 섹션 (세로로 2분할) */
+/* 왼쪽: 화상통화 섹션 (위아래 2분할) */
 .video-section {
   width: 50%;
   display: flex;
   flex-direction: column;
+  /* 검정 배경 제거 */
   background: #fff; 
-  overflow: hidden;
 }
 
-/* 각 비디오 행은 전체 높이의 50% */
+/* 상단(내 화면), 하단(상대방 화면) */
 .video-row {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  margin: 0;
-  padding: 0;
+  margin: 0;    /* 여백 제거 */
+  padding: 0;   /* 여백 제거 */
+  /* 배경/테두리 제거 */
   border: none;
-  overflow: hidden;
 }
 
-/* 비디오는 행을 꽉 채우도록 */
+/* 실제 비디오를 꽉 차게 (가로세로 100%) + 오버플로우 잘림 방지 */
 .video-row video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* 화면 가득 채우기 */
   border: none;
   border-radius: 0;
 }
 
-/* 라벨 위치 */
+/* "나", "상대방" 라벨 */
 .video-row p {
   position: absolute;
   bottom: 10px;

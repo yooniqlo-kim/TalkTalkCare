@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Session, Publisher, Subscriber, StreamManager } from 'openvidu-browser';
 import openviduService from '../../services/openviduService';
 import { useNavigate } from 'react-router-dom';
-import GameListPage from '../../pages/GamePages/GameListPage'; // 실제 경로에 맞게 import
+import GameListPage from '../../pages/GamePages/GameListPage'; // 실제 경로
 import '../../styles/components/VideoCall.css';
 
 const VideoCall: React.FC = () => {
@@ -103,15 +103,17 @@ const VideoCall: React.FC = () => {
     }
   };
 
+  // (A) 화면 공유 예시: 브라우저 탭 or 앱 전체 공유
   const handleStartScreenShare = async () => {
     if (!sessionRef.current) return;
+
     try {
       const OV = sessionRef.current.openvidu;
       const screenPublisher = await OV.initPublisherAsync(undefined, {
-        videoSource: 'screen',
-        publishAudio: false,
+        videoSource: 'screen', // 화면 공유
+        publishAudio: false,   // 필요하다면 true
         publishVideo: true,
-        mirror: false,
+        mirror: false
       });
       await sessionRef.current.publish(screenPublisher);
       console.log('화면 공유 시작!');
@@ -128,15 +130,15 @@ const VideoCall: React.FC = () => {
           <button onClick={handleToggleCamera}>
             {isVideoEnabled ? '카메라 끄기' : '카메라 켜기'}
           </button>
+          {/* 화면 공유 버튼 예시 */}
           <button onClick={handleStartScreenShare}>화면 공유</button>
           <button onClick={handleLeaveSession}>세션 나가기</button>
         </div>
       </header>
 
       <div className="videocall-content">
-        {/* 왼쪽: 화상통화 영역 */}
+        {/* 왼쪽: 위(내화면), 아래(상대방화면) */}
         <div className="video-section">
-          {/* 위: 내 화면 */}
           <div className="video-row local">
             {publisherRef.current && (
               <video
@@ -152,7 +154,6 @@ const VideoCall: React.FC = () => {
             <p>나</p>
           </div>
 
-          {/* 아래: 상대방 화면 */}
           <div className="video-row remote">
             {subscribers.length > 0 ? (
               <>
@@ -168,7 +169,7 @@ const VideoCall: React.FC = () => {
                 <p>상대방</p>
               </>
             ) : (
-              <p style={{ color: '#000' }}>상대방 대기중...</p>
+              <p style={{ color: '#fff' }}>상대방 대기중...</p>
             )}
           </div>
         </div>
