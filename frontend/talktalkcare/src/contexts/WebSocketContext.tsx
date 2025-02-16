@@ -73,10 +73,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             }
 
             // 화상통화 수락시 처리
-            if (data.message.include("수락")) {
-              console.log('CALL_ACCEPTED 메시지 수신:', data);
-              await openviduService.joinSession(data.openviduSessionId);
-              localStorage.setItem('currentSessionId', data.openviduSessionId);
+            if (data.message && data.message.includes("수락하였습니다")) {
+              const acceptedData = data as CallInvitationDto;
+              console.log('CALL_ACCEPTED 메시지 수신:', acceptedData);
+              await openviduService.joinSession(acceptedData.openviduSessionId);
+              localStorage.setItem('currentSessionId', acceptedData.openviduSessionId);
               navigate('/videocall');
             }
 
