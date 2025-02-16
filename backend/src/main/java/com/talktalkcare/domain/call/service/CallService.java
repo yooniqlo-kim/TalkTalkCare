@@ -50,7 +50,7 @@ public class CallService {
 
         CallInvitationDto invitation = new CallInvitationDto();
         invitation.setCallerId(callerId);
-        invitation.setMessage("요청을 수락하였습니다.");
+        invitation.setMessage("요청을 수락하였습니다");
         invitation.setOpenviduSessionId(openviduSessionId);
 
         userStatusWebSocketHandler.sendNotification(callerId, invitation);
