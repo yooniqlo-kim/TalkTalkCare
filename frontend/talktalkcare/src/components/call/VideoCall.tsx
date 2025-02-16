@@ -22,24 +22,37 @@ const VideoCall: React.FC = () => {
         const { session: sess, publisher: pub } = await openviduService.joinSession(sessionId);
         setSession(sess);
         setPublisher(pub);
-        setMainStreamManager(pub); // 초기 메인 스트림 설정
+        setMainStreamManager(pub); // 초기 메인 스트림은 자신의 퍼블리셔로 설정
   
-        // 📌 🔥 상대방 스트림 추가 수정
+        // ✅ 이미 존재하는 remote 연결들의 스트림을 구독합니다.
+        if (sess.remoteConnections) {
+          Object.values(sess.remoteConnections).forEach((connection: any) => {
+            // 현재 자신의 연결은 제외하고, stream 정보가 있을 경우 구독
+            if (
+              connection.connectionId !== sess.connection.connectionId &&
+              connection.stream
+            ) {
+              const subscriber = sess.subscribe(connection.stream, undefined);
+              console.log("✅ 기존 스트림 구독됨:", connection.stream.streamId);
+              setSubscribers((prev) => [...prev, subscriber]);
+            }
+          });
+        }
+  
+        // 신규 스트림이 추가될 경우 처리
         sess.on('streamCreated', (event) => {
           const subscriber = sess.subscribe(event.stream, undefined);
-          console.log("✅ 상대방 스트림 추가됨:", event.stream.streamId);
-  
+          console.log("✅ 신규 스트림 추가됨:", event.stream.streamId);
           setSubscribers((prev) => [...prev, subscriber]);
         });
   
-        // 📌 🔥 상대방이 세션에서 나갔을 때 처리
+        // 스트림 종료 처리
         sess.on('streamDestroyed', (event) => {
-          console.log("❌ 상대방 스트림 종료:", event.stream.streamId);
+          console.log("❌ 스트림 종료:", event.stream.streamId);
           setSubscribers((prev) =>
             prev.filter((sub) => sub.stream.streamId !== event.stream.streamId)
           );
         });
-  
       } catch (error) {
         console.error('세션 접속 실패:', error);
         alert('세션 접속에 실패했습니다.');
@@ -55,13 +68,17 @@ const VideoCall: React.FC = () => {
       }
     };
   }, [sessionId, navigate]);
+  
 
   const handleLeaveSession = () => {
     if (session) {
+      // (선택 사항) WebSocket이나 다른 채널을 통해 상대방에게 종료 메시지 전송
       session.disconnect();
-      navigate('/'); // 세션 종료 후 홈으로 이동
+      localStorage.removeItem('currentSessionId'); // 세션 ID 삭제
+      navigate('/'); // 홈 또는 원하는 화면으로 이동
     }
   };
+  
 
   const handleToggleCamera = async () => {
     if (publisher) {
