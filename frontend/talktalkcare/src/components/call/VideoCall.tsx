@@ -22,41 +22,43 @@ const VideoCall: React.FC = () => {
         const { session: sess, publisher: pub } = await openviduService.joinSession(sessionId);
         setSession(sess);
         setPublisher(pub);
-        setMainStreamManager(pub); // 초기 메인 스트림은 자신의 퍼블리셔로 설정
-  
-        // ✅ 이미 존재하는 remote 연결들의 스트림을 구독합니다.
-        if (sess.remoteConnections) {
-          Object.values(sess.remoteConnections).forEach((connection: any) => {
-            // 현재 자신의 연결은 제외하고, stream 정보가 있을 경우 구독
-            if (
-              connection.connectionId !== sess.connection.connectionId &&
-              connection.stream
-            ) {
-              const subscriber = sess.subscribe(connection.stream, undefined);
-              console.log("✅ 기존 스트림 구독됨:", connection.stream.streamId);
-              setSubscribers((prev) => [...prev, subscriber]);
-            }
-          });
-        }
-  
-        // 신규 스트림이 추가될 경우 처리
+        setMainStreamManager(pub); // 자신의 퍼블리셔를 기본 메인 스트림으로 설정
+        
+        // 신규 스트림 이벤트 핸들러 등록 (이미 연결된 스트림이 없을 경우 대비)
         sess.on('streamCreated', (event) => {
           const subscriber = sess.subscribe(event.stream, undefined);
           console.log("✅ 신규 스트림 추가됨:", event.stream.streamId);
           setSubscribers((prev) => [...prev, subscriber]);
         });
   
-        // 스트림 종료 처리
         sess.on('streamDestroyed', (event) => {
           console.log("❌ 스트림 종료:", event.stream.streamId);
           setSubscribers((prev) =>
             prev.filter((sub) => sub.stream.streamId !== event.stream.streamId)
           );
         });
+  
+        // 세션 연결 후 잠시 지연을 두고 이미 존재하는 remoteConnections를 구독
+        setTimeout(() => {
+          if (sess.remoteConnections) {
+            Object.values(sess.remoteConnections).forEach((connection: any) => {
+              if (
+                connection.connectionId !== sess.connection.connectionId &&
+                connection.stream
+              ) {
+                // 중복 구독 방지를 위해 이미 구독한 스트림인지 체크하는 로직 추가도 고려
+                const subscriber = sess.subscribe(connection.stream, undefined);
+                console.log("✅ 기존 스트림 구독됨:", connection.stream.streamId);
+                setSubscribers((prev) => [...prev, subscriber]);
+              }
+            });
+          }
+        }, 500); // 500ms 정도의 지연
+        
       } catch (error) {
         console.error('세션 접속 실패:', error);
         alert('세션 접속에 실패했습니다.');
-        navigate('/'); // 실패 시 홈으로 이동
+        navigate('/');
       }
     };
   
@@ -67,7 +69,7 @@ const VideoCall: React.FC = () => {
         session.disconnect();
       }
     };
-  }, [sessionId, navigate]);
+  }, [sessionId, navigate]);  
   
 
   const handleLeaveSession = () => {
