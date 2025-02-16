@@ -166,14 +166,13 @@ public class UserStatusWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    public void sendNotification(User receiver, CallInvitationDto invitation) {
-        WebSocketSession session = sessions.get(receiver.getUserId());
+    public void sendNotification(Integer userId, CallInvitationDto invitation) {
+        WebSocketSession session = sessions.get(userId);
         try {
             String payload = objectMapper.writeValueAsString(invitation);
             session.sendMessage(new TextMessage(payload));
         } catch (Exception e) {
 
         }
-
     }
 }
