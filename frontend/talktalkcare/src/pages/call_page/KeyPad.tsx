@@ -5,7 +5,6 @@ import phone from '../../assets/phoneicon.png';
 import side from '../../assets/side.png';
 import FriendList from '../../components/main_page/FriendList';
 import CustomModal from '../../components/CustomModal';
-import openviduService from '../../services/openviduService';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

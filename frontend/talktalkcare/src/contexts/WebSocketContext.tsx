@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { useNavigate } from 'react-router-dom';  // ✅ useNavigate 추가
 import { Friend } from '../components/main_page/friends';
 import CallNotificationModal from '../components/CallNotificationModal';
+import CustomModal from '../../components/CustomModal';
 import openviduService from '../services/openviduService';
 
 const WS_URL = import.meta.env.VITE_API_WS_URL;
@@ -31,6 +32,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalMessage, setModalMessage] = useState<string>("");
   const friendStatusCallbackRef = useRef<((friends: Friend[]) => void) | undefined>();
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 3;
@@ -79,6 +82,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               await openviduService.joinSession(acceptedData.openviduSessionId);
               localStorage.setItem('currentSessionId', acceptedData.openviduSessionId);
               navigate('/videocall');
+            }
+
+            // 화상통화 거절시 처리
+            if (data.message && data.message.includes("거절하였습니다")) {
+              const acceptedData = data as CallInvitationDto;
+              
+              localStorage.removeItem('currentSessionId');
+              
+              setModalMessage(`${acceptedData.receiverName}님께서 화상통화 요청을 거절하셨습니다.`);
+              setIsModalOpen(true);
             }
 
             // 친구 상태 업데이트
@@ -153,9 +166,28 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const handleRejectCall = () => {
-    console.log('화상통화 거절:', callInvitation);
-    setCallInvitation(null);
+   // 거절 버튼 클릭 시, /call/reject 요청을 보내 caller에게 알림
+   const handleRejectCall = async () => {
+    if (callInvitation) {
+      console.log('화상통화 거절:', callInvitation);
+      try {
+        await fetch(`${BASE_URL}/call/reject`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            receiverName: callInvitation.receiverName,
+            callerId: callInvitation.callerId,
+            openviduSessionId: callInvitation.openviduSessionId,
+          }),
+          credentials: 'include',
+        });
+      } catch (error) {
+        console.error('call/reject 요청 중 에러:', error);
+      }
+      setCallInvitation(null);
+    }
   };
 
   const contextValue = {

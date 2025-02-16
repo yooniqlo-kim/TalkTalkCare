@@ -1,41 +1,40 @@
-// src/components/call/VideoCall.tsx
 import React, { useEffect, useState, useRef } from 'react';
 import { Session, Publisher, Subscriber, StreamManager } from 'openvidu-browser';
 import openviduService from '../../services/openviduService';
 import { useNavigate } from 'react-router-dom';
+import GameListPage from '../../pages/GamePages/GameListPage'; // 🔥 실제 경로에 맞게 import
 import '../../styles/components/VideoCall.css';
 
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
 
-  // 클래스 컴포넌트처럼 session과 publisher를 재생성 없이 유지
+  // session과 publisher를 useRef로 관리
   const sessionRef = useRef<Session | null>(null);
   const publisherRef = useRef<Publisher | null>(null);
-  
-  // 구독자 배열은 state로 관리
+
+  // 구독자 배열 (상대방 화면)
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-  // 메인 비디오로 보여줄 StreamManager (초기엔 publisher)
-  const [mainStreamManager, setMainStreamManager] = useState<StreamManager | null>(null);
   const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(true);
 
-  // caller 또는 receiver가 사용하는 sessionId (localStorage에 저장된 값 사용)
+  // 현재 sessionId (localStorage에서 가져옴)
   const sessionId = localStorage.getItem('currentSessionId') || 'default-session';
 
   useEffect(() => {
     let mounted = true;
+
     const joinSession = async () => {
       try {
-        // 이전 세션이 있으면 leave 처리 (테스트 시에는 클래스 컴포넌트처럼 한 번만 생성)
+        // 기존 세션이 있다면 종료
         if (sessionRef.current) {
           sessionRef.current.disconnect();
         }
 
-        // openviduService.joinSession은 내부적으로 세션 초기화, 토큰 발급, publisher 생성 후 publish를 수행함
+        // openviduService.joinSession: 세션 생성 + 토큰발급 + publisher publish
         const { session, publisher } = await openviduService.joinSession(sessionId);
         if (!mounted) return;
+
         sessionRef.current = session;
         publisherRef.current = publisher;
-        setMainStreamManager(publisher);
 
         // 신규 스트림 subscribe
         session.on('streamCreated', (event) => {
@@ -56,7 +55,7 @@ const VideoCall: React.FC = () => {
           );
         });
 
-        // (필요시) connectionDestroyed 이벤트도 등록
+        // 연결 종료 시 구독자 제거
         session.on('connectionDestroyed', (event) => {
           try {
             const destroyedId = event.connection.connectionId;
@@ -64,11 +63,10 @@ const VideoCall: React.FC = () => {
             setSubscribers((prev) =>
               prev.filter((sub) => sub.stream?.connection?.connectionId !== destroyedId)
             );
-          } catch (error) {
-            console.error('connectionDestroyed 처리 중 에러:', error);
+          } catch (err) {
+            console.error('connectionDestroyed 처리 중 에러:', err);
           }
         });
-
       } catch (error) {
         console.error('세션 접속 실패:', error);
         alert('세션 접속에 실패했습니다.');
@@ -78,7 +76,7 @@ const VideoCall: React.FC = () => {
 
     joinSession();
 
-    // 언마운트 시 세션 disconnect (한 번만 실행)
+    // 언마운트 시 세션 정리
     return () => {
       mounted = false;
       if (sessionRef.current) {
@@ -91,18 +89,7 @@ const VideoCall: React.FC = () => {
     };
   }, [sessionId, navigate]);
 
-  const handleLeaveSession = () => {
-    if (sessionRef.current) {
-      try {
-        sessionRef.current.disconnect();
-      } catch (error) {
-        console.error('세션 종료 중 에러:', error);
-      }
-      localStorage.removeItem('currentSessionId');
-      navigate('/');
-    }
-  };
-
+  // 카메라 토글
   const handleToggleCamera = async () => {
     if (publisherRef.current) {
       const newState = !isVideoEnabled;
@@ -115,8 +102,22 @@ const VideoCall: React.FC = () => {
     }
   };
 
+  // 세션 나가기
+  const handleLeaveSession = () => {
+    if (sessionRef.current) {
+      try {
+        sessionRef.current.disconnect();
+      } catch (error) {
+        console.error('세션 종료 중 에러:', error);
+      }
+      localStorage.removeItem('currentSessionId');
+      navigate('/');
+    }
+  };
+
   return (
     <div className="videocall-container">
+      {/* 상단 헤더 */}
       <header className="videocall-header">
         <h1>화상 통화 중</h1>
         <div className="control-buttons">
@@ -127,29 +128,13 @@ const VideoCall: React.FC = () => {
         </div>
       </header>
 
-      <main className="videocall-main">
-        {/* 메인 비디오 영역 */}
-        <div className="main-video">
-          {mainStreamManager && (
-            <video
-              autoPlay
-              playsInline
-              ref={(video) => {
-                if (video) {
-                  mainStreamManager.addVideoElement(video);
-                }
-              }}
-            />
-          )}
-        </div>
-
-        {/* 썸네일 영역 */}
-        <div className="thumbnails">
-          {publisherRef.current && (
-            <div
-              className="thumbnail"
-              onClick={() => setMainStreamManager(publisherRef.current!)}
-            >
+      {/* 좌우로 화면 분할: 왼쪽(화상통화), 오른쪽(게임목록) */}
+      <div className="videocall-content">
+        {/* 왼쪽 화상통화 영역 */}
+        <div className="video-section">
+          {/* 위: 내 화면 (publisher) */}
+          <div className="video-row local">
+            {publisherRef.current && (
               <video
                 autoPlay
                 playsInline
@@ -159,30 +144,36 @@ const VideoCall: React.FC = () => {
                   }
                 }}
               />
-              <p>나</p>
-            </div>
-          )}
+            )}
+            <p>나</p>
+          </div>
 
-          {subscribers.map((sub, idx) => (
-            <div
-              key={idx}
-              className="thumbnail"
-              onClick={() => setMainStreamManager(sub)}
-            >
-              <video
-                autoPlay
-                playsInline
-                ref={(video) => {
-                  if (video) {
-                    sub.addVideoElement(video);
-                  }
-                }}
-              />
-              <p>상대방 {idx + 1}</p>
-            </div>
-          ))}
+          {/* 아래: 상대방 화면(첫 번째 subscriber) */}
+          <div className="video-row remote">
+            {subscribers.length > 0 ? (
+              <>
+                <video
+                  autoPlay
+                  playsInline
+                  ref={(video) => {
+                    if (video && subscribers[0]) {
+                      subscribers[0].addVideoElement(video);
+                    }
+                  }}
+                />
+                <p>상대방</p>
+              </>
+            ) : (
+              <p style={{ color: '#fff' }}>상대방 대기중...</p>
+            )}
+          </div>
         </div>
-      </main>
+
+        {/* 오른쪽 게임 리스트 영역 */}
+        <div className="game-section">
+          <GameListPage />
+        </div>
+      </div>
     </div>
   );
 };
