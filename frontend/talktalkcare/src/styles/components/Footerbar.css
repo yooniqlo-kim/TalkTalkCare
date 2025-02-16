@@ -1,5 +1,6 @@
 /* Footerbar.css */
 .footer {
+  position: sticky;
   background-color: #F5FFEA;
   padding: 1rem 0;
   width: 100%;
