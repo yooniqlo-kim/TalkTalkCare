@@ -5,6 +5,7 @@ import CallNotificationModal from '../components/CallNotificationModal';
 import openviduService from '../services/openviduService';
 
 const WS_URL = import.meta.env.VITE_API_WS_URL;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface CallInvitationDto {
   callerId: number;
@@ -62,7 +63,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           reconnectAttempts.current = 0;
         };
 
-        websocket.onmessage = (event) => {
+        websocket.onmessage = async (event) => {
           try {
             const data = JSON.parse(event.data);
 
@@ -71,10 +72,19 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               setCallInvitation(data);
             }
 
+            // 화상통화 수락시 처리
+            if (data.message.include("수락")) {
+              console.log('CALL_ACCEPTED 메시지 수신:', data);
+              await openviduService.joinSession(data.openviduSessionId);
+              localStorage.setItem('currentSessionId', data.openviduSessionId);
+              navigate('/videocall');
+            }
+
             // 친구 상태 업데이트
             if (friendStatusCallbackRef.current && Array.isArray(data)) {
               friendStatusCallbackRef.current(data);
             }
+
           } catch (error) {
             console.error('WebSocket 메시지 처리 오류:', error);
           }
@@ -110,14 +120,31 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
   }, [isLoggedIn]);
 
-  // 🔥 수정: navigateTo prop 제거하고 useNavigate() 직접 사용
+
   const handleAcceptCall = async () => {
     if (callInvitation) {
       console.log('화상통화 수락:', callInvitation);
       try {
+        // receiver
         await openviduService.joinSession(callInvitation.openviduSessionId);
         localStorage.setItem('currentSessionId', callInvitation.openviduSessionId);
-        navigate('/videocall');  // ✅ 직접 navigate 사용
+
+        // 백엔드로 /call/accept 요청 전송하여 caller에게 수락 메시지 전송
+        await fetch(`${BASE_URL}/call/accept`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            receiverId: callInvitation.receiverId,
+            callerId: callInvitation.callerId,
+            openviduSessionId: callInvitation.openviduSessionId,
+          }),
+          credentials: 'include',
+        });
+
+        navigate('/videocall');
+
       } catch (error) {
         console.error('Receiver 세션 접속 실패:', error);
       }

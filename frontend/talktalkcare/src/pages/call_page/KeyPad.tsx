@@ -86,10 +86,9 @@ const KeyPad: React.FC = () => {
       } else {
         setModalMessage("호출 알림을 보냈습니다. 상대방의 응답을 기다려주세요.");
         setIsModalOpen(true);
+        // await openviduService.joinSession(newSessionId);
 
-        await openviduService.joinSession(newSessionId);
-
-        navigate('/videocall');
+        // navigate('/videocall');
       }
     } catch (error) {
       setModalMessage('일시적인 서버 오류가 발생했습니다.');
