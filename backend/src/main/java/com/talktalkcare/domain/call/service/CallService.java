@@ -9,6 +9,7 @@ import com.talktalkcare.domain.users.service.FriendService;
 import com.talktalkcare.domain.users.service.UserService;
 import com.talktalkcare.domain.users.service.UserStatusWebSocketHandler;
 import lombok.RequiredArgsConstructor;
+import okhttp3.Call;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,7 +20,7 @@ public class CallService {
     private final FriendService friendService;
     private final UserStatusWebSocketHandler userStatusWebSocketHandler;
 
-    public void callFriend(CallDto callDto) {
+    public void requestCall(CallDto callDto) {
         Integer callerId = callDto.getCallerId();
         User caller = userService.getUserById(callerId);
 
@@ -35,11 +36,24 @@ public class CallService {
         CallInvitationDto invitation = new CallInvitationDto();
         invitation.setCallerId(callerId);
         invitation.setCallerName(caller.getName());
+        invitation.setReceiverId(receiver.getUserId());
         invitation.setReceiverName(receiver.getName());
         invitation.setMessage("화상통화 요청이 도착했습니다.");
         invitation.setOpenviduSessionId(sessionid);
 
-        userStatusWebSocketHandler.sendNotification(receiver, invitation);
+        userStatusWebSocketHandler.sendNotification(receiver.getUserId(), invitation);
+    }
+
+    public void acceptCall(CallDto callDto) {
+        Integer callerId = callDto.getCallerId();
+        String openviduSessionId = callDto.getOpenviduSessionId();
+
+        CallInvitationDto invitation = new CallInvitationDto();
+        invitation.setCallerId(callerId);
+        invitation.setMessage("요청을 수락하였습니다.");
+        invitation.setOpenviduSessionId(openviduSessionId);
+
+        userStatusWebSocketHandler.sendNotification(callerId, invitation);
     }
 
 }
