@@ -19,8 +19,22 @@ public class CallController {
     private final CallService callService;
 
     @PostMapping("/request")
-    public Api<Void> callFriend(@RequestBody CallDto callDto) {
-        callService.callFriend(callDto);
+    public Api<Void> requestCall(@RequestBody CallDto callDto) {
+        callService.requestCall(callDto);
+
+        return Api.OK();
+    }
+
+    @PostMapping("/accept")
+    public Api<Void> acceptCall(@RequestBody CallDto callDto) {
+        callService.acceptCall(callDto);
+
+        return Api.OK();
+    }
+
+    @PostMapping("/reject")
+    public Api<Void> rejectCall(@RequestBody CallDto callDto) {
+        callService.rejectCall(callDto);
 
         return Api.OK();
     }

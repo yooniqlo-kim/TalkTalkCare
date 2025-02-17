@@ -15,6 +15,7 @@ const KeyPad: React.FC = () => {
   const [showFriends, setShowFriends] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>("");
+  const [sessionId, setSessionId] = useState<string>('');
 
   const formatPhoneNumber = (value: string): string => {
     const digits = value.replace(/[^0-9]/g, '');
@@ -70,21 +71,34 @@ const KeyPad: React.FC = () => {
 
     const userId = localStorage.getItem('userId');
 
+    // 호출마다 고유 세션 ID 생성 (caller가 미리 OpenVidu 세션에 접속)
+    const newSessionId = `session-${Date.now()}`;
+    setSessionId(newSessionId);
+    localStorage.setItem('currentSessionId', newSessionId); // 📌 세션 ID 저장
+
     try {
       const response = await fetch(`${BASE_URL}/call/request`, { 
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ callerId: userId, receiverPhone: digits }),
+        body: JSON.stringify({ callerId: userId, receiverPhone: digits,  openviduSessionId: newSessionId }),
         credentials: 'include'
       });
       const data = await response.json();
 
+      // receiver가 오프라인이거나 가입된 사용자가 아니라면
       if (data.result.msg !== 'success') {
         setModalMessage(data.result.msg);
-      } else {
+        setIsModalOpen(true);
+
+        localStorage.removeItem('currentSessionId');
+      } else { // receiver가 온라인이라면 receiver에게 웹소켓을 통해 메세지 보냄
         setModalMessage("호출 알림을 보냈습니다. 상대방의 응답을 기다려주세요.");
+        setIsModalOpen(true);
+        // await openviduService.joinSession(newSessionId);
+
+        // navigate('/videocall');
       }
       setIsModalOpen(true);
     } catch (error) {

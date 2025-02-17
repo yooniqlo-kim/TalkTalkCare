@@ -54,4 +54,9 @@ public class UserController {
 //        return Api.OK(userService.getProfileImage(userId));
 //    }
 
+    @GetMapping("/infos/{userId}")
+    public Api<UserInfoResp> infos(@PathVariable("userId") Integer userId) {
+        return Api.OK(userService.getUserInfos(userId));
+    }
+
 }
