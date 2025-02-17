@@ -43,22 +43,6 @@
   border-radius: 5px;
 }
 
-.instructions  {
-  padding: 10px 20px;
-  font-size: 1.2em;
-  background-color: #4a148c;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.input-section button:hover,
-.instructions button:hover {
-  background-color: #6a1b9a;
-}
-
 .message {
   margin-top: 20px;
   padding: 10px;
@@ -74,14 +58,6 @@
 .message.wrong {
   background-color: #ffcdd2;
   color: #c62828;
-}
-
-.instructions {
-  text-align: left;
-  background-color: #f5f5f5;
-  padding: 20px;
-  border-radius: 10px;
-  margin: 20px 0;
 }
 
 .final-score {

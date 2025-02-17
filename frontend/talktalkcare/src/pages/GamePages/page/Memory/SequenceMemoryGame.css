@@ -61,25 +61,6 @@
   color: #c62828;
 }
 
-.instructions {
-  text-align: left;
-  background-color: #b50e0e;
-  padding: 20px;
-  border-radius: 10px;
-  margin: 20px 0;
-}
-
-.instructions button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 1.2em;
-  background-color: #444346;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
 @media (max-width: 600px) {
   .color-button {
     width: 120px;
