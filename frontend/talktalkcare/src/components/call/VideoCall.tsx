@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
 import { useNavigate } from 'react-router-dom';
-import WsGameListPage from '../../pages/GamePages/WsGameListPage';
+import WsGameListPage from '../../pages/GamePages/ws/WsGameListPage';
 import '../../styles/components/VideoCall.css';
 
 // RemoteStream 컴포넌트 분리
