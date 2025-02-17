@@ -47,66 +47,64 @@ const WsGameListPage = () => {
       ? games
       : games.filter((game) => game.skill.trim() === selectedSkill.trim());
     setFilteredGames(filtered);
-  }, [selectedSkill]);
+  }, [selectedSkill, games]);
 
-  // WebSocket 이벤트 리스너
+  // WebSocket 이벤트 리스너 등록
   useEffect(() => {
-    onGameSelected((event: GameEvent) => {
-      const userId = localStorage.getItem('userId');
-      
+    const userId = localStorage.getItem('userId');
+
+    const handleGameEvent = (event: GameEvent) => {
+      console.log('🎮 게임 이벤트 수신:', event); // ✅ 수신 로그 확인
+
       if (event.senderId !== userId) {
         switch (event.type) {
-          case 'GAME_SELECTED':
+          case 'GAME_SELECTED': {
             const selectedGame = games.find((g) => g.id === event.gameId);
-            setActiveGame(selectedGame || null);
-            setIsHost(false);
+            console.log('🎯 상대방이 선택한 게임:', selectedGame);
+
+            if (selectedGame) {
+              setActiveGame(selectedGame);
+              setIsHost(false);
+            }
             break;
+          }
           case 'GAME_DESELECTED':
+            console.log('❌ 상대방이 게임을 해제함');
             setActiveGame(null);
             setIsHost(false);
             break;
           case 'SKILL_CHANGED':
             if (event.skill) {
+              console.log('🔄 상대방이 스킬 변경:', event.skill);
               setSelectedSkill(event.skill);
             }
             break;
         }
       }
-    });
-  }, [onGameSelected, games]);
+    };
+
+    // WebSocket 이벤트 리스너 등록
+    onGameSelected(handleGameEvent);
+
+    return () => {
+      onGameSelected(() => {});
+    };
+  }, [games]); // ✅ games 의존성 추가
 
   const handleGameClick = (game: Game) => {
     const userId = localStorage.getItem('userId');
     setActiveGame(game);
     setIsHost(true);
-    
-    sendGameEvent({
+
+    const gameEvent: GameEvent = {
       type: 'GAME_SELECTED',
       gameId: game.id,
-      senderId: userId
-    });
-  };
+      skill: game.skill,
+      senderId: userId,
+    };
 
-  const handleBackToList = () => {
-    const userId = localStorage.getItem('userId');
-    setActiveGame(null);
-    setIsHost(false);
-    
-    sendGameEvent({
-      type: 'GAME_DESELECTED',
-      senderId: userId
-    });
-  };
-
-  const handleSkillChange = (skill: string) => {
-    const userId = localStorage.getItem('userId');
-    setSelectedSkill(skill);
-    
-    sendGameEvent({
-      type: 'SKILL_CHANGED',
-      skill: skill,
-      senderId: userId
-    });
+    console.log('📤 WebSocket 이벤트 전송:', gameEvent); // ✅ 전송 로그 확인
+    sendGameEvent(gameEvent);
   };
 
   return (
@@ -114,7 +112,7 @@ const WsGameListPage = () => {
       {activeGame ? (
         <div className="game-detail">
           {isHost && (
-            <button className="back-button" onClick={handleBackToList}>
+            <button className="back-button" onClick={() => handleGameClick(activeGame)}>
               ⬅ 목록으로
             </button>
           )}
@@ -137,7 +135,7 @@ const WsGameListPage = () => {
             <div className="skills-filter">
               <button
                 className={`skill-button ${selectedSkill === 'all' ? 'active' : ''}`}
-                onClick={() => handleSkillChange('all')}
+                onClick={() => setSelectedSkill('all')}
               >
                 전체
               </button>
@@ -145,7 +143,7 @@ const WsGameListPage = () => {
                 <button
                   key={skill}
                   className={`skill-button ${selectedSkill === skill ? 'active' : ''}`}
-                  onClick={() => handleSkillChange(skill)}
+                  onClick={() => setSelectedSkill(skill)}
                 >
                   {skill}
                 </button>
