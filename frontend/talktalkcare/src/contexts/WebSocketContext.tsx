@@ -78,7 +78,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             // 화상통화 수락시 처리
             if (data.message && data.message.includes("수락하였습니다")) {
               const acceptedData = data as CallInvitationDto;
-              console.log('CALL_ACCEPTED 메시지 수신:', acceptedData);
+              
+              localStorage.setItem('opponentUserId', acceptedData.receiverId.toString());
+              // caller도 openvidu 세션 참가
               await openviduService.joinSession(acceptedData.openviduSessionId);
               localStorage.setItem('currentSessionId', acceptedData.openviduSessionId);
               navigate('/videocall');
@@ -139,18 +141,19 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (callInvitation) {
       console.log('📞 화상통화 수락 시작:', {
         sessionId: callInvitation.openviduSessionId,
-        caller: callInvitation.callerId,
-        receiver: callInvitation.receiverId
+        callerId: callInvitation.callerId,
+        receiverId: callInvitation.receiverId
       });
 
       try {
-        // OpenVidu 세션 참가
+        // receiver 먼저 OpenVidu 세션 참가
         const sessionResult = await openviduService.joinSession(callInvitation.openviduSessionId);
         console.log('✅ OpenVidu 세션 참가 완료:', sessionResult.session.sessionId);
         
+        localStorage.setItem('opponentUserId', callInvitation.callerId.toString());
         localStorage.setItem('currentSessionId', callInvitation.openviduSessionId);
 
-        // 수락 메시지 전송
+        // receiver가 caller에게 수락 메시지 전송
         const response = await fetch(`${BASE_URL}/call/accept`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
