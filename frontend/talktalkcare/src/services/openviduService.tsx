@@ -169,8 +169,12 @@ class OpenviduService {
       const data = await response.json();
       console.log('토큰 생성 성공:', data.token);
       
-      // OpenVidu 서버가 생성한 토큰 URL을 그대로 반환
-      return data.token;
+      // 토큰 URL에 /openvidu/ 경로 추가 (마지막 슬래시 포함)
+      const fixedToken = data.token.replace(
+        /^wss:\/\/www\.talktalkcare\.com:4443/,
+        'wss://www.talktalkcare.com:4443/openvidu/'
+      );
+      return fixedToken;
     }
   
     private async getToken(sessionId: string): Promise<string> {
