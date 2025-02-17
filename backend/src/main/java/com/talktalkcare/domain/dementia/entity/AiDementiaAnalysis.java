@@ -31,6 +31,6 @@ public class AiDementiaAnalysis {
 
     @NotNull
     @Column(name = "analysis_sequence", nullable = false)
-    private Integer analysisSequence;
+    private int analysisSequence;
 
 }
