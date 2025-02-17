@@ -111,29 +111,6 @@ const GamePage: React.FC<GamePageProps> = ({
   
   return (
     <div className="game-page">
-      <div className="game-header">
-        {/* <div className="header-content">
-          {gameStarted && (
-            <div className="time-display">
-              {isPreview 
-                ? `준비 시간: ${currentPreviewTime}초`
-                : `남은 시간: ${actualCurrentTime}초`}
-            </div>
-          )}
-        </div>
-        <div className="game-controls">
-          {gameStarted && onRestart && (
-            <button className="control-button restart" onClick={handleRestart}>
-              다시 시작
-            </button>
-          )}
-          {gameStarted && (
-            <button className="control-button exit" onClick={handleExit}>
-              나가기
-            </button>
-          )}
-        </div> */}
-      </div>
       {gameStarted && (
         <>
           <div className="small-game-header">
