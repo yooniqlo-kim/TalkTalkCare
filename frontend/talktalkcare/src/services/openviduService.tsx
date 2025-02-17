@@ -168,12 +168,15 @@ class OpenviduService {
   
       const data = await response.json();
       console.log('토큰 생성 성공:', data.token);
-      // OpenVidu 서버의 WebSocket URL 형식에 맞게 수정
-      const token = data.token.replace(
-        /^wss:\/\/www\.talktalkcare\.com:4443\?/,
-        'wss://www.talktalkcare.com:4443/openvidu?'
-      );
-      return token;
+      
+      // URL에서 sessionId와 token 파라미터 추출
+      const url = new URL(data.token);
+      const params = new URLSearchParams(url.search);
+      const token = params.get('token');
+      
+      // 새로운 WebSocket URL 생성
+      const wsUrl = `wss://www.talktalkcare.com:4443/openvidu?sessionId=${sessionId}&token=${token}`;
+      return wsUrl;
     }
   
     private async getToken(sessionId: string): Promise<string> {
