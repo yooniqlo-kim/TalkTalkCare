@@ -1,11 +1,12 @@
+// WsGameListPage.tsx
 import React, { useState, useEffect } from 'react';
 import '../../styles/components/GameList.css';
-import logicGames from './page/Logic/LogicalGame';
-import concentrationGames from './page/Concentration/Concentration';
-import thinkingGames from './page/Thinking/Thinking';
-import quicknessGames from './page/Quickness/Quickness';
-import memoryGames from './page/Memory/Memory';
-import { useWebSocket } from '../../contexts/WebSocketContext';
+import logicGames from '../page/Logic/LogicalGame';
+import concentrationGames from '../page/Concentration/Concentration';
+import thinkingGames from '../page/Thinking/Thinking';
+import quicknessGames from '../page/Quickness/Quickness';
+import memoryGames from '../page/Memory/Memory';
+import { useWebSocket } from '../../../contexts/WebSocketContext';
 
 export interface Game {
   id: string;
@@ -46,13 +47,14 @@ const WsGameListPage: React.FC = () => {
   const handleGameClick = (game: Game) => {
     setActiveGame(game);
     console.log(`🕹️ 선택된 게임: ${game.id}`);
+    // HTTP API 호출 대신 WebSocket 메시지만 전송합니다.
     sendGameEvent({
       type: 'GAME_SELECTED',
-      game, // 필요한 정보를 포함한 게임 객체를 전송
+      game, // 필요한 게임 정보를 담아 전송 (예: id, name, description, icon 등)
     });
   };
 
-  // WebSocket 메시지 수신: 상대방이 게임을 선택하면 activeGame 업데이트
+  // WebSocket 메시지 수신: 상대방이 게임 선택 이벤트를 보냈을 때 처리
   useEffect(() => {
     if (!ws) return;
 
@@ -78,7 +80,7 @@ const WsGameListPage: React.FC = () => {
   const handleBackToList = () => {
     console.log('🔄 목록으로 돌아가기');
     setActiveGame(null);
-    // 선택 해제 이벤트를 보내고 싶다면 여기도 sendGameEvent 호출 가능
+    // 선택 해제 이벤트를 원한다면 여기서도 WebSocket 메시지를 보낼 수 있습니다.
   };
 
   return (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
 import { useNavigate } from 'react-router-dom';
-import GameListPage from '../../pages/GamePages/GameListPage'; // 실제 경로
+import WsGameListPage from '../../pages/GamePages/WsGameListPage';
 import '../../styles/components/VideoCall.css';
 
 // RemoteStream 컴포넌트 분리
@@ -246,7 +246,7 @@ const VideoCall: React.FC = () => {
 
         {/* 오른쪽: 게임 리스트 */}
         <div className="game-section">
-          <GameListPage />
+          <WsGameListPage />
         </div>
       </div>
     </div>
