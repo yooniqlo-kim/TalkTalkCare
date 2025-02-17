@@ -103,6 +103,7 @@ services:
         "url=turn:talktalkcare.com:3478,username=turnuser,credential=turnpassword"]
       - OPENVIDU_WEBRTC_TURN_ENABLED=true
       - OPENVIDU_WEBRTC_STUN_ENABLED=true
+      - OPENVIDU_BIND_ADDRESS=0.0.0.0
     ports:
       - "4443:4443"
       - "40000-40400:40000-40400/tcp"
