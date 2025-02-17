@@ -1,6 +1,6 @@
 import React from 'react';
 import UserInfo from '../../components/my_page/UserInfo';
-import Header from '../Header';
+// import Header from '../Header';
 
 const UserInfoPage = () => {
   const mockUserInfo = {
