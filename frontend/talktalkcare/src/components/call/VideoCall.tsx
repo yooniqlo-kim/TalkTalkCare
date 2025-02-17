@@ -24,12 +24,12 @@ const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
 
-  // OpenVidu 인스턴스는 한 번만 생성 (ref 사용)
+  // OV 인스턴스는 컴포넌트 최초 렌더링 시 한 번만 생성
   const OV = useRef<OpenVidu>(new OpenVidu()).current;
   OV.enableProdMode();
   console.log('[OV] OpenVidu 인스턴스 생성');
 
-  // 세션은 ref로 관리하여 최신값을 항상 참조
+  // 세션은 ref로 관리하여 항상 최신 객체를 참조
   const sessionRef = useRef<Session | null>(null);
   const [publisher, setPublisher] = useState<Publisher | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -44,7 +44,7 @@ const VideoCall: React.FC = () => {
     navigate('/');
   }, [navigate]);
 
-  // 세션 종료 함수 (cleanup)
+  // 세션 종료 및 정리 함수
   const leaveSession = useCallback(() => {
     console.log('[leaveSession] 세션 종료');
     if (sessionRef.current) {
@@ -55,7 +55,7 @@ const VideoCall: React.FC = () => {
     }
   }, []);
 
-  // 브라우저 종료 시 세션 종료
+  // 브라우저 종료 시 세션 종료 처리
   useEffect(() => {
     window.addEventListener('beforeunload', leaveSession);
     return () => {
@@ -73,13 +73,14 @@ const VideoCall: React.FC = () => {
 
     // 이미 세션이 생성되어 있다면 재초기화를 방지
     if (sessionRef.current) {
-      console.log('[useEffect] 이미 세션 초기화됨');
+      console.log('[useEffect] 세션이 이미 초기화되어 있음');
       return;
     }
 
     const initSession = async () => {
       try {
         console.log('[initSession] 세션 초기화 시작');
+        // 새 세션 생성
         const newSession = OV.initSession();
         sessionRef.current = newSession;
         console.log('[initSession] 새 세션 생성:', newSession);
@@ -88,7 +89,7 @@ const VideoCall: React.FC = () => {
         newSession.on('streamCreated', async (event: any) => {
           console.log('[initSession] streamCreated 이벤트 발생:', event);
           try {
-            // 안정화를 위한 딜레이 (1초)
+            // 안정화를 위해 1초 딜레이 후 구독 시도
             await new Promise(resolve => setTimeout(resolve, 1000));
             const subscriber = await newSession.subscribe(event.stream, undefined);
             console.log('[initSession] 스트림 구독 성공:', event.stream.streamId);
@@ -120,10 +121,10 @@ const VideoCall: React.FC = () => {
         await newSession.connect(token);
         console.log('[initSession] 세션 연결 완료');
 
-        // 연결 후 안정화를 위한 딜레이 (1초)
+        // 연결 후 안정화를 위한 딜레이 1초
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // 퍼블리셔 초기화 및 발행
+        // 퍼블리셔 초기화 및 게시
         console.log('[initSession] 퍼블리셔 초기화 시작');
         const newPublisher = await OV.initPublisherAsync(undefined, {
           audioSource: undefined,
