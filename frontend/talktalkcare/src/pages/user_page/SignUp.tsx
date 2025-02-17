@@ -67,12 +67,14 @@ const SignUp = () => {
 
   const requestSmsVerification = async () => {
     try {
-      await authService.sendSmsVerification(formData.phoneNumber);
-      setIsSmsVerificationSent(true);
-      alert('인증번호가 전송되었습니다.');
-      setStep(4);
+      const response = await authService.sendSmsVerification(formData.phoneNumber);
+      if(response) {
+        setIsSmsVerificationSent(true);
+        alert('인증번호가 전송되었습니다.');
+        setStep(4);
+      }
     } catch (error) {
-      alert('SMS 인증번호 요청에 실패했습니다.');
+        alert('SMS 인증번호 요청에 실패했습니다.');
     }
   };
 
