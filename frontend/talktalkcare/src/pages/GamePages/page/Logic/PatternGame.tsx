@@ -176,7 +176,7 @@ const PatternGame: React.FC = () => {
           <div className="">
             <div className="score">점수: {score}</div>
             <div className="level">레벨: {level}</div>
-            <div className="timer">남은 시간: {timeLeft}초</div>
+            {/* <div className="timer">남은 시간: {timeLeft}초</div> */}
           </div>
 
           <div className="sequence-display">
