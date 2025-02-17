@@ -39,14 +39,15 @@
 }
 
 /* 3x3 두더지 구멍 게임판 */
-.game-board {
+.game-board-mole {
   display: grid;
   grid-template-columns: repeat(3, 1fr);  /* 3x3 그리드 유지 */
   gap: 10px;
   padding: 15px;
   background-color: #8b4513;
   border-radius: 10px;
-  width: 100%;
+  width: 80%;
+  height: 50%;
   aspect-ratio: 1;  /* 정사각형 유지 */
   margin: 20px 0;
 }
