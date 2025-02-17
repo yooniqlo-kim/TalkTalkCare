@@ -9,6 +9,16 @@ class OpenviduService {
     constructor() {
       this.OV = new OpenVidu();
       this.OV.enableProdMode();
+      this.OV.setAdvancedConfiguration({
+        iceServers: [
+          {
+            urls: [
+              "stun:stun.l.google.com:19302",
+              "stun:stun1.l.google.com:19302"
+            ]
+          }
+        ]
+      });
     }
   
 
@@ -17,12 +27,15 @@ class OpenviduService {
         // 기존 세션이 있다면 종료하고 잠시 대기
         if (this.session) {
           await this.leaveSession();
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 세션 정리 대기 추가
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
 
         this.session = this.OV.initSession();
         
-        // 이벤트 핸들러 등록 - 구독 로직 추가
+        if (!this.session) {
+          throw new Error('세션 초기화 실패');
+        }
+
         this.session.on('streamCreated', async (event) => {
           console.log('새 스트림 생성됨:', event.stream.streamId);
           await new Promise(resolve => setTimeout(resolve, 1000));
@@ -32,20 +45,21 @@ class OpenviduService {
             return;
           }
 
-          try {
-            const subscriber = await this.session.subscribe(event.stream, undefined);
-            console.log('✅ 구독 성공:', subscriber.stream?.streamId);
-            return subscriber;
-          } catch (error) {
-            console.error('❌ 첫 구독 시도 실패, 재시도:', error);
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            if (!this.session) {
-              console.error('재시도 중 세션이 종료됨');
-              return;
+          let retryCount = 0;
+          const maxRetries = 3;
+
+          while (retryCount < maxRetries) {
+            try {
+              const subscriber = await this.session.subscribe(event.stream, undefined);
+              console.log(`✅ 구독 성공 (시도 ${retryCount + 1}):`, subscriber.stream?.streamId);
+              return subscriber;
+            } catch (error) {
+              retryCount++;
+              console.error(`❌ 구독 시도 ${retryCount} 실패:`, error);
+              if (retryCount < maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+              }
             }
-            
-            return await this.session.subscribe(event.stream, undefined);
           }
         });
 
@@ -56,6 +70,7 @@ class OpenviduService {
         // 토큰 발급 및 세션 연결
         const token = await this.getToken(sessionId);
         await this.session.connect(token);
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Publisher 초기화
         console.log('🎥 Publisher 초기화 시작');
@@ -67,12 +82,15 @@ class OpenviduService {
           resolution: '640x480',
           frameRate: 30,
           insertMode: 'APPEND',
-          mirror: false
+          mirror: false,
+          videoSimulcast: false
         });
         console.log('✅ Publisher 초기화 완료');
 
-        // 스트림 발행
-        console.log('📡 스트림 발행 시작');
+        if (!this.publisher || !this.session) {
+          throw new Error('Publisher 또는 Session 초기화 실패');
+        }
+
         await this.session.publish(this.publisher);
         console.log('✅ 스트림 발행 완료');
 

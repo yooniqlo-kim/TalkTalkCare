@@ -2,11 +2,7 @@ import React from 'react';
 
 interface PentagonGraphProps {
   scores: {
-    순발력: number;
-    논리력: number;
-    기억력: number;
-    사고력: number;
-    집중력: number;
+    [key: number]: number; // categoryId: average
   };
   maxScore?: number;
 }
@@ -18,6 +14,15 @@ const PentagonGraph: React.FC<PentagonGraphProps> = ({
   const center = { x: 150, y: 150 };
   const radius = 100;
   const angles = [270, 342, 54, 126, 198].map((angle) => angle * Math.PI / 180);
+
+  // 카테고리 ID에 해당하는 레이블 매핑
+  const categoryLabels: { [key: number]: string } = {
+    1: '순발력',
+    2: '논리력',
+    3: '기억력',
+    4: '사고력',
+    5: '집중력'
+  };
 
   // 각 꼭지점의 좌표 계산
   const getPoint = (angle: number, score: number) => {
@@ -32,13 +37,9 @@ const PentagonGraph: React.FC<PentagonGraphProps> = ({
   const outerPoints = angles.map(angle => getPoint(angle, maxScore));
   
   // 실제 점수 기반의 좌표
-  const scorePoints = [
-    scores.순발력,
-    scores.논리력,
-    scores.기억력,
-    scores.사고력,
-    scores.집중력
-  ].map((score, i) => getPoint(angles[i], score));
+  const scorePoints = [1, 2, 3, 4, 5].map((categoryId, i) => 
+    getPoint(angles[i], scores[categoryId] || 0)
+  );
 
   // 각 레벨별 오각형 좌표 생성 (5단계)
   const levelPoints = [0.2, 0.4, 0.6, 0.8, 1].map(level =>
@@ -71,7 +72,7 @@ const PentagonGraph: React.FC<PentagonGraphProps> = ({
         {/* 라벨 */}
         {angles.map((angle, i) => {
           const labelPoint = getPoint(angle, radius * 1.2);
-          const labels = ['순발력', '논리력', '기억력', '사고력', '집중력'];
+          const categoryId = i + 1;
           return (
             <text
               key={i}
@@ -82,7 +83,7 @@ const PentagonGraph: React.FC<PentagonGraphProps> = ({
               fontSize="12"
               fill="#666"
             >
-              {labels[i]}
+              {categoryLabels[categoryId]}
             </text>
           );
         })}

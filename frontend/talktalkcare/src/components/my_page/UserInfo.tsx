@@ -6,15 +6,15 @@ interface UserInfoProps {
   userInfo: {
     name: string;
     age: number;
-    id: string;
-    nickname: string;
+    loginId: string;
     phone: string;
+    s3Filename?: string;
   };
   onEdit?: () => void;
 }
 
 const UserInfo: React.FC<UserInfoProps> = ({ userInfo, onEdit }) => {
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(userInfo.s3Filename || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSignOut = () => {
@@ -78,15 +78,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ userInfo, onEdit }) => {
           </div>
           <div className="info-row">
             <span className="info-label">아이디:</span>
-            <span className="info-value">{userInfo.id}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">닉네임:</span>
-            <span className="info-value">{userInfo.nickname}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">비밀번호:</span>
-            <span className="info-value">***********</span>
+            <span className="info-value">{userInfo.loginId}</span>
           </div>
           <div className="info-row" style={{ marginBottom: '0' }}>
             <span className="info-label">전화번호:</span>
