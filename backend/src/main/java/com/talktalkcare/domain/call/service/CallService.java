@@ -46,10 +46,12 @@ public class CallService {
 
     public void acceptCall(CallDto callDto) {
         Integer callerId = callDto.getCallerId();
+        Integer receiverId = callDto.getReceiverId();
         String openviduSessionId = callDto.getOpenviduSessionId();
 
         CallInvitationDto invitation = new CallInvitationDto();
         invitation.setCallerId(callerId);
+        invitation.setReceiverId(receiverId);
         invitation.setMessage("요청을 수락하였습니다");
         invitation.setOpenviduSessionId(openviduSessionId);
 
