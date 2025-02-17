@@ -22,6 +22,8 @@ interface WebSocketContextType {
   onFriendStatusUpdate: (callback: (friends: Friend[]) => void) => void;
   acceptCall: () => Promise<void>;
   rejectCall: () => Promise<void>;
+  sendGameEvent: (data: any) => void;
+  onGameSelected: (callback: (game: any) => void) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -34,6 +36,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const friendStatusCallbackRef = useRef<((friends: Friend[]) => void) | undefined>();
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 3;
+  const gameSelectionCallback = useRef<(game: any) => void | undefined>();
   const [callInvitation, setCallInvitation] = useState<CallInvitationDto | null>(null);
 
   useEffect(() => {
@@ -83,6 +86,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             // 친구 상태 업데이트 (옵션)
             if (friendStatusCallbackRef.current && Array.isArray(data)) {
               friendStatusCallbackRef.current(data);
+            }
+            // 게임 선택 처리
+            if (data.type === 'GAME_SELECTED' && gameSelectionCallback.current) {
+              gameSelectionCallback.current(data);
             }
           } catch (error) {
             console.error('WebSocket 메시지 처리 오류:', error);
@@ -164,6 +171,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const sendGameEvent = (data: any) => {
+    if (ws && isConnected) {
+      ws.send(JSON.stringify(data));
+    }
+  };
+
+  const onGameSelected = useCallback((callback: (game: any) => void) => {
+    gameSelectionCallback.current = callback;
+  }, []);
+
   const contextValue: WebSocketContextType = {
     isConnected,
     setIsLoggedIn,
@@ -172,6 +189,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }, []),
     acceptCall: handleAcceptCall,
     rejectCall: handleRejectCall,
+    sendGameEvent,
+    onGameSelected,
   };
 
   return (
