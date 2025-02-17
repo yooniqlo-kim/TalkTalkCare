@@ -1,19 +1,17 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
+import { OpenVidu, Session, Publisher, Subscriber, StreamManager } from 'openvidu-browser';
 import { useNavigate } from 'react-router-dom';
-import GameListPage from '../../pages/GamePages/GameListPage'; // 실제 경로
+import GameListPage from '../../pages/GamePages/GameListPage';
 import '../../styles/components/VideoCall.css';
 
-// RemoteStream 컴포넌트 분리
+// RemoteStream 컴포넌트: 각 구독자의 비디오 요소 렌더링
 const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-
   useEffect(() => {
     if (videoRef.current) {
       subscriber.addVideoElement(videoRef.current);
     }
   }, [subscriber]);
-
   return (
     <div className="video-row remote">
       <video autoPlay playsInline ref={videoRef} />
@@ -27,9 +25,18 @@ const VideoCall: React.FC = () => {
   const [OV] = useState(() => {
     const ov = new OpenVidu();
     ov.enableProdMode();
+    // 기본 STUN 서버 및 암호화 설정 적용 (TURN 서버 설정 필요 시 추가)
+    ov.setAdvancedConfiguration({
+      iceServers: [
+        {
+          urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"],
+        },
+      ],
+      publisherSrtcpCipher: 'AEAD_AES_128_GCM',
+      subscriberSrtcpCipher: 'AEAD_AES_128_GCM',
+    });
     return ov;
   });
-
   const [session, setSession] = useState<Session | null>(null);
   const [publisher, setPublisher] = useState<Publisher | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -37,43 +44,59 @@ const VideoCall: React.FC = () => {
 
   const sessionId = localStorage.getItem('currentSessionId');
 
+  const navigateHome = useCallback(() => {
+    localStorage.removeItem('currentSessionId');
+    localStorage.removeItem('opponentUserId');
+    navigate('/');
+  }, [navigate]);
+
   useEffect(() => {
     if (!sessionId) {
-      navigate('/');
+      navigateHome();
       return;
     }
 
     const initSession = async () => {
       try {
-        // 1. 세션 초기화
         const newSession = OV.initSession();
-        setSession(newSession);
 
-        // 2. 이벤트 핸들러 등록
-        const streamCreatedHandler = async (event: any) => {
-          const subscriber = await newSession.subscribe(event.stream, undefined);
-          setSubscribers(prev => [...prev, subscriber]);
+        // 이벤트 핸들러 등록
+        const handleStreamCreated = async (event: any) => {
+          try {
+            // 연결 안정화를 위해 1초 딜레이
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const subscriber = await newSession.subscribe(event.stream, undefined);
+            console.log('스트림 구독 성공:', event.stream.streamId);
+            setSubscribers(prev => [...prev, subscriber]);
+          } catch (error) {
+            console.error('스트림 구독 실패:', error);
+          }
         };
 
-        const streamDestroyedHandler = (event: any) => {
-          setSubscribers(prev => 
-            prev.filter(sub => sub.stream.streamId !== event.stream.streamId)
+        const handleStreamDestroyed = (event: any) => {
+          setSubscribers(prev =>
+            prev.filter(sub => sub.stream?.streamId !== event.stream.streamId)
           );
         };
 
-        const sessionDisconnectedHandler = () => {
+        const handleSessionDisconnected = () => {
           cleanupSession();
         };
 
-        newSession.on('streamCreated', streamCreatedHandler);
-        newSession.on('streamDestroyed', streamDestroyedHandler);
-        newSession.on('sessionDisconnected', sessionDisconnectedHandler);
+        newSession.on('streamCreated', handleStreamCreated);
+        newSession.on('streamDestroyed', handleStreamDestroyed);
+        newSession.on('sessionDisconnected', handleSessionDisconnected);
 
-        // 3. 토큰 발급 및 세션 연결
+        setSession(newSession);
+
+        // 토큰 발급 및 세션 연결
         const token = await getToken(sessionId);
         await newSession.connect(token);
+        console.log('세션 연결 완료');
 
-        // 4. Publisher 초기화 및 발행
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // 퍼블리셔 초기화 및 발행
         const newPublisher = await OV.initPublisherAsync(undefined, {
           audioSource: undefined,
           videoSource: undefined,
@@ -82,24 +105,14 @@ const VideoCall: React.FC = () => {
           resolution: '640x480',
           frameRate: 30,
           insertMode: 'APPEND',
-          mirror: false
+          mirror: false,
         });
-
         await newSession.publish(newPublisher);
         setPublisher(newPublisher);
-
-        // 5. Cleanup 함수 반환
-        return () => {
-          newSession.off('streamCreated', streamCreatedHandler);
-          newSession.off('streamDestroyed', streamDestroyedHandler);
-          newSession.off('sessionDisconnected', sessionDisconnectedHandler);
-          cleanupSession();
-        };
-
       } catch (error) {
         console.error('세션 초기화 실패:', error);
         cleanupSession();
-        navigate('/');
+        navigateHome();
       }
     };
 
@@ -115,7 +128,11 @@ const VideoCall: React.FC = () => {
     };
 
     initSession();
-  }, [OV, sessionId, navigate]);
+
+    return () => {
+      cleanupSession();
+    };
+  }, [OV, sessionId, navigateHome]);
 
   const handleToggleCamera = useCallback(async () => {
     if (publisher) {
@@ -123,7 +140,7 @@ const VideoCall: React.FC = () => {
       await publisher.publishVideo(newState);
       setIsVideoEnabled(newState);
     }
-  }, [isVideoEnabled, publisher]);
+  }, [publisher, isVideoEnabled]);
 
   const handleLeaveSession = () => {
     if (session) {
@@ -132,23 +149,19 @@ const VideoCall: React.FC = () => {
       } catch (error) {
         console.error('세션 종료 중 에러:', error);
       }
-      localStorage.removeItem('currentSessionId');
-      localStorage.removeItem('opponentUserId');
-      navigate('/');
+      navigateHome();
     }
   };
 
-  // (A) 화면 공유 예시: 브라우저 탭 or 앱 전체 공유
   const handleStartScreenShare = async () => {
     if (!session) return;
-
     try {
-      const OV = session.openvidu;
-      const screenPublisher = await OV.initPublisherAsync(undefined, {
-        videoSource: 'screen', // 화면 공유
-        publishAudio: false,   // 필요하다면 true
+      const OVInstance = session.openvidu;
+      const screenPublisher = await OVInstance.initPublisherAsync(undefined, {
+        videoSource: 'screen',
+        publishAudio: false,
         publishVideo: true,
-        mirror: false
+        mirror: false,
       });
       await session.publish(screenPublisher);
       console.log('화면 공유 시작!');
@@ -157,50 +170,43 @@ const VideoCall: React.FC = () => {
     }
   };
 
-  // OpenVidu 토큰 발급 관련 함수들 추가
-  const createSession = async (sessionId: string): Promise<string> => {
+  // API 함수들: createSession, createToken, getToken
+  const createSession = async (sessId: string): Promise<string> => {
     const response = await fetch('https://www.talktalkcare.com/openvidu/api/sessions', {
       method: 'POST',
       headers: {
         'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare'),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ customSessionId: sessionId }),
-      credentials: 'include'
+      body: JSON.stringify({ customSessionId: sessId }),
+      credentials: 'include',
     });
-
-    if (response.status === 409) {
-      return sessionId;
-    }
-
+    if (response.status === 409) return sessId;
     if (!response.ok) {
       throw new Error(`세션 생성 실패: ${response.status}`);
     }
-
     const data = await response.json();
     return data.id;
   };
 
-  const createToken = async (sessionId: string): Promise<string> => {
-    const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessionId}/connection`, {
+  const createToken = async (sessId: string): Promise<string> => {
+    const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessId}/connection`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
+        'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare'),
       },
-      credentials: 'include'
+      credentials: 'include',
     });
-
     if (!response.ok) {
       throw new Error(`토큰 생성 실패: ${response.status}`);
     }
-
     const data = await response.json();
     return data.token;
   };
 
-  const getToken = async (sessionId: string): Promise<string> => {
-    const sid = await createSession(sessionId);
+  const getToken = async (sessId: string): Promise<string> => {
+    const sid = await createSession(sessId);
     return await createToken(sid);
   };
 
@@ -212,15 +218,14 @@ const VideoCall: React.FC = () => {
           <button onClick={handleToggleCamera}>
             {isVideoEnabled ? '카메라 끄기' : '카메라 켜기'}
           </button>
-          {/* 화면 공유 버튼 예시 */}
           <button onClick={handleStartScreenShare}>화면 공유</button>
           <button onClick={handleLeaveSession}>세션 나가기</button>
         </div>
       </header>
 
       <div className="videocall-content">
-        {/* 왼쪽: 위(내화면), 아래(상대방화면) */}
         <div className="video-section">
+          {/* 로컬 비디오 */}
           <div className="video-row local">
             {publisher && (
               <video
@@ -235,16 +240,16 @@ const VideoCall: React.FC = () => {
             )}
             <p>나</p>
           </div>
-
-          {/* 원격 스트림 (상대방 화면) */}
-          {subscribers.length > 0 ? (
-            <RemoteStream subscriber={subscribers[0]} />
-          ) : (
-            <p style={{ color: '#fff' }}>상대방 대기중...</p>
-          )}
+          {/* 원격 비디오 */}
+          <div className="video-row remote">
+            {subscribers.length > 0 ? (
+              <RemoteStream subscriber={subscribers[0]} />
+            ) : (
+              <p style={{ color: '#fff' }}>상대방 대기중...</p>
+            )}
+          </div>
         </div>
 
-        {/* 오른쪽: 게임 리스트 */}
         <div className="game-section">
           <GameListPage />
         </div>
