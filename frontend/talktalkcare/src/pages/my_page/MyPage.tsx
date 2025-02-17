@@ -6,30 +6,58 @@ import '../../styles/components/MyPage.css';
 import ResultPage from '../DimentiaTest/Result.tsx'
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+interface UserInfo {
+  name: string;
+  age: number;
+  loginId: string;
+  phone: string;
+  s3Filename?: string;
+}
+
 const MyPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('game');
   const [activeTestTab, setActiveTestTab] = useState('user');
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   const [userAiAnalysis, setUserAiAnalysis] = useState<string | null>(null);
   const [guardianAiAnalysis, setGuardianAiAnalysis] = useState<string | null>(null);
 
+  const [gameScores, setGameScores] = useState<{ [key: number]: number }>({});
+
   const userId = localStorage.getItem('userId');
   const isLoggedIn = Boolean(userId);
 
+  const fetchUserInfo = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await fetch(`${BASE_URL}/users/infos/${userId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) throw new Error('사용자 정보를 가져오지 못했습니다.');
+      
+      const data = await response.json();
+      setUserInfo(data.body);
+    } catch (error) {
+      console.error('사용자 정보 조회 중 오류:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUserInfo();
+    }
+  }, [isLoggedIn]);
 
   const handleUserInfoClick = () => {
-    navigate('/userinfopage');
+    if (userInfo) {
+      navigate('/userinfopage', { state: { userInfo } });
+    }
   };
 
-  // 예시 데이터
-  const gameScores = {
-    순발력: 80,
-    논리력: 65,
-    기억력: 90,
-    사고력: 75,
-    집중력: 85
-  };
   // AI 분석 결과 요청 함수
   const fetchAiAnalyses = async () => {
     if (!userId) return;
@@ -60,6 +88,31 @@ const MyPage = () => {
     }
   };
 
+  // 게임 점수 가져오기
+  const fetchGameScores = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await fetch(`${BASE_URL}/games/monthly-stats/${userId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) throw new Error('게임 점수를 가져오지 못했습니다.');
+      
+      const data = await response.json();
+      
+      // 응답 데이터를 gameScores 형식으로 변환
+      const scores = data.body.reduce((acc: { [key: number]: number }, item: any) => {
+        acc[item.categoryId] = item.average;
+        return acc;
+      }, {});
+
+      setGameScores(scores);
+    } catch (error) {
+      console.error('게임 점수 조회 중 오류:', error);
+    }
+  };
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -69,8 +122,11 @@ const MyPage = () => {
     }
   }, [isLoggedIn, activeTab]);
 
-  // 로컬 스토리지에서 로그인된 사용자 정보 가져오기
-
+  useEffect(() => {
+    if (isLoggedIn && activeTab === 'game') {
+      fetchGameScores();
+    }
+  }, [isLoggedIn, activeTab]);
 
   return (
     <div className="my-page-container">
@@ -81,7 +137,15 @@ const MyPage = () => {
           style={{ cursor: 'pointer' }}
         >
           <div className="profile-image">
-            <User size={64} />
+            {userInfo?.s3Filename ? (
+              <img 
+                src={userInfo.s3Filename} 
+                alt="프로필" 
+                style={{ width: '64px', height: '64px', borderRadius: '50%' }}
+              />
+            ) : (
+              <User size={64} />
+            )}
           </div>
         </div>
         <h2 
@@ -89,7 +153,7 @@ const MyPage = () => {
           onClick={handleUserInfoClick}
           style={{ cursor: 'pointer' }}
         >
-          회원 정보
+          {'회원 정보'}
         </h2>
       </div>
 

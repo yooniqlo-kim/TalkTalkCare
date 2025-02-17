@@ -20,9 +20,9 @@ export interface CallInvitationDto {
 interface WebSocketContextType {
   isConnected: boolean;
   setIsLoggedIn: (value: boolean) => void;
-  onFriendStatusUpdate?: (friends: Friend[]) => void;
-  acceptCall: () => void;
-  rejectCall: () => void;
+  onFriendStatusUpdate: (callback: (friends: Friend[]) => void) => void;
+  acceptCall: () => Promise<void>;
+  rejectCall: () => Promise<void>;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
