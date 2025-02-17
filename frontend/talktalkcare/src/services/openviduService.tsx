@@ -171,9 +171,21 @@ class OpenviduService {
       return data.token;
     }
   
+    // private async getToken(sessionId: string): Promise<string> {
+    //   const sid = await this.createSession(sessionId);
+    //   return await this.createToken(sid);
+    // }
+    
+    // getToken 함수에서 반환되는 토큰 URL에 "/openvidu" 경로 추가
     private async getToken(sessionId: string): Promise<string> {
       const sid = await this.createSession(sessionId);
-      return await this.createToken(sid);
+      const token = await this.createToken(sid);
+      // 토큰 URL에 "/openvidu" 경로를 추가 (마지막 슬래시 포함)
+      const fixedToken = token.replace(
+        /^wss:\/\/www\.talktalkcare\.com:4443/,
+        'wss://www.talktalkcare.com:4443/openvidu'
+      );
+      return fixedToken;
     }
 
     // 새로운 public 메서드 추가

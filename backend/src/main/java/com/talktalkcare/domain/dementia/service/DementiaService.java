@@ -12,6 +12,7 @@ import com.talktalkcare.domain.dementia.repository.DementiaRepository;
 import com.talktalkcare.domain.dementia.service.handler.TestTypeHandler;
 import com.talktalkcare.domain.dementia.service.handler.TestTypeHandlerFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class DementiaService {
-
+    @Autowired
     private final AiAnalysisRepository analysisRepository;
     private final DementiaRepository dementiaRepository;
     private final TestTypeHandlerFactory testTypeHandlerFactory;
@@ -40,15 +41,22 @@ public class DementiaService {
 
         if(testResults.size() < 2)
             throw new DementiaTestException(DementiaTestErrorCode.NOT_ENOUGH_TEST_RESULTS);
-
-        return handler.analyzeTestResults(testResults);
+        String testResult = handler.analyzeTestResults(testResults);
+        int analysisSequence = analysisRepository.findMaxAnalysisSequenceByUserId(userId,testType)+1;
+        AiDementiaAnalysis analysis = AiDementiaAnalysis.builder()
+                .userId(userId)
+                .analysisResult(testResult)
+                .analysisType(testType)
+                .analysisSequence(analysisSequence)
+                .build();
+        analysisRepository.save(analysis);
+        return testResult;
     }
     public String getAiTestAnalysis(Integer userId, int testType) {
         return analysisRepository.findLatestAnalysis(userId, testType)
                 .map(AiDementiaAnalysis::getAnalysisResult) // 최신 분석 결과가 존재하면 반환
                 .orElseGet(() -> { // 결과가 없으면 generateAiTestAnalysis 실행 후 다시 가져오기
                     String newAnalysis = generateAiTestAnalysis(userId, testType);
-                    System.out.println(newAnalysis);
                     return newAnalysis;
                 });
     }

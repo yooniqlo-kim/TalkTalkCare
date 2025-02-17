@@ -67,13 +67,23 @@ services:
     ports:
       - "3478:3478/udp"
       - "3478:3478/tcp"
+      - "5349:5349/tcp"
+      - "5349:5349/udp"
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./turnserver.conf:/etc/turnserver.conf
     environment:
       - REALM=talktalkcare.com
       - USER=turnuser:turnpassword
+      - EXTERNAL_IP=54.180.148.155
       - CERT_FILE=/etc/letsencrypt/live/talktalkcare.com/fullchain.pem
       - KEY_FILE=/etc/letsencrypt/live/talktalkcare.com/privkey.pem
+      - MIN_PORT=40000
+      - MAX_PORT=40400
+      - TURN_PUBLIC_IP=54.180.148.155
+      - TURN_PORT=3478
+      - TURN_USERNAME=turnuser
+      - TURN_PASSWORD=turnpassword
     networks:
       - cicd_network
     restart: on-failure:3
@@ -92,8 +102,15 @@ services:
       - OPENVIDU_STREAMS_VIDEO_MIN_RECV_BANDWIDTH=500
       - OPENVIDU_STREAMS_VIDEO_MAX_SEND_BANDWIDTH=2000
       - OPENVIDU_STREAMS_VIDEO_MIN_SEND_BANDWIDTH=500
+      - OPENVIDU_WEBRTC_ICE_SERVERS=[
+        "url=stun:talktalkcare.com:3478",
+        "url=turn:talktalkcare.com:3478,username=turnuser,credential=turnpassword"]
+      - OPENVIDU_WEBRTC_TURN_ENABLED=true
+      - OPENVIDU_WEBRTC_STUN_ENABLED=true
+      - OPENVIDU_BIND_ADDRESS=0.0.0.0
+      - OPENVIDU_WEBRTC_WEBSOCKET_PATH=/openvidu
     ports:
-      # - "443:443"
+      - "4443:4443"
       - "40000-40400:40000-40400/tcp"
       - "40000-40400:40000-40400/udp"
     volumes:

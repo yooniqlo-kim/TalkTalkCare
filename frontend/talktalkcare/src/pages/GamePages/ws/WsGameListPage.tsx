@@ -1,14 +1,13 @@
-// WsGameListPage.tsx
 import React, { useState, useEffect } from 'react';
-import '../../../styles/components/GameList.css';
+import '../../../styles/components/WsGameList.css';
+import { useWebSocket } from '../../../contexts/WebSocketContext';
 import logicGames from '../page/Logic/LogicalGame';
 import concentrationGames from '../page/Concentration/Concentration';
 import thinkingGames from '../page/Thinking/Thinking';
 import quicknessGames from '../page/Quickness/Quickness';
 import memoryGames from '../page/Memory/Memory';
-import { useWebSocket } from '../../../contexts/WebSocketContext';
 
-export interface Game {
+interface Game {
   id: string;
   name: string;
   description: string;
@@ -17,13 +16,21 @@ export interface Game {
   icon: string;
 }
 
-const WsGameListPage: React.FC = () => {
-  const { sendGameEvent, ws } = useWebSocket();
+interface GameEvent {
+  type: 'GAME_SELECTED' | 'GAME_DESELECTED' | 'SKILL_CHANGED';
+  gameId?: string;
+  skill?: string;
+  senderId?: string;
+}
+
+const WsGameListPage = () => {
+  const { sendGameEvent, onGameSelected } = useWebSocket();
   const [selectedSkill, setSelectedSkill] = useState<string>('all');
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
+  const [isHost, setIsHost] = useState<boolean>(false);
 
-  // 모든 게임 리스트 구성
+  // 모든 게임 리스트
   const games: Game[] = [
     ...logicGames.map((game) => ({ ...game, skill: '논리력' })),
     ...concentrationGames.map((game) => ({ ...game, skill: '집중력' })),
@@ -34,65 +41,83 @@ const WsGameListPage: React.FC = () => {
 
   const skills = ['사고력', '집중력', '기억력', '순발력', '논리력'];
 
-  // 선택된 skill에 따라 게임 목록 필터링
+  // 선택된 skill에 맞는 게임만 필터링
   useEffect(() => {
-    const filtered =
-      selectedSkill === 'all'
-        ? games
-        : games.filter((game) => game.skill.trim() === selectedSkill.trim());
+    const filtered = selectedSkill === 'all'
+      ? games
+      : games.filter((game) => game.skill.trim() === selectedSkill.trim());
     setFilteredGames(filtered);
   }, [selectedSkill, games]);
 
-  // 게임 선택 시 activeGame 업데이트 및 WebSocket 메시지 전송
-  const handleGameClick = (game: Game) => {
-    setActiveGame(game);
-    console.log(`🕹️ 선택된 게임: ${game.id}`);
-    // HTTP API 호출 대신 WebSocket 메시지만 전송합니다.
-    sendGameEvent({
-      type: 'GAME_SELECTED',
-      game, // 필요한 게임 정보를 담아 전송 (예: id, name, description, icon 등)
-    });
-  };
-
-  // WebSocket 메시지 수신: 상대방이 게임 선택 이벤트를 보냈을 때 처리
+  // WebSocket 이벤트 리스너 등록
   useEffect(() => {
-    if (!ws) return;
+    const userId = localStorage.getItem('userId');
 
-    const handleMessage = (event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'GAME_SELECTED' && data.game) {
-          console.log('상대방 게임 선택 이벤트 수신:', data.game);
-          setActiveGame(data.game);
+    const handleGameEvent = (event: GameEvent) => {
+      console.log('🎮 게임 이벤트 수신:', event); // ✅ 수신 로그 확인
+
+      if (event.senderId !== userId) {
+        switch (event.type) {
+          case 'GAME_SELECTED': {
+            const selectedGame = games.find((g) => g.id === event.gameId);
+            console.log('🎯 상대방이 선택한 게임:', selectedGame);
+
+            if (selectedGame) {
+              setActiveGame(selectedGame);
+              setIsHost(false);
+            }
+            break;
+          }
+          case 'GAME_DESELECTED':
+            console.log('❌ 상대방이 게임을 해제함');
+            setActiveGame(null);
+            setIsHost(false);
+            break;
+          case 'SKILL_CHANGED':
+            if (event.skill) {
+              console.log('🔄 상대방이 스킬 변경:', event.skill);
+              setSelectedSkill(event.skill);
+            }
+            break;
         }
-      } catch (error) {
-        console.error('게임 이벤트 처리 오류:', error);
       }
     };
 
-    ws.addEventListener('message', handleMessage);
-    return () => {
-      ws.removeEventListener('message', handleMessage);
-    };
-  }, [ws]);
+    // WebSocket 이벤트 리스너 등록
+    onGameSelected(handleGameEvent);
 
-  // 목록으로 돌아가기
-  const handleBackToList = () => {
-    console.log('🔄 목록으로 돌아가기');
-    setActiveGame(null);
-    // 선택 해제 이벤트를 원한다면 여기서도 WebSocket 메시지를 보낼 수 있습니다.
+    return () => {
+      onGameSelected(() => {});
+    };
+  }, [games]); // ✅ games 의존성 추가
+
+  const handleGameClick = (game: Game) => {
+    const userId = localStorage.getItem('userId');
+    setActiveGame(game);
+    setIsHost(true);
+
+    const gameEvent: GameEvent = {
+      type: 'GAME_SELECTED',
+      gameId: game.id,
+      skill: game.skill,
+      senderId: userId,
+    };
+
+    console.log('📤 WebSocket 이벤트 전송:', gameEvent); // ✅ 전송 로그 확인
+    sendGameEvent(gameEvent);
   };
 
   return (
     <div className="game-list-container">
       {activeGame ? (
-        // 선택한 게임 화면
         <div className="game-detail">
-          <button className="back-button" onClick={handleBackToList}>
-            ⬅ 목록으로
-          </button>
-          <h2 className="middle-title">{activeGame.name}</h2>
-          <div className="small-title">
+          {isHost && (
+            <button className="back-button" onClick={() => handleGameClick(activeGame)}>
+              ⬅ 목록으로
+            </button>
+          )}
+          <h2 className='middle-title'>{activeGame.name}</h2>
+          <div className='small-title'>
             <p>{activeGame.icon}</p>
             <p>{activeGame.description}</p>
           </div>
@@ -101,13 +126,12 @@ const WsGameListPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        // 게임 목록 화면
         <>
           <div className="game-header">
-            <h1>치매 예방 게임 목록</h1>
+            <h1>화상통화 중 게임하기</h1>
           </div>
+
           <div className="game-content-wrapper">
-            {/* 필터 버튼 */}
             <div className="skills-filter">
               <button
                 className={`skill-button ${selectedSkill === 'all' ? 'active' : ''}`}
@@ -125,7 +149,7 @@ const WsGameListPage: React.FC = () => {
                 </button>
               ))}
             </div>
-            {/* 게임 목록 */}
+
             <div className="games-list">
               {filteredGames.map((game) => (
                 <div
