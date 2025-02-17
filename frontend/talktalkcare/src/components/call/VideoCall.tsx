@@ -241,14 +241,10 @@ const VideoCall: React.FC = () => {
     return data.token;
   };
 
-  // const getToken = async (sessId: string): Promise<string> => {
-  //   const sid = await createSession(sessId);
-  //   return await createToken(sid);
-  // };
   const getToken = async (sessId: string): Promise<string> => {
     const sid = await createSession(sessId);
     const token = await createToken(sid);
-    // openviduService에서 이미 URL을 수정하므로 여기서는 그대로 반환
+    // OpenVidu 서버가 생성한 토큰을 그대로 반환
     return token;
   };
 

@@ -169,14 +169,8 @@ class OpenviduService {
       const data = await response.json();
       console.log('토큰 생성 성공:', data.token);
       
-      // URL에서 sessionId와 token 파라미터 추출
-      const url = new URL(data.token);
-      const params = new URLSearchParams(url.search);
-      const token = params.get('token');
-      
-      // 새로운 WebSocket URL 생성
-      const wsUrl = `wss://www.talktalkcare.com:4443/openvidu?sessionId=${sessionId}&token=${token}`;
-      return wsUrl;
+      // OpenVidu 서버가 생성한 토큰 URL을 그대로 반환
+      return data.token;
     }
   
     private async getToken(sessionId: string): Promise<string> {
