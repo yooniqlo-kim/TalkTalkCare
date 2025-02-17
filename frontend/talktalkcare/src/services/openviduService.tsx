@@ -31,30 +31,60 @@ class OpenviduService {
           console.log('스트림 종료:', event.stream.streamId);
         });
     
+        // ICE 연결 상태 모니터링 추가
+        this.session.on('connectionPropertyChanged', (event) => {
+          console.log('🌐 연결 상태 변경:', event.connection.connectionId, event.changedProperty);
+        });
+    
         // 토큰 발급 (세션이 이미 존재하면 409 에러가 발생해도 sessionId를 그대로 사용)
         const token = await this.getToken(sessionId);
     
         // 세션에 연결
         await this.session.connect(token);
     
-        // Publisher 생성 과정 로깅 추가
-        console.log('🎥 Publisher 초기화 시작');
-        this.publisher = await this.OV.initPublisherAsync(undefined, {
-          audioSource: undefined,
-          videoSource: undefined,
-          publishAudio: true,
-          publishVideo: true,
-          resolution: '640x480',
-          frameRate: 30,
-          insertMode: 'APPEND',
-          mirror: false
+        // Publisher 초기화 시 타임아웃 설정
+        const publisherPromise = new Promise<Publisher>(async (resolve, reject) => {
+          try {
+            const publisher = await this.OV.initPublisherAsync(undefined, {
+              audioSource: undefined,
+              videoSource: undefined,
+              publishAudio: true,
+              publishVideo: true,
+              resolution: '640x480',
+              frameRate: 30,
+              insertMode: 'APPEND',
+              mirror: false
+            });
+            resolve(publisher);
+          } catch (error) {
+            reject(error);
+          }
         });
-        console.log('✅ Publisher 초기화 완료:', this.publisher.stream?.streamId);
     
-        // Publisher 발행 과정 로깅 추가
-        console.log('📡 스트림 발행 시작');
-        await this.session.publish(this.publisher);
-        console.log('✅ 스트림 발행 완료');
+        this.publisher = await Promise.race([
+          publisherPromise,
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Publisher 초기화 타임아웃')), 10000)
+          )
+        ]);
+    
+        // 스트림 상태 확인
+        if (this.publisher.stream) {
+          console.log('스트림 정보:', {
+            hasAudio: this.publisher.stream.hasAudio,
+            hasVideo: this.publisher.stream.hasVideo,
+            streamId: this.publisher.stream.streamId,
+            connection: this.publisher.stream.connection.connectionId
+          });
+        }
+    
+        // 발행 전 연결 상태 확인
+        if (this.session.connection && this.session.connection.connectionId) {
+          await this.session.publish(this.publisher);
+          console.log('✅ 스트림 발행 완료:', this.publisher.stream?.streamId);
+        } else {
+          throw new Error('세션 연결이 없습니다');
+        }
     
         return { session: this.session, publisher: this.publisher };
       } catch (error) {
