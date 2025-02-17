@@ -24,12 +24,12 @@ const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
 
-  // OpenVidu 인스턴스를 ref로 생성 (한 번만 생성)
+  // OpenVidu 인스턴스는 한 번만 생성 (ref 사용)
   const OV = useRef<OpenVidu>(new OpenVidu()).current;
   OV.enableProdMode();
   console.log('[OV] OpenVidu 인스턴스 생성');
 
-  // 세션은 ref로 관리하여 최신 값을 항상 참조
+  // 세션은 ref로 관리하여 최신값을 항상 참조
   const sessionRef = useRef<Session | null>(null);
   const [publisher, setPublisher] = useState<Publisher | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -71,13 +71,15 @@ const VideoCall: React.FC = () => {
       return;
     }
 
+    // 이미 세션이 생성되어 있다면 재초기화를 방지
+    if (sessionRef.current) {
+      console.log('[useEffect] 이미 세션 초기화됨');
+      return;
+    }
+
     const initSession = async () => {
       try {
         console.log('[initSession] 세션 초기화 시작');
-        // 기존 세션 종료 (혹은 초기화)
-        leaveSession();
-
-        // 새로운 세션 생성 및 저장
         const newSession = OV.initSession();
         sessionRef.current = newSession;
         console.log('[initSession] 새 세션 생성:', newSession);
@@ -86,7 +88,7 @@ const VideoCall: React.FC = () => {
         newSession.on('streamCreated', async (event: any) => {
           console.log('[initSession] streamCreated 이벤트 발생:', event);
           try {
-            // 안정화 딜레이 (1초)
+            // 안정화를 위한 딜레이 (1초)
             await new Promise(resolve => setTimeout(resolve, 1000));
             const subscriber = await newSession.subscribe(event.stream, undefined);
             console.log('[initSession] 스트림 구독 성공:', event.stream.streamId);
@@ -118,7 +120,7 @@ const VideoCall: React.FC = () => {
         await newSession.connect(token);
         console.log('[initSession] 세션 연결 완료');
 
-        // 연결 후 안정화 딜레이 (1초)
+        // 연결 후 안정화를 위한 딜레이 (1초)
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // 퍼블리셔 초기화 및 발행
@@ -147,7 +149,7 @@ const VideoCall: React.FC = () => {
     };
 
     initSession();
-    // cleanup: 세션 종료
+
     return () => {
       console.log('[useEffect cleanup] 세션 정리 시작');
       leaveSession();
