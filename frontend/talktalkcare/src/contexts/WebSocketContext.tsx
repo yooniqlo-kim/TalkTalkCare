@@ -99,7 +99,14 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (data.type === 'GAME_SELECTED' || 
               data.type === 'GAME_DESELECTED' || 
               data.type === 'SKILL_CHANGED') {
-            gameSelectionCallback.current?.(data);
+                console.log('🎮 게임 이벤트를 gameSelectionCallback으로 전달:', data);
+
+                gameSelectionCallback.current?.(data);
+                if (gameSelectionCallback.current) {
+                  gameSelectionCallback.current(data);
+                } else {
+                  console.warn('⚠️ gameSelectionCallback이 등록되지 않음');
+                }
           }
 
           } catch (error) {
@@ -185,17 +192,21 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const sendGameEvent = (data: GameEvent) => {
     if (ws && isConnected) {
       const userId = localStorage.getItem('userId');
-      const enrichedData = {
-        ...data,
-        senderId: userId
-      };
+      const enrichedData = { ...data, senderId: userId };
+  
+      console.log('📤 WebSocket 이벤트 전송:', enrichedData); // 🚀 이벤트 보내는 로그
       ws.send(JSON.stringify(enrichedData));
+    } else {
+      console.log('⚠️ WebSocket이 연결되지 않음, 이벤트 전송 실패');
     }
   };
+  
 
-  const onGameSelected = useCallback((callback: (game: any) => void) => {
+  const onGameSelected = useCallback((callback: (game: GameEvent) => void) => {
+    console.log('🟢 onGameSelected() 실행됨, 콜백 등록:', callback);
     gameSelectionCallback.current = callback;
   }, []);
+  
 
   const contextValue: WebSocketContextType = {
     isConnected,
