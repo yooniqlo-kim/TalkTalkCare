@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import WsGameListPage from '../../pages/GamePages/ws/WsGameListPage';
 import '../../styles/components/VideoCall.css';
 
-// RemoteStream 컴포넌트: 각 구독자의 비디오 요소 렌더링
 const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
@@ -24,12 +23,27 @@ const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
 
-  // OV 인스턴스는 컴포넌트 최초 렌더링 시 한 번만 생성
+  // OV 인스턴스는 한 번만 생성 (만약 여러 번 생성된다면 전역 컨텍스트로 관리 고려)
   const OV = useRef<OpenVidu>(new OpenVidu()).current;
   OV.enableProdMode();
+  
+  // Coturn 서버 설정 추가
+  OV.setAdvancedConfiguration({
+    iceServers: [
+      {
+        urls: ["turn:talktalkcare.com:3478"],
+        username: "turnuser",
+        credential: "turnpassword"
+      },
+      {
+        urls: ["stun:talktalkcare.com:3478"]
+      }
+    ]
+  });
+
   console.log('[OV] OpenVidu 인스턴스 생성');
 
-  // 세션은 ref로 관리하여 항상 최신 객체를 참조
+  // 세션과 관련 상태를 ref로 관리하여 재생성 방지
   const sessionRef = useRef<Session | null>(null);
   const [publisher, setPublisher] = useState<Publisher | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -55,7 +69,7 @@ const VideoCall: React.FC = () => {
     }
   }, []);
 
-  // 브라우저 종료 시 세션 종료 처리
+  // beforeunload 이벤트로 브라우저 종료 시 세션 종료 보장
   useEffect(() => {
     window.addEventListener('beforeunload', leaveSession);
     return () => {
@@ -71,7 +85,7 @@ const VideoCall: React.FC = () => {
       return;
     }
 
-    // 이미 세션이 생성되어 있다면 재초기화를 방지
+    // 이미 세션이 있다면 재초기화 방지
     if (sessionRef.current) {
       console.log('[useEffect] 세션이 이미 초기화되어 있음');
       return;
@@ -80,16 +94,13 @@ const VideoCall: React.FC = () => {
     const initSession = async () => {
       try {
         console.log('[initSession] 세션 초기화 시작');
-        // 새 세션 생성
         const newSession = OV.initSession();
         sessionRef.current = newSession;
         console.log('[initSession] 새 세션 생성:', newSession);
 
-        // 이벤트 핸들러 등록
         newSession.on('streamCreated', async (event: any) => {
           console.log('[initSession] streamCreated 이벤트 발생:', event);
           try {
-            // 안정화를 위한 딜레이 (1초)
             await new Promise(resolve => setTimeout(resolve, 1000));
             const subscriber = await newSession.subscribe(event.stream, undefined);
             console.log('[initSession] 스트림 구독 성공:', event.stream.streamId);
@@ -112,7 +123,6 @@ const VideoCall: React.FC = () => {
           navigateHome();
         });
 
-        // 토큰 발급 및 세션 연결
         console.log('[initSession] 토큰 발급 시작');
         const token = await getToken(sessionId);
         console.log('[initSession] 발급받은 토큰:', token);
@@ -121,11 +131,7 @@ const VideoCall: React.FC = () => {
         await newSession.connect(token);
         console.log('[initSession] 세션 연결 완료');
 
-        // 세션 연결 후 안정화를 위한 딜레이 10초 (추가 딜레이)
-        console.log('[initSession] 세션 연결 안정화를 위해 10초 대기');
-        await new Promise(resolve => setTimeout(resolve, 10000));
-
-        // 퍼블리셔 초기화 및 게시
+        // 퍼블리셔를 즉시 초기화 (연결 안정화를 위한 딜레이 없이)
         console.log('[initSession] 퍼블리셔 초기화 시작');
         const newPublisher = await OV.initPublisherAsync(undefined, {
           audioSource: undefined,
@@ -255,7 +261,6 @@ const VideoCall: React.FC = () => {
 
       <div className="videocall-content">
         <div className="video-section">
-          {/* 로컬 비디오 */}
           <div className="video-row local">
             {publisher && (
               <video
@@ -271,7 +276,6 @@ const VideoCall: React.FC = () => {
             )}
             <p>나</p>
           </div>
-          {/* 원격 비디오 */}
           <div className="video-row remote">
             {subscribers.length > 0 ? (
               <RemoteStream subscriber={subscribers[0]} />
