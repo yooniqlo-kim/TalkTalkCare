@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { OpenVidu, Session, Publisher, Subscriber, StreamManager } from 'openvidu-browser';
+import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
 import { useNavigate } from 'react-router-dom';
 import WsGameListPage from '../../pages/GamePages/ws/WsGameListPage';
 import '../../styles/components/VideoCall.css';
@@ -9,6 +9,7 @@ const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     if (videoRef.current) {
+      console.log('[RemoteStream] 비디오 엘리먼트에 스트림 추가');
       subscriber.addVideoElement(videoRef.current);
     }
   }, [subscriber]);
@@ -25,16 +26,7 @@ const VideoCall: React.FC = () => {
   const [OV] = useState(() => {
     const ov = new OpenVidu();
     ov.enableProdMode();
-    // 기본 STUN 서버 및 암호화 설정 적용 (TURN 서버 설정 필요 시 추가)
-    ov.setAdvancedConfiguration({
-      iceServers: [
-        {
-          urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"],
-        },
-      ],
-      publisherSrtcpCipher: 'AEAD_AES_128_GCM',
-      subscriberSrtcpCipher: 'AEAD_AES_128_GCM',
-    });
+    console.log('[OV] OpenVidu 인스턴스 생성');
     return ov;
   });
   const [session, setSession] = useState<Session | null>(null);
@@ -43,6 +35,7 @@ const VideoCall: React.FC = () => {
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
   const sessionId = localStorage.getItem('currentSessionId');
+  console.log('[VideoCall] sessionId:', sessionId);
 
   const navigateHome = useCallback(() => {
     localStorage.removeItem('currentSessionId');
@@ -52,51 +45,59 @@ const VideoCall: React.FC = () => {
 
   useEffect(() => {
     if (!sessionId) {
+      console.log('[useEffect] sessionId 없음, 홈으로 이동');
       navigateHome();
       return;
     }
 
     const initSession = async () => {
       try {
+        console.log('[initSession] 세션 초기화 시작');
         const newSession = OV.initSession();
-
+        console.log('[initSession] 새 세션 생성:', newSession);
+        
         // 이벤트 핸들러 등록
-        const handleStreamCreated = async (event: any) => {
+        newSession.on('streamCreated', async (event: any) => {
+          console.log('[initSession] streamCreated 이벤트 발생:', event);
           try {
             // 연결 안정화를 위해 1초 딜레이
             await new Promise(resolve => setTimeout(resolve, 1000));
             const subscriber = await newSession.subscribe(event.stream, undefined);
-            console.log('스트림 구독 성공:', event.stream.streamId);
+            console.log('[initSession] 스트림 구독 성공:', event.stream.streamId);
             setSubscribers(prev => [...prev, subscriber]);
           } catch (error) {
-            console.error('스트림 구독 실패:', error);
+            console.error('[initSession] 스트림 구독 실패:', error);
           }
-        };
+        });
 
-        const handleStreamDestroyed = (event: any) => {
+        newSession.on('streamDestroyed', (event: any) => {
+          console.log('[initSession] streamDestroyed 이벤트 발생:', event);
           setSubscribers(prev =>
             prev.filter(sub => sub.stream?.streamId !== event.stream.streamId)
           );
-        };
+        });
 
-        const handleSessionDisconnected = () => {
+        newSession.on('sessionDisconnected', () => {
+          console.log('[initSession] sessionDisconnected 이벤트 발생');
           cleanupSession();
-        };
-
-        newSession.on('streamCreated', handleStreamCreated);
-        newSession.on('streamDestroyed', handleStreamDestroyed);
-        newSession.on('sessionDisconnected', handleSessionDisconnected);
+        });
 
         setSession(newSession);
 
         // 토큰 발급 및 세션 연결
+        console.log('[initSession] 토큰 발급 시작');
         const token = await getToken(sessionId);
-        await newSession.connect(token);
-        console.log('세션 연결 완료');
+        console.log('[initSession] 발급받은 토큰:', token);
 
+        console.log('[initSession] 세션 연결 시도');
+        await newSession.connect(token);
+        console.log('[initSession] 세션 연결 완료');
+
+        // 연결 후 딜레이
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // 퍼블리셔 초기화 및 발행
+        console.log('[initSession] 퍼블리셔 초기화 시작');
         const newPublisher = await OV.initPublisherAsync(undefined, {
           audioSource: undefined,
           videoSource: undefined,
@@ -107,16 +108,21 @@ const VideoCall: React.FC = () => {
           insertMode: 'APPEND',
           mirror: false,
         });
+        console.log('[initSession] 퍼블리셔 초기화 완료:', newPublisher);
+        
+        console.log('[initSession] 퍼블리셔 세션에 게시 시작');
         await newSession.publish(newPublisher);
+        console.log('[initSession] 퍼블리셔 게시 완료');
         setPublisher(newPublisher);
       } catch (error) {
-        console.error('세션 초기화 실패:', error);
+        console.error('[initSession] 세션 초기화 실패:', error);
         cleanupSession();
         navigateHome();
       }
     };
 
     const cleanupSession = () => {
+      console.log('[cleanupSession] 세션 정리 시작');
       if (session) {
         session.disconnect();
         setSession(null);
@@ -124,6 +130,7 @@ const VideoCall: React.FC = () => {
         setSubscribers([]);
         localStorage.removeItem('currentSessionId');
         localStorage.removeItem('opponentUserId');
+        console.log('[cleanupSession] 세션 정리 완료');
       }
     };
 
@@ -137,6 +144,7 @@ const VideoCall: React.FC = () => {
   const handleToggleCamera = useCallback(async () => {
     if (publisher) {
       const newState = !isVideoEnabled;
+      console.log('[handleToggleCamera] 카메라 상태 변경:', newState);
       await publisher.publishVideo(newState);
       setIsVideoEnabled(newState);
     }
@@ -144,10 +152,11 @@ const VideoCall: React.FC = () => {
 
   const handleLeaveSession = () => {
     if (session) {
+      console.log('[handleLeaveSession] 세션 나가기');
       try {
         session.disconnect();
       } catch (error) {
-        console.error('세션 종료 중 에러:', error);
+        console.error('[handleLeaveSession] 세션 종료 중 에러:', error);
       }
       navigateHome();
     }
@@ -155,6 +164,7 @@ const VideoCall: React.FC = () => {
 
   const handleStartScreenShare = async () => {
     if (!session) return;
+    console.log('[handleStartScreenShare] 화면 공유 시작 요청');
     try {
       const OVInstance = session.openvidu;
       const screenPublisher = await OVInstance.initPublisherAsync(undefined, {
@@ -163,15 +173,17 @@ const VideoCall: React.FC = () => {
         publishVideo: true,
         mirror: false,
       });
+      console.log('[handleStartScreenShare] 화면 공유 퍼블리셔 초기화 완료:', screenPublisher);
       await session.publish(screenPublisher);
-      console.log('화면 공유 시작!');
+      console.log('[handleStartScreenShare] 화면 공유 퍼블리셔 게시 완료');
     } catch (error) {
-      console.error('화면 공유 에러:', error);
+      console.error('[handleStartScreenShare] 화면 공유 에러:', error);
     }
   };
 
   // API 함수들: createSession, createToken, getToken
   const createSession = async (sessId: string): Promise<string> => {
+    console.log('[createSession] 세션 생성 요청:', sessId);
     const response = await fetch('https://www.talktalkcare.com/openvidu/api/sessions', {
       method: 'POST',
       headers: {
@@ -181,15 +193,21 @@ const VideoCall: React.FC = () => {
       body: JSON.stringify({ customSessionId: sessId }),
       credentials: 'include',
     });
-    if (response.status === 409) return sessId;
+    console.log('[createSession] 응답 상태:', response.status);
+    if (response.status === 409) {
+      console.log('[createSession] 세션이 이미 존재함:', sessId);
+      return sessId;
+    }
     if (!response.ok) {
-      throw new Error(`세션 생성 실패: ${response.status}`);
+      throw new Error(`[createSession] 세션 생성 실패: ${response.status}`);
     }
     const data = await response.json();
+    console.log('[createSession] 세션 생성 성공:', data.id);
     return data.id;
   };
 
   const createToken = async (sessId: string): Promise<string> => {
+    console.log('[createToken] 토큰 생성 요청 for session:', sessId);
     const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessId}/connection`, {
       method: 'POST',
       headers: {
@@ -198,10 +216,12 @@ const VideoCall: React.FC = () => {
       },
       credentials: 'include',
     });
+    console.log('[createToken] 응답 상태:', response.status);
     if (!response.ok) {
-      throw new Error(`토큰 생성 실패: ${response.status}`);
+      throw new Error(`[createToken] 토큰 생성 실패: ${response.status}`);
     }
     const data = await response.json();
+    console.log('[createToken] 토큰 생성 성공:', data.token);
     return data.token;
   };
 
@@ -233,6 +253,7 @@ const VideoCall: React.FC = () => {
                 playsInline
                 ref={(video) => {
                   if (video && publisher) {
+                    console.log('[Local Video] 로컬 퍼블리셔에 비디오 엘리먼트 연결');
                     publisher.addVideoElement(video);
                   }
                 }}
