@@ -83,8 +83,33 @@ const VideoCall: React.FC = () => {
         });
 
         // 스트림 생성 이벤트
-        session.on('streamCreated', (event) => {
-          subscribeToStream(session, event.stream);
+        session.on('streamCreated', async (event) => {
+          console.log('🔄 스트림 생성 감지:', event.stream.streamId);
+          // 연결 안정화를 위해 1초 딜레이
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          let subscriber: Subscriber | null = null;
+          try {
+            subscriber = await session.subscribe(event.stream, undefined);
+          } catch (error) {
+            console.error('❌ 첫 구독 시도 실패, 재시도 중:', error);
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            try {
+              subscriber = await session.subscribe(event.stream, undefined);
+            } catch (error) {
+              console.error('❌ 재시도 후 구독 실패:', error);
+            }
+          }
+
+          if (subscriber) {
+            setSubscribers(prev => {
+              // 중복 구독 방지
+              if (prev.some(sub => sub.stream?.streamId === event.stream.streamId)) {
+                return prev;
+              }
+              return [...prev, subscriber];
+            });
+          }
         });
 
       } catch (error) {
