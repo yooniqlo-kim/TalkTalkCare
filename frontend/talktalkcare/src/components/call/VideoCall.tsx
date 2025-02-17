@@ -23,10 +23,10 @@ const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
 
-  // OV 인스턴스는 한 번만 생성 (만약 여러 번 생성된다면 전역 컨텍스트로 관리 고려)
+  // OV 인스턴스는 한 번만 생성
   const OV = useRef<OpenVidu>(new OpenVidu()).current;
   OV.enableProdMode();
-  
+
   // Coturn 서버 설정 추가
   OV.setAdvancedConfiguration({
     iceServers: [
@@ -127,7 +127,7 @@ const VideoCall: React.FC = () => {
         const token = await getToken(sessionId);
         console.log('[initSession] 발급받은 토큰:', token);
 
-        console.log('[initSession] 세션 연결 시도');
+        console.log('[initSession] 세션 연결 시도 토큰:', token);
         await newSession.connect(token);
         console.log('[initSession] 세션 연결 완료');
 
@@ -244,14 +244,7 @@ const VideoCall: React.FC = () => {
   const getToken = async (sessId: string): Promise<string> => {
     const sid = await createSession(sessId);
     const token = await createToken(sid);
-    
-    // URL 파싱하여 필요한 파라미터 추출
-    const url = new URL(token);
-    const tokenParam = url.searchParams.get('token');
-    
-    // OpenVidu 클라이언트가 기대하는 형식으로 URL 생성
-    const fixedToken = `wss://www.talktalkcare.com:4443/openvidu?sessionId=${sid}&token=${tokenParam}`;
-    return fixedToken;
+    return token;  // 토큰을 수정하지 않고 그대로 반환
   };
 
   return (
