@@ -7,6 +7,13 @@ import openviduService from '../services/openviduService';
 const WS_URL = import.meta.env.VITE_API_WS_URL;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+interface GameEvent {
+  type: 'GAME_SELECTED' | 'GAME_DESELECTED' | 'SKILL_CHANGED';
+  gameId?: string;
+  skill?: string;
+  senderId?: string;
+}
+
 export interface CallInvitationDto {
   callerId: number;
   callerName: string;
@@ -22,8 +29,8 @@ interface WebSocketContextType {
   onFriendStatusUpdate: (callback: (friends: Friend[]) => void) => void;
   acceptCall: () => Promise<void>;
   rejectCall: () => Promise<void>;
-  sendGameEvent: (data: any) => void;
-  onGameSelected: (callback: (game: any) => void) => void;
+  sendGameEvent: (data: GameEvent) => void;
+  onGameSelected: (callback: (event: GameEvent) => void) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -34,10 +41,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const friendStatusCallbackRef = useRef<((friends: Friend[]) => void) | undefined>();
-  const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 3;
   const gameSelectionCallback = useRef<(game: any) => void | undefined>();
   const [callInvitation, setCallInvitation] = useState<CallInvitationDto | null>(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 3;
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
@@ -64,6 +71,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         websocket.onmessage = async (event) => {
           try {
             const data = JSON.parse(event.data);
+
             // 화상통화 요청 처리
             if (data.message && data.message.includes("화상통화")) {
               setCallInvitation(data);
@@ -87,10 +95,13 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (friendStatusCallbackRef.current && Array.isArray(data)) {
               friendStatusCallbackRef.current(data);
             }
-            // 게임 선택 처리
-            if (data.type === 'GAME_SELECTED' && gameSelectionCallback.current) {
-              gameSelectionCallback.current(data);
-            }
+            // 게임 선택 이벤트 처리
+            if (data.type === 'GAME_SELECTED' || 
+              data.type === 'GAME_DESELECTED' || 
+              data.type === 'SKILL_CHANGED') {
+            gameSelectionCallback.current?.(data);
+          }
+
           } catch (error) {
             console.error('WebSocket 메시지 처리 오류:', error);
           }
@@ -171,9 +182,14 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const sendGameEvent = (data: any) => {
+  const sendGameEvent = (data: GameEvent) => {
     if (ws && isConnected) {
-      ws.send(JSON.stringify(data));
+      const userId = localStorage.getItem('userId');
+      const enrichedData = {
+        ...data,
+        senderId: userId
+      };
+      ws.send(JSON.stringify(enrichedData));
     }
   };
 
