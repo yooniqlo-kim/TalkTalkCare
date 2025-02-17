@@ -30,6 +30,7 @@ const VideoCall: React.FC = () => {
         sessionRef.current = session;
         publisherRef.current = publisher;
 
+        // 스트림 생성 이벤트
         session.on('streamCreated', async (event) => {
           try {
             console.log('🔄 스트림 생성 감지:', event.stream.streamId);
@@ -40,45 +41,53 @@ const VideoCall: React.FC = () => {
               typeOfVideo: event.stream.typeOfVideo
             });
 
-            // 구독 전 지연 추가
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            const subscriber = session.subscribe(event.stream, undefined);
+            const subscriber = await session.subscribe(event.stream, undefined);
             console.log('✅ 구독 성공:', subscriber.stream?.streamId);
             
-            // 구독자 상태 모니터링
             subscriber.on('streamPlaying', () => {
               console.log('▶️ 스트림 재생 시작:', event.stream.streamId);
             });
 
-            setSubscribers((prev) => [...prev, subscriber]);
+            setSubscribers(prev => {
+              // 중복 구독 방지
+              if (prev.some(sub => sub.stream?.streamId === subscriber.stream?.streamId)) {
+                return prev;
+              }
+              return [...prev, subscriber];
+            });
           } catch (error) {
             console.error('❌ 스트림 구독 실패:', error);
           }
         });
 
+        // 스트림 종료 이벤트
         session.on('streamDestroyed', (event) => {
           console.log('❌ 스트림 종료:', event.stream.streamId);
-          setSubscribers((prev) =>
-            prev.filter((sub) => sub.stream?.streamId !== event.stream.streamId)
+          setSubscribers(prev => 
+            prev.filter(sub => sub.stream?.streamId !== event.stream.streamId)
           );
         });
 
-        session.on('connectionDestroyed', (event) => {
-          try {
-            const destroyedId = event.connection.connectionId;
-            console.log('연결 종료됨:', destroyedId);
-            setSubscribers((prev) =>
-              prev.filter((sub) => sub.stream?.connection?.connectionId !== destroyedId)
-            );
-          } catch (err) {
-            console.error('connectionDestroyed 처리 중 에러:', err);
-          }
+        // 연결 종료 이벤트
+        session.on('sessionDisconnected', (event) => {
+          console.log('세션 연결 종료:', event.reason);
+          setSubscribers([]);
         });
+
+        // 참가자 퇴장 이벤트
+        session.on('streamDestroyed', (event) => {
+          console.log('참가자 퇴장:', event.stream.connection.connectionId);
+          setSubscribers(prev => 
+            prev.filter(sub => sub.stream?.connection?.connectionId !== event.stream.connection.connectionId)
+          );
+        });
+
       } catch (error) {
         console.error('세션 접속 실패:', error);
-        alert('세션 접속에 실패했습니다.');
-        navigate('/');
+        if (mounted) {
+          alert('세션 접속에 실패했습니다.');
+          navigate('/');
+        }
       }
     };
 
@@ -87,11 +96,7 @@ const VideoCall: React.FC = () => {
     return () => {
       mounted = false;
       if (sessionRef.current) {
-        try {
-          sessionRef.current.disconnect();
-        } catch (error) {
-          console.error('세션 종료 중 에러:', error);
-        }
+        sessionRef.current.disconnect();
       }
     };
   }, [sessionId, navigate]);
