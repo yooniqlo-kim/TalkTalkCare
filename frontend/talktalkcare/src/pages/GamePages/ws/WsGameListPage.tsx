@@ -1,6 +1,6 @@
 // WsGameListPage.tsx
 import React, { useState, useEffect } from 'react';
-import '../../styles/components/GameList.css';
+import '../../../styles/components/GameList.css';
 import logicGames from '../page/Logic/LogicalGame';
 import concentrationGames from '../page/Concentration/Concentration';
 import thinkingGames from '../page/Thinking/Thinking';
