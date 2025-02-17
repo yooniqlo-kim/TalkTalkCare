@@ -23,13 +23,14 @@ const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
 
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
-  const [OV] = useState(() => {
-    const ov = new OpenVidu();
-    ov.enableProdMode();
-    console.log('[OV] OpenVidu 인스턴스 생성');
-    return ov;
-  });
-  const [session, setSession] = useState<Session | null>(null);
+
+  // OpenVidu 인스턴스를 ref로 생성 (한 번만 생성)
+  const OV = useRef<OpenVidu>(new OpenVidu()).current;
+  OV.enableProdMode();
+  console.log('[OV] OpenVidu 인스턴스 생성');
+
+  // 세션은 ref로 관리하여 최신 값을 항상 참조
+  const sessionRef = useRef<Session | null>(null);
   const [publisher, setPublisher] = useState<Publisher | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
@@ -43,6 +44,26 @@ const VideoCall: React.FC = () => {
     navigate('/');
   }, [navigate]);
 
+  // 세션 종료 함수 (cleanup)
+  const leaveSession = useCallback(() => {
+    console.log('[leaveSession] 세션 종료');
+    if (sessionRef.current) {
+      sessionRef.current.disconnect();
+      sessionRef.current = null;
+      setPublisher(null);
+      setSubscribers([]);
+    }
+  }, []);
+
+  // 브라우저 종료 시 세션 종료
+  useEffect(() => {
+    window.addEventListener('beforeunload', leaveSession);
+    return () => {
+      window.removeEventListener('beforeunload', leaveSession);
+      leaveSession();
+    };
+  }, [leaveSession]);
+
   useEffect(() => {
     if (!sessionId) {
       console.log('[useEffect] sessionId 없음, 홈으로 이동');
@@ -53,14 +74,19 @@ const VideoCall: React.FC = () => {
     const initSession = async () => {
       try {
         console.log('[initSession] 세션 초기화 시작');
+        // 기존 세션 종료 (혹은 초기화)
+        leaveSession();
+
+        // 새로운 세션 생성 및 저장
         const newSession = OV.initSession();
+        sessionRef.current = newSession;
         console.log('[initSession] 새 세션 생성:', newSession);
-        
+
         // 이벤트 핸들러 등록
         newSession.on('streamCreated', async (event: any) => {
           console.log('[initSession] streamCreated 이벤트 발생:', event);
           try {
-            // 연결 안정화를 위해 1초 딜레이
+            // 안정화 딜레이 (1초)
             await new Promise(resolve => setTimeout(resolve, 1000));
             const subscriber = await newSession.subscribe(event.stream, undefined);
             console.log('[initSession] 스트림 구독 성공:', event.stream.streamId);
@@ -79,10 +105,9 @@ const VideoCall: React.FC = () => {
 
         newSession.on('sessionDisconnected', () => {
           console.log('[initSession] sessionDisconnected 이벤트 발생');
-          cleanupSession();
+          leaveSession();
+          navigateHome();
         });
-
-        setSession(newSession);
 
         // 토큰 발급 및 세션 연결
         console.log('[initSession] 토큰 발급 시작');
@@ -93,7 +118,7 @@ const VideoCall: React.FC = () => {
         await newSession.connect(token);
         console.log('[initSession] 세션 연결 완료');
 
-        // 연결 후 딜레이
+        // 연결 후 안정화 딜레이 (1초)
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // 퍼블리셔 초기화 및 발행
@@ -109,37 +134,25 @@ const VideoCall: React.FC = () => {
           mirror: false,
         });
         console.log('[initSession] 퍼블리셔 초기화 완료:', newPublisher);
-        
+
         console.log('[initSession] 퍼블리셔 세션에 게시 시작');
         await newSession.publish(newPublisher);
         console.log('[initSession] 퍼블리셔 게시 완료');
         setPublisher(newPublisher);
       } catch (error) {
         console.error('[initSession] 세션 초기화 실패:', error);
-        cleanupSession();
+        leaveSession();
         navigateHome();
       }
     };
 
-    const cleanupSession = () => {
-      console.log('[cleanupSession] 세션 정리 시작');
-      if (session) {
-        session.disconnect();
-        setSession(null);
-        setPublisher(null);
-        setSubscribers([]);
-        localStorage.removeItem('currentSessionId');
-        localStorage.removeItem('opponentUserId');
-        console.log('[cleanupSession] 세션 정리 완료');
-      }
-    };
-
     initSession();
-
+    // cleanup: 세션 종료
     return () => {
-      cleanupSession();
+      console.log('[useEffect cleanup] 세션 정리 시작');
+      leaveSession();
     };
-  }, [OV, sessionId, navigateHome]);
+  }, [OV, sessionId, navigateHome, leaveSession]);
 
   const handleToggleCamera = useCallback(async () => {
     if (publisher) {
@@ -151,37 +164,30 @@ const VideoCall: React.FC = () => {
   }, [publisher, isVideoEnabled]);
 
   const handleLeaveSession = () => {
-    if (session) {
-      console.log('[handleLeaveSession] 세션 나가기');
-      try {
-        session.disconnect();
-      } catch (error) {
-        console.error('[handleLeaveSession] 세션 종료 중 에러:', error);
-      }
-      navigateHome();
-    }
+    console.log('[handleLeaveSession] 세션 나가기');
+    leaveSession();
+    navigateHome();
   };
 
   const handleStartScreenShare = async () => {
-    if (!session) return;
+    if (!sessionRef.current) return;
     console.log('[handleStartScreenShare] 화면 공유 시작 요청');
     try {
-      const OVInstance = session.openvidu;
-      const screenPublisher = await OVInstance.initPublisherAsync(undefined, {
+      const screenPublisher = await OV.initPublisherAsync(undefined, {
         videoSource: 'screen',
         publishAudio: false,
         publishVideo: true,
         mirror: false,
       });
       console.log('[handleStartScreenShare] 화면 공유 퍼블리셔 초기화 완료:', screenPublisher);
-      await session.publish(screenPublisher);
+      await sessionRef.current.publish(screenPublisher);
       console.log('[handleStartScreenShare] 화면 공유 퍼블리셔 게시 완료');
     } catch (error) {
       console.error('[handleStartScreenShare] 화면 공유 에러:', error);
     }
   };
 
-  // API 함수들: createSession, createToken, getToken
+  // API 함수들
   const createSession = async (sessId: string): Promise<string> => {
     console.log('[createSession] 세션 생성 요청:', sessId);
     const response = await fetch('https://www.talktalkcare.com/openvidu/api/sessions', {
