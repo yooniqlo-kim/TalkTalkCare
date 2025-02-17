@@ -98,7 +98,7 @@ services:
       - OPENVIDU_STREAMS_VIDEO_MIN_RECV_BANDWIDTH=500
       - OPENVIDU_STREAMS_VIDEO_MAX_SEND_BANDWIDTH=2000
       - OPENVIDU_STREAMS_VIDEO_MIN_SEND_BANDWIDTH=500
-      - OPENVIDU_WEBRTC_ICE_SERVERS='[{"urls": "turn:talktalkcare.com:3478", "username": "turnuser", "credential": "turnpassword"}]'
+      - OPENVIDU_WEBRTC_ICE_SERVERS='[{"urls":["stun:talktalkcare.com:3478","turn:talktalkcare.com:3478"],"username":"turnuser","credential":"turnpassword"}]'
       - OPENVIDU_WEBRTC_TURN_ENABLED=true
       - OPENVIDU_WEBRTC_STUN_ENABLED=true
     ports:
