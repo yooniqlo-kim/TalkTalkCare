@@ -36,7 +36,6 @@ const VideoCall: React.FC = () => {
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
   const sessionId = localStorage.getItem('currentSessionId');
-  const opponentUserId = localStorage.getItem('opponentUserId');
 
   useEffect(() => {
     if (!sessionId) {
@@ -46,29 +45,36 @@ const VideoCall: React.FC = () => {
 
     const initSession = async () => {
       try {
-        const session = OV.initSession();
-        
-        // 스트림 생성 이벤트 핸들러
-        session.on('streamCreated', async (event) => {
-          const subscriber = await session.subscribe(event.stream, undefined);
-          setSubscribers(prev => [...prev, subscriber]);
-        });
+        // 1. 세션 초기화
+        const newSession = OV.initSession();
+        setSession(newSession);
 
-        // 스트림 제거 이벤트 핸들러
-        session.on('streamDestroyed', (event) => {
+        // 2. 이벤트 핸들러 등록
+        const streamCreatedHandler = async (event: any) => {
+          const subscriber = await newSession.subscribe(event.stream, undefined);
+          setSubscribers(prev => [...prev, subscriber]);
+        };
+
+        const streamDestroyedHandler = (event: any) => {
           setSubscribers(prev => 
             prev.filter(sub => sub.stream.streamId !== event.stream.streamId)
           );
-        });
+        };
 
-        setSession(session);
+        const sessionDisconnectedHandler = () => {
+          cleanupSession();
+        };
 
-        // 토큰 발급 및 세션 연결
+        newSession.on('streamCreated', streamCreatedHandler);
+        newSession.on('streamDestroyed', streamDestroyedHandler);
+        newSession.on('sessionDisconnected', sessionDisconnectedHandler);
+
+        // 3. 토큰 발급 및 세션 연결
         const token = await getToken(sessionId);
-        await session.connect(token);
+        await newSession.connect(token);
 
-        // Publisher 초기화
-        const publisher = await OV.initPublisherAsync(undefined, {
+        // 4. Publisher 초기화 및 발행
+        const newPublisher = await OV.initPublisherAsync(undefined, {
           audioSource: undefined,
           videoSource: undefined,
           publishAudio: true,
@@ -79,22 +85,36 @@ const VideoCall: React.FC = () => {
           mirror: false
         });
 
-        await session.publish(publisher);
-        setPublisher(publisher);
+        await newSession.publish(newPublisher);
+        setPublisher(newPublisher);
+
+        // 5. Cleanup 함수 반환
+        return () => {
+          newSession.off('streamCreated', streamCreatedHandler);
+          newSession.off('streamDestroyed', streamDestroyedHandler);
+          newSession.off('sessionDisconnected', sessionDisconnectedHandler);
+          cleanupSession();
+        };
 
       } catch (error) {
         console.error('세션 초기화 실패:', error);
+        cleanupSession();
         navigate('/');
       }
     };
 
-    initSession();
-
-    return () => {
-      session?.disconnect();
-      localStorage.removeItem('currentSessionId');
-      localStorage.removeItem('opponentUserId');
+    const cleanupSession = () => {
+      if (session) {
+        session.disconnect();
+        setSession(null);
+        setPublisher(null);
+        setSubscribers([]);
+        localStorage.removeItem('currentSessionId');
+        localStorage.removeItem('opponentUserId');
+      }
     };
+
+    initSession();
   }, [OV, sessionId, navigate]);
 
   const handleToggleCamera = useCallback(async () => {
