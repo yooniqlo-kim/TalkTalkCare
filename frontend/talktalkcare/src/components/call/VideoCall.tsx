@@ -241,9 +241,19 @@ const VideoCall: React.FC = () => {
     return data.token;
   };
 
+  // const getToken = async (sessId: string): Promise<string> => {
+  //   const sid = await createSession(sessId);
+  //   return await createToken(sid);
+  // };
   const getToken = async (sessId: string): Promise<string> => {
     const sid = await createSession(sessId);
-    return await createToken(sid);
+    const token = await createToken(sid);
+    // 반환된 토큰 URL에 "/openvidu" 경로를 추가
+    const fixedToken = token.replace(
+      /^wss:\/\/www\.talktalkcare\.com:4443/,
+      'wss://www.talktalkcare.com:4443/openvidu'
+    );
+    return fixedToken;
   };
 
   return (
