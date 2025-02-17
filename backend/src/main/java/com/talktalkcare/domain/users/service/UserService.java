@@ -13,12 +13,14 @@ import com.talktalkcare.domain.users.utils.PasswordEncryptor;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service
@@ -66,7 +68,7 @@ public class UserService {
         User user = getUserById(profileImageReq.getUserId());
 
         try {
-            String newFileName = s3Service.uploadFile(profileImageReq.getFile(), user.getS3FileName());
+            String newFileName = "https://talktalkcare.s3.ap-southeast-2.amazonaws.com/"+s3Service.uploadFile(profileImageReq.getFile(), user.getS3FileName());
             user.setS3FileName(newFileName);
             return new ProfileImageResp(newFileName);
         } catch (IOException e) {
@@ -213,4 +215,22 @@ public class UserService {
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
+    public UserInfoResp getUserInfos(Integer userId) {
+        User user = getUserById(userId);
+
+        Integer userAge = Integer.parseInt(LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                .substring(0,4)) - Integer.parseInt(user.getBirth()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                .substring(0,4)) + 1;
+
+        return new UserInfoResp(
+                user.getName(),
+                userAge,
+                user.getLoginId(),
+                user.getPhone(),
+                user.getS3FileName()
+        );
+    }
 }

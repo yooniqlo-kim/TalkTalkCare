@@ -25,7 +25,6 @@ export const authService = {
   },
 
   sendSmsVerification: async (phoneNumber: string) => {
-    try {
       const response = await axios.post(`${BASE_URL}/sms/send`, 
         { phoneNumber },
         {
@@ -34,15 +33,15 @@ export const authService = {
           }
         }
       );
-      return response.data;
-    } catch (error) {
-      console.error('SMS 인증번호 요청 실패:', error);
-      throw error;
-    }
+
+      if (response.data.result.errorCode !== null) {
+        alert(response.data.result.msg);
+        return false;
+      }
+      return true;
   },
 
   verifySmsCode: async (phoneNumber: string, verificationCode: string) => {
-    try {
       const response = await axios.post(`${BASE_URL}/sms/verify`, 
         { 
           phoneNumber, 
@@ -55,10 +54,6 @@ export const authService = {
         }
       );
       return response.data;
-    } catch (error) {
-      console.error('SMS 인증번호 검증 실패:', error);
-      throw error;
-    }
   },
 
   signup: async (userData: UserSignupRequest, profileImage: File | null | undefined) => {
