@@ -80,6 +80,10 @@ services:
       - KEY_FILE=/etc/letsencrypt/live/talktalkcare.com/privkey.pem
       - MIN_PORT=40000
       - MAX_PORT=40400
+      - TURN_PUBLIC_IP=54.180.148.155
+      - TURN_PORT=3478
+      - TURN_USERNAME=turnuser
+      - TURN_PASSWORD=turnpassword
     networks:
       - cicd_network
     restart: on-failure:3
