@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Session, Publisher, Subscriber, StreamManager } from 'openvidu-browser';
-import openviduService from '../../services/openviduService';
+import { OpenVidu, Session, Publisher, Subscriber } from 'openvidu-browser';
 import { useNavigate } from 'react-router-dom';
 import GameListPage from '../../pages/GamePages/GameListPage'; // 실제 경로
 import '../../styles/components/VideoCall.css';
@@ -25,151 +24,164 @@ const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
 
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
+  const [OV] = useState(() => {
+    const ov = new OpenVidu();
+    ov.enableProdMode();
+    return ov;
+  });
 
-  const sessionRef = useRef<Session | null>(null);
-  const publisherRef = useRef<Publisher | null>(null);
-
+  const [session, setSession] = useState<Session | null>(null);
+  const [publisher, setPublisher] = useState<Publisher | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-  const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(true);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
-  const sessionId = localStorage.getItem('currentSessionId') || 'default-session';
-
-  // 스트림 구독 함수 분리
-  const subscribeToStream = useCallback(async (session: Session, stream: any) => {
-    try {
-      console.log('스트림 구독 시작:', stream.streamId);
-      
-      // 구독 전 지연
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const subscriber = await session.subscribe(stream, undefined);
-      console.log('구독 성공:', stream.streamId);
-
-      setSubscribers(prev => {
-        // 중복 구독 방지
-        if (prev.some(sub => sub.stream?.streamId === stream.streamId)) {
-          return prev;
-        }
-        return [...prev, subscriber];
-      });
-    } catch (error) {
-      console.error('구독 실패:', error);
-    }
-  }, []);
+  const sessionId = localStorage.getItem('currentSessionId');
+  const opponentUserId = localStorage.getItem('opponentUserId');
 
   useEffect(() => {
-    let mounted = true;
+    if (!sessionId) {
+      navigate('/');
+      return;
+    }
 
-    const joinSession = async () => {
+    const initSession = async () => {
       try {
-        // 이미 연결된 세션이 있는 경우 처리
-        if (sessionRef.current?.connection) {
-          console.log('이미 연결된 세션 존재:', sessionRef.current.connection.connectionId);
-          return;
-        }
+        const session = OV.initSession();
+        
+        // 스트림 생성 이벤트 핸들러
+        session.on('streamCreated', async (event) => {
+          const subscriber = await session.subscribe(event.stream, undefined);
+          setSubscribers(prev => [...prev, subscriber]);
+        });
 
-        const { session, publisher } = await openviduService.joinSession(sessionId);
-        if (!mounted) return;
-
-        sessionRef.current = session;
-        publisherRef.current = publisher;
-
-        // 단일 streamDestroyed 이벤트 핸들러
+        // 스트림 제거 이벤트 핸들러
         session.on('streamDestroyed', (event) => {
-          console.log('스트림 종료:', event.stream.streamId);
           setSubscribers(prev => 
-            prev.filter(sub => sub.stream?.streamId !== event.stream.streamId)
+            prev.filter(sub => sub.stream.streamId !== event.stream.streamId)
           );
         });
 
-        // 스트림 생성 이벤트
-        session.on('streamCreated', async (event) => {
-          console.log('🔄 스트림 생성 감지:', event.stream.streamId);
-          // 연결 안정화를 위해 1초 딜레이
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+        setSession(session);
 
-          let subscriber: Subscriber | null = null;
-          try {
-            subscriber = await session.subscribe(event.stream, undefined);
-          } catch (error) {
-            console.error('❌ 첫 구독 시도 실패, 재시도 중:', error);
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            try {
-              subscriber = await session.subscribe(event.stream, undefined);
-            } catch (error) {
-              console.error('❌ 재시도 후 구독 실패:', error);
-            }
-          }
+        // 토큰 발급 및 세션 연결
+        const token = await getToken(sessionId);
+        await session.connect(token);
 
-          if (subscriber) {
-            setSubscribers(prev => {
-              // 중복 구독 방지
-              if (prev.some(sub => sub.stream?.streamId === event.stream.streamId)) {
-                return prev;
-              }
-              return [...prev, subscriber];
-            });
-          }
+        // Publisher 초기화
+        const publisher = await OV.initPublisherAsync(undefined, {
+          audioSource: undefined,
+          videoSource: undefined,
+          publishAudio: true,
+          publishVideo: true,
+          resolution: '640x480',
+          frameRate: 30,
+          insertMode: 'APPEND',
+          mirror: false
         });
 
+        await session.publish(publisher);
+        setPublisher(publisher);
+
       } catch (error) {
-        console.error('세션 접속 실패:', error);
-        if (mounted) {
-          alert('세션 접속에 실패했습니다.');
-          navigate('/');
-        }
+        console.error('세션 초기화 실패:', error);
+        navigate('/');
       }
     };
 
-    joinSession();
+    initSession();
 
     return () => {
-      mounted = false;
-      if (sessionRef.current) {
-        console.log('세션 정리:', sessionRef.current.connection?.connectionId);
-        sessionRef.current.disconnect();
-      }
+      session?.disconnect();
+      localStorage.removeItem('currentSessionId');
+      localStorage.removeItem('opponentUserId');
     };
-  }, [sessionId, navigate, subscribeToStream]);
+  }, [OV, sessionId, navigate]);
 
   const handleToggleCamera = useCallback(async () => {
-    if (publisherRef.current) {
+    if (publisher) {
       const newState = !isVideoEnabled;
-      await publisherRef.current.publishVideo(newState);
+      await publisher.publishVideo(newState);
       setIsVideoEnabled(newState);
     }
-  }, [isVideoEnabled]);
+  }, [isVideoEnabled, publisher]);
 
   const handleLeaveSession = () => {
-    if (sessionRef.current) {
+    if (session) {
       try {
-        sessionRef.current.disconnect();
+        session.disconnect();
       } catch (error) {
         console.error('세션 종료 중 에러:', error);
       }
       localStorage.removeItem('currentSessionId');
-      localStorage.removeItem('opponentUserId')
+      localStorage.removeItem('opponentUserId');
       navigate('/');
     }
   };
 
   // (A) 화면 공유 예시: 브라우저 탭 or 앱 전체 공유
   const handleStartScreenShare = async () => {
-    if (!sessionRef.current) return;
+    if (!session) return;
 
     try {
-      const OV = sessionRef.current.openvidu;
+      const OV = session.openvidu;
       const screenPublisher = await OV.initPublisherAsync(undefined, {
         videoSource: 'screen', // 화면 공유
         publishAudio: false,   // 필요하다면 true
         publishVideo: true,
         mirror: false
       });
-      await sessionRef.current.publish(screenPublisher);
+      await session.publish(screenPublisher);
       console.log('화면 공유 시작!');
     } catch (error) {
       console.error('화면 공유 에러:', error);
     }
+  };
+
+  // OpenVidu 토큰 발급 관련 함수들 추가
+  const createSession = async (sessionId: string): Promise<string> => {
+    const response = await fetch('https://www.talktalkcare.com/openvidu/api/sessions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ customSessionId: sessionId }),
+      credentials: 'include'
+    });
+
+    if (response.status === 409) {
+      return sessionId;
+    }
+
+    if (!response.ok) {
+      throw new Error(`세션 생성 실패: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.id;
+  };
+
+  const createToken = async (sessionId: string): Promise<string> => {
+    const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessionId}/connection`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
+      },
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error(`토큰 생성 실패: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.token;
+  };
+
+  const getToken = async (sessionId: string): Promise<string> => {
+    const sid = await createSession(sessionId);
+    return await createToken(sid);
   };
 
   return (
@@ -190,13 +202,13 @@ const VideoCall: React.FC = () => {
         {/* 왼쪽: 위(내화면), 아래(상대방화면) */}
         <div className="video-section">
           <div className="video-row local">
-            {publisherRef.current && (
+            {publisher && (
               <video
                 autoPlay
                 playsInline
                 ref={(video) => {
-                  if (video && publisherRef.current) {
-                    publisherRef.current.addVideoElement(video);
+                  if (video && publisher) {
+                    publisher.addVideoElement(video);
                   }
                 }}
               />
