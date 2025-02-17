@@ -86,21 +86,23 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  font-size: 14px;
 }
 
 .edit-button {
-  background-color: #555050 !important;
-  color: #214005;
+  background-color: #107303 !important;
   border: none;
+  color: white;
   padding: 0.5rem 1rem;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease; 
 }
 
 .edit-button:hover {
-  background-color: #45a049;
+  background-color: #43ff4d !important;
+  color: #000;
 }
 
 /* 회원 탈퇴 버튼 스타일 (배경 제거 + 오른쪽 정렬) */
