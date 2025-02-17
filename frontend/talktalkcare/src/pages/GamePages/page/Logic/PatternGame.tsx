@@ -192,7 +192,7 @@ const PatternGame: React.FC = () => {
               type="text"
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
-              placeholder="빈칸에 들어갈 숫자를 입력하세요"
+              placeholder="정답을 입력하세요."
             />
             <button onClick={checkAnswer}>확인</button>
           </div>
