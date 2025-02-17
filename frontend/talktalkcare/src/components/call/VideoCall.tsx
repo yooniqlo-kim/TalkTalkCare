@@ -248,12 +248,8 @@ const VideoCall: React.FC = () => {
   const getToken = async (sessId: string): Promise<string> => {
     const sid = await createSession(sessId);
     const token = await createToken(sid);
-    // 반환된 토큰 URL에 "/openvidu" 경로를 추가
-    const fixedToken = token.replace(
-      /^wss:\/\/www\.talktalkcare\.com:4443/,
-      'wss://www.talktalkcare.com:4443/openvidu'
-    );
-    return fixedToken;
+    // openviduService에서 이미 URL을 수정하므로 여기서는 그대로 반환
+    return token;
   };
 
   return (

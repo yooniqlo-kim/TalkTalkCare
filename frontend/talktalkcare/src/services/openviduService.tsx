@@ -167,6 +167,7 @@ class OpenviduService {
       }
   
       const data = await response.json();
+      console.log('토큰 생성 성공:', data.token);
       // OpenVidu 서버의 WebSocket URL 형식에 맞게 수정
       const token = data.token.replace(
         /^wss:\/\/www\.talktalkcare\.com:4443\?/,
