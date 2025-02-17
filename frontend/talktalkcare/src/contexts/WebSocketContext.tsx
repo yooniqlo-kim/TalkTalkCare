@@ -137,18 +137,23 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const handleAcceptCall = async () => {
     if (callInvitation) {
-      console.log('화상통화 수락:', callInvitation);
+      console.log('📞 화상통화 수락 시작:', {
+        sessionId: callInvitation.openviduSessionId,
+        caller: callInvitation.callerId,
+        receiver: callInvitation.receiverId
+      });
+
       try {
-        // receiver
-        await openviduService.joinSession(callInvitation.openviduSessionId);
+        // OpenVidu 세션 참가
+        const sessionResult = await openviduService.joinSession(callInvitation.openviduSessionId);
+        console.log('✅ OpenVidu 세션 참가 완료:', sessionResult.session.sessionId);
+        
         localStorage.setItem('currentSessionId', callInvitation.openviduSessionId);
 
-        // 백엔드로 /call/accept 요청 전송하여 caller에게 수락 메시지 전송
-        await fetch(`${BASE_URL}/call/accept`, {
+        // 수락 메시지 전송
+        const response = await fetch(`${BASE_URL}/call/accept`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             receiverId: callInvitation.receiverId,
             callerId: callInvitation.callerId,
@@ -156,11 +161,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           }),
           credentials: 'include',
         });
+        console.log('✅ 수락 메시지 전송 완료:', response.status);
 
         navigate('/videocall');
-
       } catch (error) {
-        console.error('Receiver 세션 접속 실패:', error);
+        console.error('❌ 화상통화 수락 처리 실패:', error);
       }
       setCallInvitation(null);
     }

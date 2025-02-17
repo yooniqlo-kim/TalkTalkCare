@@ -30,13 +30,30 @@ const VideoCall: React.FC = () => {
         sessionRef.current = session;
         publisherRef.current = publisher;
 
-        session.on('streamCreated', (event) => {
+        session.on('streamCreated', async (event) => {
           try {
+            console.log('🔄 스트림 생성 감지:', event.stream.streamId);
+            console.log('스트림 상세 정보:', {
+              connectionId: event.stream.connection.connectionId,
+              hasAudio: event.stream.hasAudio,
+              hasVideo: event.stream.hasVideo,
+              typeOfVideo: event.stream.typeOfVideo
+            });
+
+            // 구독 전 지연 추가
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
             const subscriber = session.subscribe(event.stream, undefined);
-            console.log('✅ 신규 스트림 추가됨:', event.stream.streamId);
+            console.log('✅ 구독 성공:', subscriber.stream?.streamId);
+            
+            // 구독자 상태 모니터링
+            subscriber.on('streamPlaying', () => {
+              console.log('▶️ 스트림 재생 시작:', event.stream.streamId);
+            });
+
             setSubscribers((prev) => [...prev, subscriber]);
           } catch (error) {
-            console.error('신규 스트림 구독 중 에러:', error);
+            console.error('❌ 스트림 구독 실패:', error);
           }
         });
 
