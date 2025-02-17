@@ -89,7 +89,7 @@ const VideoCall: React.FC = () => {
         newSession.on('streamCreated', async (event: any) => {
           console.log('[initSession] streamCreated 이벤트 발생:', event);
           try {
-            // 안정화를 위해 1초 딜레이 후 구독 시도
+            // 안정화를 위한 딜레이 (1초)
             await new Promise(resolve => setTimeout(resolve, 1000));
             const subscriber = await newSession.subscribe(event.stream, undefined);
             console.log('[initSession] 스트림 구독 성공:', event.stream.streamId);
@@ -121,8 +121,9 @@ const VideoCall: React.FC = () => {
         await newSession.connect(token);
         console.log('[initSession] 세션 연결 완료');
 
-        // 연결 후 안정화를 위한 딜레이 1초
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // 세션 연결 후 안정화를 위한 딜레이 10초 (추가 딜레이)
+        console.log('[initSession] 세션 연결 안정화를 위해 10초 대기');
+        await new Promise(resolve => setTimeout(resolve, 10000));
 
         // 퍼블리셔 초기화 및 게시
         console.log('[initSession] 퍼블리셔 초기화 시작');
