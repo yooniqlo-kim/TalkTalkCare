@@ -1,9 +1,27 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Session, Publisher, Subscriber, StreamManager } from 'openvidu-browser';
 import openviduService from '../../services/openviduService';
 import { useNavigate } from 'react-router-dom';
 import GameListPage from '../../pages/GamePages/GameListPage'; // 실제 경로
 import '../../styles/components/VideoCall.css';
+
+// RemoteStream 컴포넌트 분리
+const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      subscriber.addVideoElement(videoRef.current);
+    }
+  }, [subscriber]);
+
+  return (
+    <div className="video-row remote">
+      <video autoPlay playsInline ref={videoRef} />
+      <p>상대방</p>
+    </div>
+  );
+};
 
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
@@ -16,70 +34,57 @@ const VideoCall: React.FC = () => {
 
   const sessionId = localStorage.getItem('currentSessionId') || 'default-session';
 
+  // 스트림 구독 함수 분리
+  const subscribeToStream = useCallback(async (session: Session, stream: any) => {
+    try {
+      console.log('스트림 구독 시작:', stream.streamId);
+      
+      // 구독 전 지연
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const subscriber = await session.subscribe(stream, undefined);
+      console.log('구독 성공:', stream.streamId);
+
+      setSubscribers(prev => {
+        // 중복 구독 방지
+        if (prev.some(sub => sub.stream?.streamId === stream.streamId)) {
+          return prev;
+        }
+        return [...prev, subscriber];
+      });
+    } catch (error) {
+      console.error('구독 실패:', error);
+    }
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
     const joinSession = async () => {
       try {
-        if (sessionRef.current) {
-          sessionRef.current.disconnect();
+        // 이미 연결된 세션이 있는 경우 처리
+        if (sessionRef.current?.connection) {
+          console.log('이미 연결된 세션 존재:', sessionRef.current.connection.connectionId);
+          return;
         }
+
         const { session, publisher } = await openviduService.joinSession(sessionId);
         if (!mounted) return;
 
         sessionRef.current = session;
         publisherRef.current = publisher;
 
-        // 스트림 생성 이벤트
-        session.on('streamCreated', async (event) => {
-          try {
-            console.log('🔄 스트림 생성 감지:', event.stream.streamId);
-            console.log('스트림 상세 정보:', {
-              connectionId: event.stream.connection.connectionId,
-              hasAudio: event.stream.hasAudio,
-              hasVideo: event.stream.hasVideo,
-              typeOfVideo: event.stream.typeOfVideo
-            });
-
-            const subscriber = await session.subscribe(event.stream, undefined);
-            console.log('✅ 구독 성공:', subscriber.stream?.streamId);
-            
-            subscriber.on('streamPlaying', () => {
-              console.log('▶️ 스트림 재생 시작:', event.stream.streamId);
-            });
-
-            setSubscribers(prev => {
-              // 중복 구독 방지
-              if (prev.some(sub => sub.stream?.streamId === subscriber.stream?.streamId)) {
-                return prev;
-              }
-              return [...prev, subscriber];
-            });
-          } catch (error) {
-            console.error('❌ 스트림 구독 실패:', error);
-          }
-        });
-
-        // 스트림 종료 이벤트
+        // 단일 streamDestroyed 이벤트 핸들러
         session.on('streamDestroyed', (event) => {
-          console.log('❌ 스트림 종료:', event.stream.streamId);
+          console.log('스트림 종료:', event.stream.streamId);
           setSubscribers(prev => 
             prev.filter(sub => sub.stream?.streamId !== event.stream.streamId)
           );
         });
 
-        // 연결 종료 이벤트
-        session.on('sessionDisconnected', (event) => {
-          console.log('세션 연결 종료:', event.reason);
-          setSubscribers([]);
-        });
-
-        // 참가자 퇴장 이벤트
-        session.on('streamDestroyed', (event) => {
-          console.log('참가자 퇴장:', event.stream.connection.connectionId);
-          setSubscribers(prev => 
-            prev.filter(sub => sub.stream?.connection?.connectionId !== event.stream.connection.connectionId)
-          );
+        // 스트림 생성 이벤트
+        session.on('streamCreated', (event) => {
+          subscribeToStream(session, event.stream);
         });
 
       } catch (error) {
@@ -96,22 +101,19 @@ const VideoCall: React.FC = () => {
     return () => {
       mounted = false;
       if (sessionRef.current) {
+        console.log('세션 정리:', sessionRef.current.connection?.connectionId);
         sessionRef.current.disconnect();
       }
     };
-  }, [sessionId, navigate]);
+  }, [sessionId, navigate, subscribeToStream]);
 
-  const handleToggleCamera = async () => {
+  const handleToggleCamera = useCallback(async () => {
     if (publisherRef.current) {
       const newState = !isVideoEnabled;
-      try {
-        await publisherRef.current.publishVideo(newState);
-        setIsVideoEnabled(newState);
-      } catch (error) {
-        console.error('카메라 토글 중 에러:', error);
-      }
+      await publisherRef.current.publishVideo(newState);
+      setIsVideoEnabled(newState);
     }
-  };
+  }, [isVideoEnabled]);
 
   const handleLeaveSession = () => {
     if (sessionRef.current) {
@@ -176,24 +178,12 @@ const VideoCall: React.FC = () => {
             <p>나</p>
           </div>
 
-          <div className="video-row remote">
-            {subscribers.length > 0 ? (
-              <>
-                <video
-                  autoPlay
-                  playsInline
-                  ref={(video) => {
-                    if (video && subscribers[0]) {
-                      subscribers[0].addVideoElement(video);
-                    }
-                  }}
-                />
-                <p>상대방</p>
-              </>
-            ) : (
-              <p style={{ color: '#fff' }}>상대방 대기중...</p>
-            )}
-          </div>
+          {/* 원격 스트림 (상대방 화면) */}
+          {subscribers.length > 0 ? (
+            <RemoteStream subscriber={subscribers[0]} />
+          ) : (
+            <p style={{ color: '#fff' }}>상대방 대기중...</p>
+          )}
         </div>
 
         {/* 오른쪽: 게임 리스트 */}
