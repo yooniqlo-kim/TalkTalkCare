@@ -17,7 +17,8 @@ const Result: React.FC = () => {
     const state = location.state as LocationState;
     const answers = state?.answers || [];
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    
+    const [aiAnalysisMessage, setAiAnalysisMessage] = useState(""); 
+
     // 로컬 스토리지에서 로그인된 사용자 정보 가져오기
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     
@@ -50,8 +51,12 @@ const Result: React.FC = () => {
                 headers: { 'Content-Type': 'application/json' }
             });
     
-            if (!response.ok) throw new Error('분석 데이터를 가져오지 못했습니다.');
-            
+            if (!response.ok) {
+                console.warn("📌 검사 횟수가 1회뿐이므로 AI 분석이 불가능합니다.");
+                setAiAnalysisMessage("AI 분석 결과를 제공하려면 이용자의 검사가 필요합니다. \nSMCQ 검사 후 결과를 확인할 수 있습니다.");
+                return;
+            }
+
             const data = await response.json();
             console.log("📌 백엔드 응답:", data);
 
@@ -127,6 +132,17 @@ const Result: React.FC = () => {
                         <p>{aiAnalysis}</p>
                     </div>
                 )}
+                <div>
+                {aiAnalysisMessage && <p className="ai-analysis-result">
+                        {aiAnalysisMessage.split("\n").map((line, index) => (
+                            <span key={index}>
+                                {line}
+                                <br />
+                            </span>
+                        ))}
+                    </p>
+                }
+                </div>
             </div>
         </div>
     );

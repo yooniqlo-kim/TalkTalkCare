@@ -30,6 +30,13 @@
   z-index: 2000;
 }
 
+.login-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
 .navbar-link {
   text-decoration: none;
   border-radius: 10px;
