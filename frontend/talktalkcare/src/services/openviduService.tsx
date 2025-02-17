@@ -14,15 +14,39 @@ class OpenviduService {
 
     async joinSession(sessionId: string): Promise<{ session: Session; publisher: Publisher }> {
       try {
+        // 기존 세션이 있다면 종료하고 잠시 대기
         if (this.session) {
           await this.leaveSession();
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 세션 정리 대기 추가
         }
 
         this.session = this.OV.initSession();
         
-        // 이벤트 핸들러 등록
-        this.session.on('streamCreated', (event) => {
+        // 이벤트 핸들러 등록 - 구독 로직 추가
+        this.session.on('streamCreated', async (event) => {
           console.log('새 스트림 생성됨:', event.stream.streamId);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          if (!this.session) {
+            console.error('세션이 없습니다.');
+            return;
+          }
+
+          try {
+            const subscriber = await this.session.subscribe(event.stream, undefined);
+            console.log('✅ 구독 성공:', subscriber.stream?.streamId);
+            return subscriber;
+          } catch (error) {
+            console.error('❌ 첫 구독 시도 실패, 재시도:', error);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            if (!this.session) {
+              console.error('재시도 중 세션이 종료됨');
+              return;
+            }
+            
+            return await this.session.subscribe(event.stream, undefined);
+          }
         });
 
         this.session.on('streamDestroyed', (event) => {
@@ -47,11 +71,6 @@ class OpenviduService {
         });
         console.log('✅ Publisher 초기화 완료');
 
-        // 스트림 발행 전 검증
-        if (!this.session || !this.publisher) {
-          throw new Error('세션 또는 Publisher가 없습니다');
-        }
-
         // 스트림 발행
         console.log('📡 스트림 발행 시작');
         await this.session.publish(this.publisher);
@@ -68,7 +87,8 @@ class OpenviduService {
 
         return { session: this.session, publisher: this.publisher };
       } catch (error) {
-        console.error('❌ 세션 참가 중 오류:', error);
+        console.error('세션 참가 중 오류:', error);
+        await this.leaveSession();
         throw error;
       }
     }
@@ -137,8 +157,14 @@ class OpenviduService {
       const sid = await this.createSession(sessionId);
       return await this.createToken(sid);
     }
-  }
+
+    // 새로운 public 메서드 추가
+    public async subscribeToStream(stream: any): Promise<Subscriber | undefined> {
+        if (!this.session) return undefined;
+        return await this.session.subscribe(stream, undefined);
+    }
+}
   
-  export default new OpenviduService();
+export default new OpenviduService();
 
 

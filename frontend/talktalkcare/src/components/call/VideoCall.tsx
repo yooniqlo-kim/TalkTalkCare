@@ -59,12 +59,11 @@ const VideoCall: React.FC = () => {
 
   useEffect(() => {
     let mounted = true;
-
     const joinSession = async () => {
       try {
-        // 이미 연결된 세션이 있는 경우 처리
-        if (sessionRef.current?.connection) {
-          console.log('이미 연결된 세션 존재:', sessionRef.current.connection.connectionId);
+        // 중복 연결 체크 개선
+        if (sessionRef.current?.connection?.connectionId) {
+          console.log('이미 연결된 세션 유지:', sessionRef.current.connection.connectionId);
           return;
         }
 
@@ -74,37 +73,12 @@ const VideoCall: React.FC = () => {
         sessionRef.current = session;
         publisherRef.current = publisher;
 
-        // 단일 streamDestroyed 이벤트 핸들러
-        session.on('streamDestroyed', (event) => {
-          console.log('스트림 종료:', event.stream.streamId);
-          setSubscribers(prev => 
-            prev.filter(sub => sub.stream?.streamId !== event.stream.streamId)
-          );
-        });
-
-        // 스트림 생성 이벤트
+        // 스트림 생성 이벤트는 openviduService에서 처리하도록 변경
         session.on('streamCreated', async (event) => {
-          console.log('🔄 스트림 생성 감지:', event.stream.streamId);
-          // 연결 안정화를 위해 1초 딜레이
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-
-          let subscriber: Subscriber | null = null;
-          try {
-            subscriber = await session.subscribe(event.stream, undefined);
-          } catch (error) {
-            console.error('❌ 첫 구독 시도 실패, 재시도 중:', error);
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            try {
-              subscriber = await session.subscribe(event.stream, undefined);
-            } catch (error) {
-              console.error('❌ 재시도 후 구독 실패:', error);
-            }
-          }
-
+          const subscriber = await openviduService.subscribeToStream(event.stream);
           if (subscriber) {
             setSubscribers(prev => {
-              // 중복 구독 방지
-              if (prev.some(sub => sub.stream?.streamId === event.stream.streamId)) {
+              if (prev.some(sub => sub.stream?.streamId === subscriber.stream?.streamId)) {
                 return prev;
               }
               return [...prev, subscriber];
@@ -126,11 +100,10 @@ const VideoCall: React.FC = () => {
     return () => {
       mounted = false;
       if (sessionRef.current) {
-        console.log('세션 정리:', sessionRef.current.connection?.connectionId);
-        sessionRef.current.disconnect();
+        openviduService.leaveSession();
       }
     };
-  }, [sessionId, navigate, subscribeToStream]);
+  }, [sessionId, navigate]);
 
   const handleToggleCamera = useCallback(async () => {
     if (publisherRef.current) {
