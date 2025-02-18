@@ -9,7 +9,7 @@ export interface GameEvent {
 }
 
 export const sendGameEvent = async (event: GameEvent): Promise<void> => {
-  console.log("게임 이벤트 API 호출:", event);
+  console.log("게임 이벤트 AaPI 호출:", event);
   try {
     const response = await fetch(`${BASE_URL}/games/event`, {
       method: 'POST',

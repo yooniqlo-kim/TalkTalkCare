@@ -3,7 +3,7 @@ import '../../../styles/components/WsGameList.css';
 import { sendGameEvent as sendGameEventAPI, GameEvent } from '../../../services/gameEventService';
 import { useWebSocket } from '../../../contexts/WebSocketContext';
 import logicGames from '../page/Logic/LogicalGame';
-import concentrationGames from '../page/Concentration/Concentration';
+import concentrationGames from '../page/Concentration/WsConcentration';
 import thinkingGames from '../page/Thinking/Thinking';
 import quicknessGames from '../page/Quickness/Quickness';
 import memoryGames from '../page/Memory/Memory';
@@ -41,7 +41,9 @@ const WsGameListPage: React.FC = () => {
   }, [selectedSkill]);
 
   useEffect(() => {
-    onGameSelected((gameEvent: GameEvent) => {
+  onGameSelected((gameEvent: GameEvent) => {
+    // 렌더링 사이클 이후에 업데이트하도록 지연 처리
+    setTimeout(() => {
       console.log('상대방으로부터 게임 이벤트 수신:', gameEvent);
       if (gameEvent.eventType === 'GAME_SELECTED' && gameEvent.gameId) {
         const game = games.find((g) => g.id === gameEvent.gameId);
@@ -58,8 +60,10 @@ const WsGameListPage: React.FC = () => {
         console.log("상대방이 변경한 스킬 필터:", gameEvent.payload.selectedSkill);
         setSelectedSkill(gameEvent.payload.selectedSkill);
       }
-    });
-  }, [games, onGameSelected]);
+    }, 0);
+  });
+}, [games, onGameSelected]);
+
 
   const handleGameClick = useCallback((game: Game) => {
     console.log("handleGameClick 호출됨:", game.id);
