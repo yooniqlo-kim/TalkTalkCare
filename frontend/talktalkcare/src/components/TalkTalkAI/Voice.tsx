@@ -36,14 +36,13 @@ interface CustomModalProps {
 interface ControlsProps {
   fontSize: FontSize;
   setFontSize: (size: FontSize) => void;
-  showFontControls: boolean;
-  setShowFontControls: (show: boolean) => void;
   toggleListening: () => void;
   clearTranscripts: () => void;
   isLoading: boolean;
   isListening: boolean;
-  onEndChat: () => void;  // 대화 종료 핸들러 추가
+  onEndChat: () => void;
 }
+
 
 // AWS Polly 클라이언트 설정
 const pollyClient = new PollyClient({
@@ -74,44 +73,34 @@ const RobotImage: React.FC<RobotImageProps> = ({ isListening, isSpeaking }) => {
 const Controls: React.FC<ControlsProps> = ({
   fontSize,
   setFontSize,
-  showFontControls,
-  setShowFontControls,
   toggleListening,
   clearTranscripts,
   isLoading,
   isListening,
-  onEndChat  // 대화 종료 핸들러 추가
+  onEndChat
 }) => (
   <div className="controls-container">
     <div className="controls-row">
-      <button
-        onClick={() => setShowFontControls(!showFontControls)}
-        className="control-button"
-      >
-        {showFontControls ? '숨기기' : '글자 크기'}
-      </button>
-      {showFontControls && (
-        <div className="font-size-controls">
-          <button
-            onClick={() => setFontSize('small')}
-            className={`font-size-button ${fontSize === 'small' ? 'active' : ''}`}
-          >
-            작게
-          </button>
-          <button
-            onClick={() => setFontSize('medium')}
-            className={`font-size-button ${fontSize === 'medium' ? 'active' : ''}`}
-          >
-            보통
-          </button>
-          <button
-            onClick={() => setFontSize('large')}
-            className={`font-size-button ${fontSize === 'large' ? 'active' : ''}`}
-          >
-            크게
-          </button>
-        </div>
-      )}
+      <div className="font-size-controls">
+        <button
+          onClick={() => setFontSize('small')}
+          className={`font-size-button ${fontSize === 'small' ? 'active' : ''}`}
+        >
+          작게
+        </button>
+        <button
+          onClick={() => setFontSize('medium')}
+          className={`font-size-button ${fontSize === 'medium' ? 'active' : ''}`}
+        >
+          보통
+        </button>
+        <button
+          onClick={() => setFontSize('large')}
+          className={`font-size-button ${fontSize === 'large' ? 'active' : ''}`}
+        >
+          크게
+        </button>
+      </div>
     </div>
     <div className="controls-row">
       <button
@@ -138,26 +127,24 @@ const Controls: React.FC<ControlsProps> = ({
     </div>
   </div>
 );
-
 const SpeechToText = () => {
   const navigate = useNavigate();
-
   const [userId] = useState<number>(() => {
     const storedUserId = localStorage.getItem('userId');
     return storedUserId ? parseInt(storedUserId) : 7;
   });
+  
   const [showEndModal, setShowEndModal] = useState(false);  // 모달 상태 추가
   const [fontSize, setFontSize] = useState<FontSize>(() => {
-    return (localStorage.getItem('chatFontSize') as FontSize) || 'medium';
+    return (localStorage.getItem('chatFontSize') as FontSize) || 'small'; // 기본값을 'small'로 변경
   });
-
-  const [showFontControls, setShowFontControls] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [savedTranscripts, setSavedTranscripts] = useState<Array<{ text: string, isUser: boolean }>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const isComponentMounted = useRef(true);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(true);
 
   const transcriptsEndRef = useRef<HTMLDivElement>(null);
   const transcriptsListRef = useRef<HTMLDivElement>(null);
@@ -396,6 +383,21 @@ const SpeechToText = () => {
   };
 
   useEffect(() => {
+    // 페이지 첫 진입 시 무조건 모달 표시
+    setShowWelcomeModal(true);
+  }, []); 
+
+  useEffect(() => {
+    const savedTranscripts = localStorage.getItem('savedTranscripts');
+    if (savedTranscripts) {
+      setSavedTranscripts(JSON.parse(savedTranscripts));
+    }
+    
+    // startChat 호출 시 모달 상태를 건드리지 않도록 수정
+    startChat();
+  }, []);
+
+  useEffect(() => {
     return () => {
       isComponentMounted.current = false;
       if (audio) {
@@ -444,36 +446,46 @@ const SpeechToText = () => {
     }
   };
 
-  const sendTranscriptToServer = async (text: string) => {
-    try {
-      setIsLoading(true);
-      stopListening();
+const sendTranscriptToServer = async (text: string) => {
+  try {
+    setIsLoading(true);
+    stopListening();
 
+    // 현재 대화를 추가
+    setSavedTranscripts(prev => [
+      ...prev,
+      { text, isUser: true }
+    ]);
+
+    // 이전 대화 내용을 포함하여 전송
+    const response = await axios.get(`${BASE_URL}/talktalk/chat`, {
+      params: { 
+        response: text, 
+        userId,
+        // 이전 대화 내용을 포함
+        context: savedTranscripts.map(msg => ({
+          text: msg.text,
+          isUser: msg.isUser
+        }))
+      },
+      timeout: 100000
+    });
+
+    if (response.data && response.data.body) {
       setSavedTranscripts(prev => [
         ...prev,
-        { text, isUser: true }
+        { text: response.data.body, isUser: false }
       ]);
-
-      const response = await axios.get(`${BASE_URL}/talktalk/chat`, {
-        params: { response: text, userId },
-        timeout: 100000
-      });
-
-      if (response.data && response.data.body) {
-        setSavedTranscripts(prev => [
-          ...prev,
-          { text: response.data.body, isUser: false }
-        ]);
-        await synthesizeSpeech(response.data.body);
-      }
-
-    } catch (error) {
-      console.error('전송 중 에러:', error);
-    } finally {
-      setIsLoading(false);
-      startListening();
+      await synthesizeSpeech(response.data.body);
     }
-  };
+
+  } catch (error) {
+    console.error('전송 중 에러:', error);
+  } finally {
+    setIsLoading(false);
+    startListening();
+  }
+};
 
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -586,8 +598,6 @@ const SpeechToText = () => {
             <Controls
               fontSize={fontSize}
               setFontSize={setFontSize}
-              showFontControls={showFontControls}
-              setShowFontControls={setShowFontControls}
               toggleListening={toggleListening}
               clearTranscripts={clearTranscripts}
               isLoading={isLoading}
@@ -625,6 +635,7 @@ const SpeechToText = () => {
                   color: 'white',
                   border: 'none',
                   width:'90px'
+
                 }}
               >
                 아니오
