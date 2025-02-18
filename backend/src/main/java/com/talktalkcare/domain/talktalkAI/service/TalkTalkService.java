@@ -50,7 +50,7 @@ public class TalkTalkService {
     public void saveConversation(Integer userId) {
         String conversationHistory = userConversations.get(userId).getFullHistory();
 
-        String prompt = TalkTalkAiRequestType.CHAT_RESPONSE.getPrompt();
+        String prompt = TalkTalkAiRequestType.SUMMARY_CONVERSATION.getPrompt();
         String aiResponse = aiAnalysisService.analyze(prompt, conversationHistory);
 
         TalkTalk entity = TalkTalkConverter.toEntity(userId, aiResponse);
