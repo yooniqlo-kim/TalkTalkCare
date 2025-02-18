@@ -1,15 +1,15 @@
-.ws-game-list-container {
-  /* 기존의 .game-list-container 스타일을 그대로 가져오고,
-     내부 내용은 왼쪽 정렬로 변경 */
-  padding: 2rem;
-  max-width: 900px;
-  margin: 20px auto; /* 좌우 마진을 auto로 하거나 원하는 값 지정 */
-  background-color: #F5FFEA;
-  border-radius: 1rem;
-  height: auto;
-  min-width: 720px;
-  text-align: left; /* 텍스트는 왼쪽 정렬 */
-}
+  .ws-game-list-container {
+    /* 기존의 .game-list-container 스타일을 그대로 가져오고,
+      내부 내용은 왼쪽 정렬로 변경 */
+    padding: 2rem;
+    max-width: 900px;
+    margin: 20px auto; /* 좌우 마진을 auto로 하거나 원하는 값 지정 */
+    background-color: #F5FFEA;
+    border-radius: 1rem;
+    height: auto;
+    min-width: 720px;
+    text-align: left; /* 텍스트는 왼쪽 정렬 */
+  }
   
   .games-list {
     display: flex;

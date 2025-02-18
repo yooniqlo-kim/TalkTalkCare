@@ -2,11 +2,15 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Session, Publisher, Subscriber, StreamManager } from 'openvidu-browser';
 import openviduService from '../../services/openviduService';
 import { useNavigate } from 'react-router-dom';
-import GameListPage from '../../pages/GamePages/GameListPage'; // 실제 경로
 import '../../styles/components/VideoCall.css';
+import WsGameListPage from '../../pages/GamePages/ws/WsGameListPage';
+import CustomModal from '../CustomModal';
 
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalMessage, setModalMessage] = useState<string>('');
 
   const sessionRef = useRef<Session | null>(null);
   const publisherRef = useRef<Publisher | null>(null);
@@ -60,8 +64,9 @@ const VideoCall: React.FC = () => {
         });
       } catch (error) {
         console.error('세션 접속 실패:', error);
-        alert('세션 접속에 실패했습니다.');
-        navigate('/');
+        setModalMessage('일시적인 서버 오류가 발생했습니다.');
+        setIsModalOpen(true);
+        // navigate('/');
       }
     };
 
@@ -176,7 +181,7 @@ const VideoCall: React.FC = () => {
 
         {/* 오른쪽: 게임 리스트 */}
         <div className="game-section">
-          <GameListPage />
+          <WsGameListPage />
         </div>
       </div>
     </div>
