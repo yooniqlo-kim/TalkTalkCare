@@ -40,8 +40,8 @@ const questions = [
   "과거에 쓰던 기구 사용이 서툴러졌다."
 ];
 
-const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-const [modalMessage, setModalMessage] = useState<string>('');
+// const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+// const [modalMessage, setModalMessage] = useState<string>('');
 
 const submitSurvey = async (
   userId: number | null, 
@@ -68,8 +68,9 @@ const submitSurvey = async (
     const data = await response.json();
 
     if(data.result.msg !== 'success')  {
-      setModalMessage(data.result.msg || '설문조사 제출에 실패했습니다.');
-      setIsModalOpen(true);
+      alert('설문조사 제출에 실패했습니다.');
+      // setModalMessage(data.result.msg || '설문조사 제출에 실패했습니다.');
+      // setIsModalOpen(true);
     }
 
     return data;
