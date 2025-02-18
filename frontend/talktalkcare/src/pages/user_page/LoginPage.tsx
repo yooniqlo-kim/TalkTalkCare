@@ -8,8 +8,8 @@ import CustomModal from '../../components/CustomModal';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { setAuthLoggedIn, setUserName } = useAuth();
-  const {setIsLoggedIn: setWsLoggedIn} = useWebSocket();
+  const { setIsLoggedIn: setAuthLoggedIn, setUserName } = useAuth();
+  const { setIsLoggedIn: setWsLoggedIn } = useWebSocket();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>('');
   const [formData, setFormData] = useState({
