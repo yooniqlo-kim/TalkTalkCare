@@ -2,7 +2,9 @@
 .videocall-container {
   display: flex;
   flex-direction: column;
-  height: auto;
+  height: auto; /* 화면 크기에 맞춰 자동 조절 */
+  max-height: 100vh; /* 너무 커지지 않도록 제한 */
+  overflow: hidden; /* 불필요한 스크롤 방지 */
 }
 
 /* 상단 헤더 */
@@ -13,52 +15,45 @@
   background: #333;
   color: #fff;
   padding: 10px;
-}
-
-.control-buttons button {
-  margin-left: 10px;
-  padding: 8px 12px;
-  font-size: 1rem;
+  height: 60px; /* 고정 높이 설정 */
 }
 
 /* 본문: 좌우 2분할 */
 .videocall-content {
-  flex: 1;
   display: flex;
-  margin: 0 50px; /* 좌우에 20px의 마진 추가 */
-  height: auto;
+  flex: 1;
+  margin: 0 30px; /* 좌우 마진 조정 */
+  height: auto; /* 콘텐츠 크기에 맞춰 조절 */
+  max-height: calc(100vh - 60px); /* 헤더 제외한 전체 화면 차지 */
 }
 
-/* 왼쪽: 화상통화 섹션 (위아래 2분할) */
+/* 왼쪽: 화상통화 섹션 */
 .video-section {
   width: 50%;
   display: flex;
   flex-direction: column;
-  /* 검정 배경 제거 */
-  background: #fff; 
+  height: auto; /* 자동 크기 조절 */
+  justify-content: center; /* 중앙 정렬 */
 }
 
 /* 상단(내 화면), 하단(상대방 화면) */
 .video-row {
-  flex: 1;
+  flex: none;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: auto; /* 자동 조절 */
+  max-height: 40vh; /* 화면이 너무 커지는 걸 방지 */
   position: relative;
-  margin: 0;    /* 여백 제거 */
-  padding: 0;   /* 여백 제거 */
-  /* 배경/테두리 제거 */
-  border: none;
 }
 
-/* 실제 비디오를 꽉 차게 (가로세로 100%) + 오버플로우 잘림 방지 */
+/* 비디오 크기 조절 */
 .video-row video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* 화면 가득 채우기 */
-  border: none;
-  border-radius: 0;
+  width: 90%;
+  height: auto;
+  max-height: 100%; /* 부모 요소보다 커지지 않도록 */
+  object-fit: contain; /* 비율 유지하면서 크기 조절 */
 }
 
 /* "나", "상대방" 라벨 */
@@ -77,4 +72,6 @@
   width: 50%;
   overflow-y: auto;
   background: #ffffff;
+  height: auto;
+  max-height: 100%; /* 너무 커지지 않도록 설정 */
 }
