@@ -184,9 +184,6 @@ const SignUp = () => {
                   <User size={40} />
                 </div>
               )}
-              <div className="camera-icon">
-                <Camera size={20} />
-              </div>
             </div>
             <input
               type="file"
@@ -195,7 +192,7 @@ const SignUp = () => {
               accept="image/*"
               style={{ display: 'none' }}
             />
-            <p>프로필 사진 등록</p>
+            <p className='profile-notice' onClick={handleImageClick}>프로필 사진 등록</p>
           </div>
           
           {modalOpen && (
@@ -252,7 +249,7 @@ const SignUp = () => {
               name="loginId"
               value={formData.loginId}
               onChange={handleChange}
-              placeholder="아이디를 입력하세요 (6자 이상)"
+              placeholder="아이디를 입력하세요 (영문, 숫자, 6자 이상)"
               disabled={isLoginIdConfirmed}
             />
             {step === 1 && (
@@ -343,7 +340,7 @@ const SignUp = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="비밀번호를 입력하세요 (8자 이상)"
+                placeholder="비밀번호를 입력하세요 (영문, 숫자, 8자 이상)"
               />
               <input
               type="password"
@@ -373,6 +370,9 @@ const SignUp = () => {
                 name="birthdate"
                 value={formData.birthdate}
                 onChange={handleChange}
+                placeholder="생년월일"
+                onFocus={(e) => (e.target.type = "date")}
+                onBlur={(e) => (e.target.type = "text")}
               />
               {step === 6 && (
                 <button 
@@ -380,7 +380,7 @@ const SignUp = () => {
                   className="next-button"
                   disabled={!formData.birthdate}
                 >
-                  다음
+                  완료
                 </button>
               )}
             </div>
