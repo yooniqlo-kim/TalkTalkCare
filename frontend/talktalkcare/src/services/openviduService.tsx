@@ -205,12 +205,11 @@ class OpenviduService {
     console.log('[getToken] 시작: sessionId=', sessionId);
     const sid = await this.createSession(sessionId);
     console.log('[getToken] createSession 결과:', sid);
-    const token = await this.createToken(sid);
-    console.log('[getToken] createToken 결과:', token);
+    const tokenUrl = await this.createToken(sid);
+    console.log('[getToken] createToken 결과:', tokenUrl);
 
-    // URL에서 토큰만 추출
     try {
-      const url = new URL(token);
+      const url = new URL(tokenUrl);
       const tokenParam = url.searchParams.get('token');
       if (!tokenParam) {
         throw new Error('토큰 파라미터가 없습니다');
@@ -218,9 +217,8 @@ class OpenviduService {
       console.log('[getToken] 추출된 토큰:', tokenParam);
       return tokenParam;  // 토큰만 반환
     } catch (err) {
-      // URL 파싱 실패 = 이미 토큰 값만 받은 경우
-      console.log('[getToken] 원본 토큰 사용:', token);
-      return token;
+      console.warn('[getToken] URL 파싱 실패, 원본 토큰 사용:', tokenUrl);
+      return tokenUrl;
     }
   }
 
