@@ -207,7 +207,22 @@ class OpenviduService {
     console.log('[getToken] createSession 결과:', sid);
     const token = await this.createToken(sid);
     console.log('[getToken] createToken 결과:', token);
-    return token;
+
+    // URL 파싱이 필요한 경우(이미 URL 형식이면 파싱)
+    try {
+      const url = new URL(token);
+      const tokenParam = url.searchParams.get('token');
+      if (!tokenParam) {
+        console.warn('[getToken] 토큰 파라미터 없음');
+        throw new Error('토큰 파라미터가 없습니다');
+      }
+      console.log('[getToken] 파싱된 토큰:', tokenParam);
+      return tokenParam;  // 토큰 값만 반환
+    } catch (err) {
+      // URL 파싱 실패 = 이미 토큰 값만 받은 경우
+      console.log('[getToken] URL이 아닌 토큰:', token);
+      return token;
+    }
   }
 
   // 추가 public 메서드

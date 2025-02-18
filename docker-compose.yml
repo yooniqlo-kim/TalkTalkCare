@@ -84,6 +84,7 @@ services:
       - TURN_PORT=3478
       - TURN_USERNAME=turnuser
       - TURN_PASSWORD=turnpassword
+    command: ["-c", "/etc/turnserver.conf", "-v"]
     networks:
       - cicd_network
     restart: on-failure:3
@@ -95,6 +96,7 @@ services:
       - DOMAIN_OR_PUBLIC_IP=${DOMAIN_OR_PUBLIC_IP}
       - OPENVIDU_URL=${OPENVIDU_URL}
       - OPENVIDU_SECRET=${OPENVIDU_SECRET}
+      - OPENVIDU_WEBRTC_WEBSOCKET_PATH=${OPENVIDU_WEBRTC_WEBSOCKET_PATH}
       - CERTIFICATE_TYPE=${CERTIFICATE_TYPE}
       - HTTPS_PORT=${HTTPS_PORT}
       - KMS_URIS=${KMS_URIS}
@@ -108,7 +110,6 @@ services:
       - OPENVIDU_WEBRTC_TURN_ENABLED=true
       - OPENVIDU_WEBRTC_STUN_ENABLED=true
       - OPENVIDU_BIND_ADDRESS=0.0.0.0
-      - OPENVIDU_WEBRTC_WEBSOCKET_PATH=/openvidu
     ports:
       - "4443:4443"
       - "40000-40400:40000-40400/tcp"
