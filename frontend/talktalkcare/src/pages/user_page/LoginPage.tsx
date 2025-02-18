@@ -100,7 +100,7 @@ const Login: React.FC = () => {
           <span className="divider">|</span>
           <span onClick={() => navigate('/find-password')}>비밀번호 찾기</span>
           <span className="divider">|</span>
-          <span onClick={() => navigate('/signup')}>회원가입</span>
+          <span onClick={() => navigate('/sign-up')}>회원가입</span>
         </div>
       </div>
     </div>
