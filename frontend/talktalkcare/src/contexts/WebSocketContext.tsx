@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Friend } from '../components/main_page/friends';
+import CustomModal from '../../components/CustomModal';
 import CallNotificationModal from '../components/CallNotificationModal';
 import openviduService from '../services/openviduService';
 
@@ -47,6 +48,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalMessage, setModalMessage] = useState<string>("");
   const friendStatusCallbackRef = useRef<((friends: Friend[]) => void) | undefined>();
   const gameSelectionCallback = useRef<(event: GameEvent) => void>();
   const [callInvitation, setCallInvitation] = useState<CallInvitationDto | null>(null);
@@ -96,8 +99,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (data.message && data.message.includes("거절하였습니다")) {
               const acceptedData = data as CallInvitationDto;
               localStorage.removeItem('currentSessionId');
-              console.log(`${acceptedData.receiverName}님께서 화상통화 요청을 거절했습니다.`);
+              setModalMessage(`${acceptedData.receiverName}님께서 화상통화 요청을 거절하셨습니다.`);
+              setIsModalOpen(true);
             }
+
             // 친구 상태 업데이트 (옵션)
             if (friendStatusCallbackRef.current && Array.isArray(data)) {
               friendStatusCallbackRef.current(data);
@@ -143,15 +148,18 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const handleAcceptCall = async () => {
     if (callInvitation) {
-      console.log('📞 화상통화 수락 시작:', callInvitation);
+      console.log('화상통화 수락:', callInvitation);
       try {
-        const sessionResult = await openviduService.joinSession(callInvitation.openviduSessionId);
-        console.log('✅ OpenVidu 세션 참가 완료:', sessionResult.session.sessionId);
-        localStorage.setItem('opponentUserId', callInvitation.callerId.toString());
+        // receiver
+        await openviduService.joinSession(callInvitation.openviduSessionId);
         localStorage.setItem('currentSessionId', callInvitation.openviduSessionId);
-        const response = await fetch(`${BASE_URL}/call/accept`, {
+
+        // 백엔드로 /call/accept 요청 전송하여 caller에게 수락 메시지 전송
+        await fetch(`${BASE_URL}/call/accept`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
             receiverId: callInvitation.receiverId,
             callerId: callInvitation.callerId,
@@ -159,22 +167,26 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           }),
           credentials: 'include',
         });
-        console.log('✅ 수락 메시지 전송 완료:', response.status);
+
         navigate('/videocall');
+
       } catch (error) {
-        console.error('❌ 화상통화 수락 처리 실패:', error);
+        console.error('Receiver 세션 접속 실패:', error);
       }
       setCallInvitation(null);
     }
   };
 
-  const handleRejectCall = async () => {
+   // 거절 버튼 클릭 시, /call/reject 요청을 보내 caller에게 알림
+   const handleRejectCall = async () => {
     if (callInvitation) {
       console.log('화상통화 거절:', callInvitation);
       try {
         await fetch(`${BASE_URL}/call/reject`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
             receiverName: callInvitation.receiverName,
             callerId: callInvitation.callerId,
@@ -188,6 +200,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setCallInvitation(null);
     }
   };
+
 
   // 웹소켓으로 게임 이벤트 전송 (바로 ws.send 사용)
   const sendGameEvent = (data: GameEvent) => {

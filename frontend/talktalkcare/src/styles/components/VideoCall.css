@@ -27,6 +27,7 @@
 .videocall-content {
   flex: 1;
   display: flex;
+  margin: 0 50px; /* 좌우에 20px의 마진 추가 */
 }
 
 /* 왼쪽: 화상통화 섹션 (위아래 2분할) */
@@ -76,5 +77,5 @@
 .game-section {
   width: 50%;
   overflow-y: auto;
-  background: #f5f5f5;
+  background: #ffffff;
 }
