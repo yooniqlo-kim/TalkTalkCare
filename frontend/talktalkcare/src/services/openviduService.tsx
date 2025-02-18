@@ -208,16 +208,21 @@ class OpenviduService {
     const token = await this.createToken(sid);
     console.log('[getToken] createToken 결과:', token);
 
-    // OpenVidu는 전체 WebSocket URL을 토큰으로 사용
-    if (token.startsWith('wss://')) {
-      console.log('[getToken] WebSocket URL 형식의 토큰 사용:', token);
-      return token;
+    // URL에서 토큰만 추출
+    try {
+      const url = new URL(token);
+      const tokenParam = url.searchParams.get('token');
+      if (!tokenParam) {
+        throw new Error('토큰 파라미터가 없습니다');
+      }
+      // OpenVidu가 기대하는 형식으로 WebSocket URL 구성
+      const wsUrl = `wss://www.talktalkcare.com:4443/openvidu?sessionId=${sid}&token=${tokenParam}`;
+      console.log('[getToken] 구성된 WebSocket URL:', wsUrl);
+      return wsUrl;
+    } catch (err) {
+      console.warn('[getToken] URL 파싱 실패, 원본 토큰으로 URL 구성:', token);
+      return `wss://www.talktalkcare.com:4443/openvidu?sessionId=${sid}&token=${token}`;
     }
-
-    // 토큰만 받은 경우 WebSocket URL 구성
-    const wsUrl = `wss://www.talktalkcare.com:4443?sessionId=${sid}&token=${token}`;
-    console.log('[getToken] 구성된 WebSocket URL:', wsUrl);
-    return wsUrl;
   }
 
   // 추가 public 메서드
