@@ -27,7 +27,7 @@ const Login: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
+    // try {
       const response = await authService.login(formData);
       
       if (response.result.msg === 'success') {
@@ -45,11 +45,11 @@ const Login: React.FC = () => {
         setModalMessage(response.result.msg || '로그인에 실패했습니다.');
         setIsModalOpen(true);
       }
-    } catch (error) {
-      console.error('로그인 실패:', error);
-      setModalMessage('로그인 중 오류가 발생했습니다.');
-      setIsModalOpen(true);
-    }
+    // } catch (error) {
+      // console.error('로그인 실패:', error);
+      // setModalMessage('일시적인 서버 오류가 발생했습니다.');
+      // setIsModalOpen(true);
+    // }
   };
 
   return (
