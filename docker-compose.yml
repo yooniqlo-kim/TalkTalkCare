@@ -104,11 +104,11 @@ services:
       - OPENVIDU_STREAMS_VIDEO_MIN_SEND_BANDWIDTH=500
       - OPENVIDU_WEBRTC_ICE_SERVERS=[
         "url=stun:talktalkcare.com:3478",
-        "url=turn:talktalkcare.com:3478,username=turnuser,credential=turnpassword"]
+        "url=turns:talktalkcare.com:5349,staticAuthSecret=turnsecret123"]
       - OPENVIDU_WEBRTC_TURN_ENABLED=true
       - OPENVIDU_WEBRTC_STUN_ENABLED=true
       - OPENVIDU_BIND_ADDRESS=0.0.0.0
-      - OPENVIDU_WEBRTC_WEBSOCKET_PATH=/openvidu
+      - OPENVIDU_WEBRTC_WEBSOCKET_PATH=/
     ports:
       - "4443:4443"
       - "40000-40400:40000-40400/tcp"
