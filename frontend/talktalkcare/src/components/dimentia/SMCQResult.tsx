@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import '../../styles/components/Result.css';
+import LoadingModal from '../LoadingModal'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 console.log(import.meta.env.VITE_API_BASE_URL);
@@ -42,6 +43,7 @@ const Result: React.FC = () => {
         if (!userId) return;
     
         try {
+            setIsLoading(true);  // Start loading
             const url = new URL(`${BASE_URL}/dementia-test/analysis`);
             url.searchParams.append('userId', userId);
             url.searchParams.append('requestType', '1');
@@ -68,11 +70,15 @@ const Result: React.FC = () => {
             }  
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
     
     return (
         <div className="result-container">
+            {isLoading && <LoadingModal />}
+
             <div className="content-section">
                 <h2 className='result-title'>치매진단<br />테스트 결과</h2>
                 
@@ -91,6 +97,8 @@ const Result: React.FC = () => {
                 <div className="button-group" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
                     {isLoggedIn ? (
                         <>
+                            {state?.testType === 'SMCQ' && (
+
                             <button 
                                 className="ai-analysis-button" 
                                 onClick={fetchAiAnalysis}
@@ -99,7 +107,7 @@ const Result: React.FC = () => {
                             >
                                 {isLoading ? '분석 중...' : 'AI 분석 보기'}
                             </button>
-                            
+                            )}
                             <Link to="/game" className="game-button" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '200px', height: '50px', textAlign: 'center', flex: '1 1 45%' }}>
                                 게임 하러가기
                             </Link>

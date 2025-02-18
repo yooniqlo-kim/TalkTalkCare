@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import '../../styles/components/Result.css';
+import LoadingModal from '../LoadingModal'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 console.log(import.meta.env.VITE_API_BASE_URL);
@@ -42,6 +43,7 @@ const Result: React.FC = () => {
         if (!userId) return;
     
         try {
+            setIsLoading(true);  // Start loading
             const url = new URL(`${BASE_URL}/dementia-test/analysis`);
             url.searchParams.append('userId', userId);
             url.searchParams.append('requestType', '2');
@@ -67,11 +69,16 @@ const Result: React.FC = () => {
             }  
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
+
     return (
         <div className="result-container">
+            {isLoading && <LoadingModal />}
+
             <div className="content-section">
                 <h2 className='result-title'>치매진단<br />테스트 결과</h2>
 
@@ -112,21 +119,20 @@ const Result: React.FC = () => {
                             </p>
                             <button 
                                 onClick={() => navigate('/login')}
-                                className="login-button-1"
-                            >
+                                className="login-button-1">
                                 로그인
                             </button>
                             
                             <button 
                                 onClick={() => navigate('/sign-up')}
-                                className="signup-button-1"                                >
+                                className="signup-button-1">
                                 회원가입
                             </button>
                         </>
                     )}
                 </div>
 
-                {aiAnalysis && (
+                {isLoggedIn && aiAnalysis && (
                     <div className="ai-analysis-result" style={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', wordBreak: 'break-word' }}>
                         <h3>AI 분석 결과</h3>
                         <p>{aiAnalysis}</p>
