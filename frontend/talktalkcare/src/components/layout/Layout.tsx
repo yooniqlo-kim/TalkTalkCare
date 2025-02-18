@@ -5,7 +5,6 @@ import ChatChat from './ChatChat';
 import { Link } from 'react-router-dom';
 import Footer from './Footerbar.tsx';
 import { useFriendList } from '../../contexts/FriendListContext'; // ✅ 추가
-import { useAuth } from '../../contexts/AuthContext';
 
 const Layout = () => {
   const location = useLocation();
