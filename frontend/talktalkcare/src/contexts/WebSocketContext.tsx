@@ -87,11 +87,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (data.message && data.message.includes("화상통화")) {
               setCallInvitation(data);
             }
-            // 화상통화 수락 시 처리
+            // receiver가 화상통화를 수락했다는 것을 caller에게 알림
             if (data.message && data.message.includes("수락하였습니다")) {
               const acceptedData = data as CallInvitationDto;
               localStorage.setItem('opponentUserId', acceptedData.receiverId.toString());
-              await openviduService.joinSession(acceptedData.openviduSessionId);
+              await openviduService.joinSession(acceptedData.openviduSessionId); //caller 접속
               localStorage.setItem('currentSessionId', acceptedData.openviduSessionId);
               navigate('/videocall');
             }
@@ -153,6 +153,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         // receiver
         await openviduService.joinSession(callInvitation.openviduSessionId);
         localStorage.setItem('currentSessionId', callInvitation.openviduSessionId);
+        localStorage.setItem('opponentUserId',callInvitation.callerId.toString());
 
         // 백엔드로 /call/accept 요청 전송하여 caller에게 수락 메시지 전송
         await fetch(`${BASE_URL}/call/accept`, {
