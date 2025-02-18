@@ -7,7 +7,6 @@ import concentrationGames from '../page/Concentration/Concentration';
 import thinkingGames from '../page/Thinking/Thinking';
 import quicknessGames from '../page/Quickness/Quickness';
 import memoryGames from '../page/Memory/Memory';
-
 interface Game {
   id: string;
   name: string;
@@ -34,7 +33,6 @@ const WsGameListPage: React.FC = () => {
 
   const skills = ['사고력', '집중력', '기억력', '순발력', '논리력'];
 
-  // 선택된 스킬에 따라 게임 필터링
   useEffect(() => {
     const filtered = selectedSkill === 'all'
       ? games
@@ -42,7 +40,6 @@ const WsGameListPage: React.FC = () => {
     setFilteredGames(filtered);
   }, [selectedSkill]);
 
-  // 상대방 이벤트 수신 콜백 등록
   useEffect(() => {
     onGameSelected((gameEvent: GameEvent) => {
       console.log('상대방으로부터 게임 이벤트 수신:', gameEvent);
@@ -64,7 +61,6 @@ const WsGameListPage: React.FC = () => {
     });
   }, [games, onGameSelected]);
 
-  // 게임 카드 클릭 시 처리
   const handleGameClick = useCallback((game: Game) => {
     console.log("handleGameClick 호출됨:", game.id);
     setActiveGame(game);
@@ -80,7 +76,6 @@ const WsGameListPage: React.FC = () => {
     sendGameEventAPI(gameEvent);
   }, []);
 
-  // 목록으로 돌아가기 처리
   const handleBackToList = () => {
     console.log("handleBackToList 호출됨");
     setActiveGame(null);
@@ -95,7 +90,6 @@ const WsGameListPage: React.FC = () => {
     sendGameEventAPI(gameEvent);
   };
 
-  // 스킬 필터 변경 처리 (실시간 반영)
   const handleSkillFilterChange = (newSkill: string) => {
     console.log("handleSkillFilterChange 호출됨:", newSkill);
     setSelectedSkill(newSkill);
@@ -112,7 +106,7 @@ const WsGameListPage: React.FC = () => {
   };
 
   return (
-    <div className="game-list-container">
+    <div className="ws-game-list-container">
       {activeGame ? (
         <div className="game-detail">
           <button className="back-button" onClick={handleBackToList}>⬅ 목록으로</button>
