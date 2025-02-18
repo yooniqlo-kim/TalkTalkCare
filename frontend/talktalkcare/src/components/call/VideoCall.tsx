@@ -22,12 +22,8 @@ const RemoteStream: React.FC<{ subscriber: Subscriber }> = ({ subscriber }) => {
 
 const VideoCall: React.FC = () => {
   const navigate = useNavigate();
-
-  // OV 인스턴스는 한 번만 생성
   const OV = useRef<OpenVidu>(new OpenVidu()).current;
   OV.enableProdMode();
-
-  // Coturn 서버 설정 추가
   OV.setAdvancedConfiguration({
     iceServers: [
       {
@@ -40,10 +36,8 @@ const VideoCall: React.FC = () => {
       }
     ]
   });
+  console.log('[VideoCall] OpenVidu 인스턴스 생성 및 ICE 서버 설정 완료');
 
-  console.log('[OV] OpenVidu 인스턴스 생성');
-
-  // 세션과 관련 상태를 ref로 관리하여 재생성 방지
   const sessionRef = useRef<Session | null>(null);
   const [publisher, setPublisher] = useState<Publisher | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -53,26 +47,28 @@ const VideoCall: React.FC = () => {
   console.log('[VideoCall] sessionId:', sessionId);
 
   const navigateHome = useCallback(() => {
+    console.log('[VideoCall] navigateHome 호출');
     localStorage.removeItem('currentSessionId');
     localStorage.removeItem('opponentUserId');
     navigate('/');
   }, [navigate]);
 
-  // 세션 종료 및 정리 함수
   const leaveSession = useCallback(() => {
-    console.log('[leaveSession] 세션 종료');
+    console.log('[VideoCall] leaveSession 호출');
     if (sessionRef.current) {
       sessionRef.current.disconnect();
+      console.log('[VideoCall] session disconnect() 호출');
       sessionRef.current = null;
       setPublisher(null);
       setSubscribers([]);
     }
   }, []);
 
-  // beforeunload 이벤트로 브라우저 종료 시 세션 종료 보장
   useEffect(() => {
+    console.log('[VideoCall] beforeunload 이벤트 리스너 등록');
     window.addEventListener('beforeunload', leaveSession);
     return () => {
+      console.log('[VideoCall] beforeunload 이벤트 리스너 제거 및 leaveSession 호출');
       window.removeEventListener('beforeunload', leaveSession);
       leaveSession();
     };
@@ -80,14 +76,13 @@ const VideoCall: React.FC = () => {
 
   useEffect(() => {
     if (!sessionId) {
-      console.log('[useEffect] sessionId 없음, 홈으로 이동');
+      console.warn('[VideoCall] sessionId 없음, 홈으로 이동');
       navigateHome();
       return;
     }
 
-    // 이미 세션이 있다면 재초기화 방지
     if (sessionRef.current) {
-      console.log('[useEffect] 세션이 이미 초기화되어 있음');
+      console.log('[VideoCall] 이미 세션이 초기화되어 있음');
       return;
     }
 
@@ -123,15 +118,19 @@ const VideoCall: React.FC = () => {
           navigateHome();
         });
 
+        // WebSocket 관련 추가 이벤트 로그
+        newSession.on('exception', (exception: any) => {
+          console.error('[initSession] 세션 예외 발생:', exception);
+        });
+
         console.log('[initSession] 토큰 발급 시작');
         const token = await getToken(sessionId);
         console.log('[initSession] 발급받은 토큰:', token);
 
-        console.log('[initSession] 세션 연결 시도 토큰:', token);
+        console.log('[initSession] 세션 연결 시도: token=', token);
         await newSession.connect(token);
         console.log('[initSession] 세션 연결 완료');
 
-        // 퍼블리셔를 즉시 초기화 (연결 안정화를 위한 딜레이 없이)
         console.log('[initSession] 퍼블리셔 초기화 시작');
         const newPublisher = await OV.initPublisherAsync(undefined, {
           audioSource: undefined,
@@ -145,7 +144,7 @@ const VideoCall: React.FC = () => {
         });
         console.log('[initSession] 퍼블리셔 초기화 완료:', newPublisher);
 
-        console.log('[initSession] 퍼블리셔 세션에 게시 시작');
+        console.log('[initSession] 퍼블리셔 게시 시작');
         await newSession.publish(newPublisher);
         console.log('[initSession] 퍼블리셔 게시 완료');
         setPublisher(newPublisher);
@@ -159,7 +158,7 @@ const VideoCall: React.FC = () => {
     initSession();
 
     return () => {
-      console.log('[useEffect cleanup] 세션 정리 시작');
+      console.log('[VideoCall] useEffect cleanup - 세션 정리 시작');
       leaveSession();
     };
   }, [OV, sessionId, navigateHome, leaveSession]);
@@ -174,7 +173,7 @@ const VideoCall: React.FC = () => {
   }, [publisher, isVideoEnabled]);
 
   const handleLeaveSession = () => {
-    console.log('[handleLeaveSession] 세션 나가기');
+    console.log('[handleLeaveSession] 세션 나가기 호출');
     leaveSession();
     navigateHome();
   };
@@ -244,20 +243,23 @@ const VideoCall: React.FC = () => {
   const getToken = async (sessId: string): Promise<string> => {
     try {
       const sid = await createSession(sessId);
+      console.log('[getToken] createSession 결과:', sid);
       const token = await createToken(sid);
-      
-      // URL 파싱하여 토큰 파라미터만 추출
-      const url = new URL(token);
-      const tokenParam = url.searchParams.get('token');
-      
-      console.log('[getToken] 원본 토큰 URL:', token);
-      console.log('[getToken] 파싱된 토큰:', tokenParam);
-      
-      // 토큰 값만 반환 (null이면 빈 문자열)
-      if (!tokenParam) {
-        throw new Error('토큰 파라미터가 없습니다');
+      console.log('[getToken] createToken 결과:', token);
+      // URL 파싱이 필요한 경우(이미 URL 형식이면 파싱)
+      try {
+        const url = new URL(token);
+        const tokenParam = url.searchParams.get('token');
+        if (!tokenParam) {
+          console.warn('[getToken] URL 파싱 후 토큰 파라미터 없음, 원본 토큰 사용');
+          return token;
+        }
+        console.log('[getToken] 파싱된 토큰:', tokenParam);
+        return tokenParam;
+      } catch (err) {
+        console.warn('[getToken] URL 파싱 실패, 원본 토큰 사용:', token);
+        return token;
       }
-      return tokenParam;
     } catch (error) {
       console.error('[getToken] 토큰 생성 중 에러:', error);
       throw error;
