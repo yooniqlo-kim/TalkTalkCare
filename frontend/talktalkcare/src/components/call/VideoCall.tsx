@@ -244,7 +244,19 @@ const VideoCall: React.FC = () => {
   const getToken = async (sessId: string): Promise<string> => {
     const sid = await createSession(sessId);
     const token = await createToken(sid);
-    return token;  // 토큰을 수정하지 않고 그대로 반환
+    
+    // URL 파싱하여 토큰 파라미터 추출
+    const url = new URL(token);
+    const tokenParam = url.searchParams.get('token');
+    
+    // 토큰 파라미터를 포함한 URL 반환
+    const fixedUrl = `wss://www.talktalkcare.com:4443/openvidu?sessionId=${sid}&token=${tokenParam}`;
+    
+    console.log('[getToken] 원본 토큰 URL:', token);
+    console.log('[getToken] 파싱된 토큰:', tokenParam);
+    console.log('[getToken] 수정된 URL:', fixedUrl);
+    
+    return fixedUrl;
   };
 
   return (
