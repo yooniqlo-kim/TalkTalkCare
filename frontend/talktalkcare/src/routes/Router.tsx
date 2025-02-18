@@ -20,6 +20,7 @@ import ChatChat from '../components/layout/ChatChat.tsx';
 import { FriendListProvider } from '../contexts/FriendListContext.tsx';
 import ProfileEdit from '../pages/user_page/UserUpdate.tsx';
 import { AuthProvider } from '../contexts/AuthContext';
+import WsGameListPage from '../pages/GamePages/ws/WsGameListPage.tsx';
 
 function Router() {
   return (
@@ -29,7 +30,7 @@ function Router() {
           <Route element={<Layout />}>
             <Route path="/" element={<MainPage />} />
             <Route path="/call" element={<KeyPad />} />
-            <Route path="/game" element={<GameListPage />} />
+            <Route path="/game" element={<WsGameListPage />} />
             <Route path="/test" element={<Test />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/userinfopage" element={<UserInfoPage />} />

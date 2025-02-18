@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Friend } from '../components/main_page/friends';
 import CallNotificationModal from '../components/CallNotificationModal';
@@ -7,8 +14,8 @@ import openviduService from '../services/openviduService';
 const WS_URL = import.meta.env.VITE_API_WS_URL;
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-interface GameEvent {
-  type: 'GAME_SELECTED' | 'GAME_DESELECTED' | 'SKILL_CHANGED';
+export interface GameEvent {
+  eventType: 'GAME_SELECTED' | 'GAME_DESELECTED' | 'SKILL_CHANGED';
   gameId?: string;
   skill?: string;
   senderId?: string;
@@ -41,7 +48,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const friendStatusCallbackRef = useRef<((friends: Friend[]) => void) | undefined>();
-  const gameSelectionCallback = useRef<(game: any) => void | undefined>();
+  const gameSelectionCallback = useRef<(event: GameEvent) => void>();
   const [callInvitation, setCallInvitation] = useState<CallInvitationDto | null>(null);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 3;
@@ -71,6 +78,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         websocket.onmessage = async (event) => {
           try {
             const data = JSON.parse(event.data);
+            console.log("WebSocket 메시지 수신:", data);
 
             // 화상통화 요청 처리
             if (data.message && data.message.includes("화상통화")) {
@@ -80,7 +88,6 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (data.message && data.message.includes("수락하였습니다")) {
               const acceptedData = data as CallInvitationDto;
               localStorage.setItem('opponentUserId', acceptedData.receiverId.toString());
-              // caller도 OpenVidu 세션 참가
               await openviduService.joinSession(acceptedData.openviduSessionId);
               localStorage.setItem('currentSessionId', acceptedData.openviduSessionId);
               navigate('/videocall');
@@ -95,20 +102,13 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (friendStatusCallbackRef.current && Array.isArray(data)) {
               friendStatusCallbackRef.current(data);
             }
-            // 게임 선택 이벤트 처리
-            if (data.type === 'GAME_SELECTED' || 
-              data.type === 'GAME_DESELECTED' || 
-              data.type === 'SKILL_CHANGED') {
-                console.log('🎮 게임 이벤트를 gameSelectionCallback으로 전달:', data);
-
-                gameSelectionCallback.current?.(data);
-                if (gameSelectionCallback.current) {
-                  gameSelectionCallback.current(data);
-                } else {
-                  console.warn('⚠️ gameSelectionCallback이 등록되지 않음');
-                }
-          }
-
+            // 게임 이벤트 수신 처리
+            if (data.eventType) {
+              console.log("게임 이벤트 수신:", data);
+              if (gameSelectionCallback.current) {
+                gameSelectionCallback.current(data);
+              }
+            }
           } catch (error) {
             console.error('WebSocket 메시지 처리 오류:', error);
           }
@@ -189,24 +189,23 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  // 웹소켓으로 게임 이벤트 전송 (바로 ws.send 사용)
   const sendGameEvent = (data: GameEvent) => {
     if (ws && isConnected) {
       const userId = localStorage.getItem('userId');
       const enrichedData = { ...data, senderId: userId };
-  
-      console.log('📤 WebSocket 이벤트 전송:', enrichedData); // 🚀 이벤트 보내는 로그
+      console.log('📤 WebSocket 이벤트 전송:', enrichedData);
       ws.send(JSON.stringify(enrichedData));
     } else {
-      console.log('⚠️ WebSocket이 연결되지 않음, 이벤트 전송 실패');
+      console.log('⚠️ WebSocket 연결 안됨: 이벤트 전송 실패');
     }
   };
-  
 
-  const onGameSelected = useCallback((callback: (game: GameEvent) => void) => {
+  // onGameSelected 콜백 등록
+  const onGameSelected = useCallback((callback: (event: GameEvent) => void) => {
     console.log('🟢 onGameSelected() 실행됨, 콜백 등록:', callback);
     gameSelectionCallback.current = callback;
   }, []);
-  
 
   const contextValue: WebSocketContextType = {
     isConnected,

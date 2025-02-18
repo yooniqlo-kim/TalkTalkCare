@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import '../../../styles/components/WsGameList.css';
+import { sendGameEvent as sendGameEventAPI, GameEvent } from '../../../services/gameEventService';
 import { useWebSocket } from '../../../contexts/WebSocketContext';
 import logicGames from '../page/Logic/LogicalGame';
 import concentrationGames from '../page/Concentration/Concentration';
@@ -16,21 +17,13 @@ interface Game {
   icon: string;
 }
 
-interface GameEvent {
-  type: 'GAME_SELECTED' | 'GAME_DESELECTED' | 'SKILL_CHANGED';
-  gameId?: string;
-  skill?: string;
-  senderId?: string;
-}
-
-const WsGameListPage = () => {
-  const { sendGameEvent, onGameSelected } = useWebSocket();
+const WsGameListPage: React.FC = () => {
+  const { onGameSelected } = useWebSocket();
   const [selectedSkill, setSelectedSkill] = useState<string>('all');
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
-  const [isHost, setIsHost] = useState<boolean>(false);
 
-  // 모든 게임 리스트
+  // 전체 게임 리스트 생성
   const games: Game[] = [
     ...logicGames.map((game) => ({ ...game, skill: '논리력' })),
     ...concentrationGames.map((game) => ({ ...game, skill: '집중력' })),
@@ -41,81 +34,88 @@ const WsGameListPage = () => {
 
   const skills = ['사고력', '집중력', '기억력', '순발력', '논리력'];
 
-  // 선택된 skill에 맞는 게임만 필터링
+  // 선택된 스킬에 따라 게임 필터링
   useEffect(() => {
     const filtered = selectedSkill === 'all'
       ? games
       : games.filter((game) => game.skill.trim() === selectedSkill.trim());
     setFilteredGames(filtered);
-  }, [selectedSkill, games]);
+  }, [selectedSkill]);
 
-  // WebSocket 이벤트 리스너 등록
+  // 상대방 이벤트 수신 콜백 등록
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
-
-    const handleGameEvent = (event: GameEvent) => {
-      console.log('🎮 게임 이벤트 수신:', event); // ✅ 수신 로그 확인
-
-      if (event.senderId !== userId) {
-        switch (event.type) {
-          case 'GAME_SELECTED': {
-            const selectedGame = games.find((g) => g.id === event.gameId);
-            console.log('🎯 상대방이 선택한 게임:', selectedGame);
-
-            if (selectedGame) {
-              setActiveGame(selectedGame);
-              setIsHost(false);
-            }
-            break;
-          }
-          case 'GAME_DESELECTED':
-            console.log('❌ 상대방이 게임을 해제함');
-            setActiveGame(null);
-            setIsHost(false);
-            break;
-          case 'SKILL_CHANGED':
-            if (event.skill) {
-              console.log('🔄 상대방이 스킬 변경:', event.skill);
-              setSelectedSkill(event.skill);
-            }
-            break;
+    onGameSelected((gameEvent: GameEvent) => {
+      console.log('상대방으로부터 게임 이벤트 수신:', gameEvent);
+      if (gameEvent.eventType === 'GAME_SELECTED' && gameEvent.gameId) {
+        const game = games.find((g) => g.id === gameEvent.gameId);
+        if (game) {
+          console.log("상대방이 선택한 게임:", game.id);
+          setActiveGame(game);
         }
       }
-    };
+      if (gameEvent.eventType === 'GAME_DESELECTED') {
+        console.log("상대방이 목록으로 돌아갔습니다.");
+        setActiveGame(null);
+      }
+      if (gameEvent.eventType === 'SKILL_CHANGED' && gameEvent.payload?.selectedSkill) {
+        console.log("상대방이 변경한 스킬 필터:", gameEvent.payload.selectedSkill);
+        setSelectedSkill(gameEvent.payload.selectedSkill);
+      }
+    });
+  }, [games, onGameSelected]);
 
-    // WebSocket 이벤트 리스너 등록
-    onGameSelected(handleGameEvent);
-
-    return () => {
-      onGameSelected(() => {});
-    };
-  }, [games]); // ✅ games 의존성 추가
-
-  const handleGameClick = (game: Game) => {
-    const userId = localStorage.getItem('userId');
+  // 게임 카드 클릭 시 처리
+  const handleGameClick = useCallback((game: Game) => {
+    console.log("handleGameClick 호출됨:", game.id);
     setActiveGame(game);
-    setIsHost(true);
-
+    const currentUserId = Number(localStorage.getItem('userId'));
+    const opponentUserId = Number(localStorage.getItem('opponentUserId'));
     const gameEvent: GameEvent = {
-      type: 'GAME_SELECTED',
+      eventType: 'GAME_SELECTED',
       gameId: game.id,
-      skill: game.skill,
-      senderId: userId,
+      senderId: currentUserId,
+      opponentUserId,
     };
+    console.log("handleGameClick - 생성된 gameEvent:", gameEvent);
+    sendGameEventAPI(gameEvent);
+  }, []);
 
-    console.log('📤 WebSocket 이벤트 전송:', gameEvent); // ✅ 전송 로그 확인
-    sendGameEvent(gameEvent);
+  // 목록으로 돌아가기 처리
+  const handleBackToList = () => {
+    console.log("handleBackToList 호출됨");
+    setActiveGame(null);
+    const currentUserId = Number(localStorage.getItem('userId'));
+    const opponentUserId = Number(localStorage.getItem('opponentUserId'));
+    const gameEvent: GameEvent = {
+      eventType: 'GAME_DESELECTED',
+      senderId: currentUserId,
+      opponentUserId,
+    };
+    console.log("handleBackToList - 생성된 gameEvent:", gameEvent);
+    sendGameEventAPI(gameEvent);
+  };
+
+  // 스킬 필터 변경 처리 (실시간 반영)
+  const handleSkillFilterChange = (newSkill: string) => {
+    console.log("handleSkillFilterChange 호출됨:", newSkill);
+    setSelectedSkill(newSkill);
+    const currentUserId = Number(localStorage.getItem('userId'));
+    const opponentUserId = Number(localStorage.getItem('opponentUserId'));
+    const gameEvent: GameEvent = {
+      eventType: 'SKILL_CHANGED',
+      senderId: currentUserId,
+      opponentUserId,
+      payload: { selectedSkill: newSkill }
+    };
+    console.log("handleSkillFilterChange - 생성된 gameEvent:", gameEvent);
+    sendGameEventAPI(gameEvent);
   };
 
   return (
     <div className="game-list-container">
       {activeGame ? (
         <div className="game-detail">
-          {isHost && (
-            <button className="back-button" onClick={() => handleGameClick(activeGame)}>
-              ⬅ 목록으로
-            </button>
-          )}
+          <button className="back-button" onClick={handleBackToList}>⬅ 목록으로</button>
           <h2 className='middle-title'>{activeGame.name}</h2>
           <div className='small-title'>
             <p>{activeGame.icon}</p>
@@ -128,14 +128,13 @@ const WsGameListPage = () => {
       ) : (
         <>
           <div className="game-header">
-            <h1>화상통화 중 게임하기</h1>
+            <h1>치매 예방 게임 목록</h1>
           </div>
-
           <div className="game-content-wrapper">
             <div className="skills-filter">
               <button
                 className={`skill-button ${selectedSkill === 'all' ? 'active' : ''}`}
-                onClick={() => setSelectedSkill('all')}
+                onClick={() => handleSkillFilterChange('all')}
               >
                 전체
               </button>
@@ -143,13 +142,12 @@ const WsGameListPage = () => {
                 <button
                   key={skill}
                   className={`skill-button ${selectedSkill === skill ? 'active' : ''}`}
-                  onClick={() => setSelectedSkill(skill)}
+                  onClick={() => handleSkillFilterChange(skill)}
                 >
                   {skill}
                 </button>
               ))}
             </div>
-
             <div className="games-list">
               {filteredGames.map((game) => (
                 <div
