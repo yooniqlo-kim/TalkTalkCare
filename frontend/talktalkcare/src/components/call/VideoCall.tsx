@@ -31,7 +31,7 @@ const VideoCall: React.FC = () => {
   OV.setAdvancedConfiguration({
     iceServers: [
       {
-        urls: ["turn:talktalkcare.com:3478"],
+        urls: ["turns:talktalkcare.com:5349"],
         username: "turnuser",
         credential: "turnpassword"
       },
@@ -242,9 +242,26 @@ const VideoCall: React.FC = () => {
   };
 
   const getToken = async (sessId: string): Promise<string> => {
-    const sid = await createSession(sessId);
-    const token = await createToken(sid);
-    return token;  // 토큰을 수정하지 않고 그대로 반환
+    try {
+      const sid = await createSession(sessId);
+      const token = await createToken(sid);
+      
+      // URL 파싱하여 토큰 파라미터만 추출
+      const url = new URL(token);
+      const tokenParam = url.searchParams.get('token');
+      
+      console.log('[getToken] 원본 토큰 URL:', token);
+      console.log('[getToken] 파싱된 토큰:', tokenParam);
+      
+      // 토큰 값만 반환 (null이면 빈 문자열)
+      if (!tokenParam) {
+        throw new Error('토큰 파라미터가 없습니다');
+      }
+      return tokenParam;
+    } catch (error) {
+      console.error('[getToken] 토큰 생성 중 에러:', error);
+      throw error;
+    }
   };
 
   return (

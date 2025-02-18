@@ -12,10 +12,12 @@ class OpenviduService {
       this.OV.setAdvancedConfiguration({
         iceServers: [
           {
-            urls: [
-              "stun:stun.l.google.com:19302",
-              "stun:stun1.l.google.com:19302"
-            ]
+            urls: "stun:talktalkcare.com:3478"
+          },
+          {
+            urls: "turns:talktalkcare.com:443",
+            username: "turnuser",
+            credential: "turnpassword"
           }
         ]
       });
@@ -151,41 +153,35 @@ class OpenviduService {
   
     // OpenVidu 토큰 생성 API 호출
     private async createToken(sessionId: string): Promise<string> {
-      const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessionId}/connection`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
-        },
-        credentials: 'include'
-      });
+      try {
+        const response = await fetch(`https://www.talktalkcare.com/openvidu/api/sessions/${sessionId}/connection`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + btoa('OPENVIDUAPP:talktalkcare')
+          },
+          credentials: 'include'
+        });
   
-      console.log('토큰 생성 응답:', response.status);
-      if (!response.ok) {
-        console.error('토큰 생성 실패:', response.status, await response.text());
-        throw new Error(`토큰 생성 실패: ${response.status}`);
+        console.log('[createToken] 응답 상태:', response.status);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[createToken] 토큰 생성 실패:', errorText);
+          throw new Error(`토큰 생성 실패: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        console.log('[createToken] 토큰 생성 성공:', data.token);
+        return data.token;
+      } catch (error) {
+        console.error('[createToken] 예외 발생:', error);
+        throw error;
       }
-  
-      const data = await response.json();
-      console.log('토큰 생성 성공:', data.token);
-      return data.token;
     }
   
-    // private async getToken(sessionId: string): Promise<string> {
-    //   const sid = await this.createSession(sessionId);
-    //   return await this.createToken(sid);
-    // }
-    
-    // getToken 함수에서 반환되는 토큰 URL에 "/openvidu" 경로 추가
     private async getToken(sessionId: string): Promise<string> {
       const sid = await this.createSession(sessionId);
-      const token = await this.createToken(sid);
-      // 토큰 URL에 "/openvidu" 경로를 추가 (마지막 슬래시 포함)
-      const fixedToken = token.replace(
-        /^wss:\/\/www\.talktalkcare\.com:4443/,
-        'wss://www.talktalkcare.com:4443/openvidu'
-      );
-      return fixedToken;
+      return await this.createToken(sid);
     }
 
     // 새로운 public 메서드 추가
