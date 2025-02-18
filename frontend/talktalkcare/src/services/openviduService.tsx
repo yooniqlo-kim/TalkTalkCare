@@ -215,13 +215,12 @@ class OpenviduService {
       if (!tokenParam) {
         throw new Error('토큰 파라미터가 없습니다');
       }
-      // OpenVidu가 기대하는 형식으로 WebSocket URL 구성
-      const wsUrl = `wss://www.talktalkcare.com:4443/openvidu?sessionId=${sid}&token=${tokenParam}`;
-      console.log('[getToken] 구성된 WebSocket URL:', wsUrl);
-      return wsUrl;
+      console.log('[getToken] 추출된 토큰:', tokenParam);
+      return tokenParam;  // 토큰만 반환
     } catch (err) {
-      console.warn('[getToken] URL 파싱 실패, 원본 토큰으로 URL 구성:', token);
-      return `wss://www.talktalkcare.com:4443/openvidu?sessionId=${sid}&token=${token}`;
+      // URL 파싱 실패 = 이미 토큰 값만 받은 경우
+      console.log('[getToken] 원본 토큰 사용:', token);
+      return token;
     }
   }
 
