@@ -183,6 +183,7 @@ const SpeechToText = () => {
   };
   // endChat 함수 정의
   const handleEndChat = async () => {
+    localStorage.removeItem('savedTranscripts')
     setShowLoadingModal(true); // API 호출 전 로딩 모달 표시
     try {
       await axios.post(`${BASE_URL}/talktalk/end`, null, {
