@@ -74,11 +74,6 @@ const GameMiddleTermModal: React.FC<GameMiddleTermModalProps> = ({
 
   if (!open) return null;
 
-  const handleRestart = () => {
-    onExit();
-    navigate('/game', { state: { exit: true } }); // 게임 페이지로 이동
-  };
-
   return (
     <div className="fixed left-15 top-50 inset-0 z-50 flex items-center justify-center bg-transparent">
       <div className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full">
@@ -94,19 +89,16 @@ const GameMiddleTermModal: React.FC<GameMiddleTermModalProps> = ({
           {onNext && (
             <button 
               onClick={onNext}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+              className="game-control-button restart"
             >
-              다음 단계 도전하기
+              다음 단계 <br />도전하기
             </button>
           )}
           <button 
             onClick={handleExit}
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors cursor-pointer"
+            className="game-control-button restart"
           >
-            그만 하기
-          </button>
-          <button className="game-control-button restart" onClick={handleRestart}>
-            다시 하기
+            게임 목록 <br/>이동하기
           </button>
         </div>
       </div>
