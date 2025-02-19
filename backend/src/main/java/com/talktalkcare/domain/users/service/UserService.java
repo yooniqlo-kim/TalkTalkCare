@@ -33,9 +33,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserSecurityRepository userSecurityRepository;
 
-    @Value("${aws.bucket.name}")
+    @Value("${aws.s3.bucket}")
     private String bucketName;
-    @Value("${aws.region}")
+    @Value("${aws.s3.region}")
     private String region;
     private String baseUrl = String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
 
