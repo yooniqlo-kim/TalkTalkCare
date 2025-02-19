@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,12 @@ public class UserService {
     private final S3Service s3Service;
     private final UserRepository userRepository;
     private final UserSecurityRepository userSecurityRepository;
+
+    @Value("${aws.bucket.name}")
+    private String bucketName;
+    @Value("${aws.region}")
+    private String region;
+    private String baseUrl = String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
 
     public void checkUserId(String userLoginId) {
         if(userRepository.existsByLoginId(userLoginId)) {
@@ -51,7 +58,7 @@ public class UserService {
 
         if(userDto.getS3Filename() != null) {
             try{
-                uploadedFileName = "https://talktalkcare.s3.ap-southeast-2.amazonaws.com/"+s3Service.uploadFile(userDto.getS3Filename(), null);
+                uploadedFileName = baseUrl+s3Service.uploadFile(userDto.getS3Filename(), null);
             } catch (IOException e) {
                 throw new UserException(UserErrorCode.UPLOAD_IMAGE_FAILED);
             }
@@ -68,7 +75,7 @@ public class UserService {
         User user = getUserById(profileImageReq.getUserId());
 
         try {
-            String newFileName = "https://talktalkcare.s3.ap-southeast-2.amazonaws.com/"+s3Service.uploadFile(profileImageReq.getFile(), user.getS3FileName());
+            String newFileName = baseUrl+s3Service.uploadFile(profileImageReq.getFile(), user.getS3FileName());
             user.setS3FileName(newFileName);
             return new ProfileImageResp(newFileName);
         } catch (IOException e) {
