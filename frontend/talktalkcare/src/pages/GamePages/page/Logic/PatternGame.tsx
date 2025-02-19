@@ -261,6 +261,11 @@ const PatternGame: React.FC = () => {
               type="text"
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  checkAnswer();
+                }
+              }}
               placeholder="정답을 입력하세요."
               disabled={gameOver}
             />
