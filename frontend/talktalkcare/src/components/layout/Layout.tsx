@@ -57,6 +57,7 @@ const Layout = () => {
   };
 
   return (
+<<<<<<< HEAD
     <>
       <Navbar />
       <Outlet />
@@ -65,10 +66,20 @@ const Layout = () => {
           to="/talktalk" 
           onClick={handleChatChatClick}
         >
+=======
+    <div className="flex flex-col min-h-screen"> {/* 전체 레이아웃 설정 */}
+      <Navbar />
+      <main className="flex-grow"> {/* 남은 공간을 채우는 메인 콘텐츠 */}
+        <Outlet />
+      </main>
+      {isMainPage && !isFriendListOpen && (
+        <Link to="/talktalk">
+>>>>>>> f4822f9e959cb9c18edc3bbeabdaaa81be146067
           <ChatChat />
         </Link>
       )}
       <Footer />
+<<<<<<< HEAD
 
       {modalOpen && (
         <div style={styles.overlay}>
@@ -88,6 +99,9 @@ const Layout = () => {
         </div>
       )}
     </>
+=======
+    </div>
+>>>>>>> f4822f9e959cb9c18edc3bbeabdaaa81be146067
   );
 };
 
