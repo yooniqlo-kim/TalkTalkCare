@@ -95,7 +95,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ friend, onRemove, onCall }): JS
         <div className="friend-item-status">
           {friend.status === 'ONLINE' 
             ? '온라인' 
-            : `오프라인 · ${friend.displayStatus}`
+            : `오프라인`
           }
         </div>
         <div className="friend-item-details">
