@@ -24,7 +24,7 @@ public class S3Service {
     @Transactional
     public String uploadFile(MultipartFile file, String oldFileName) throws IOException {
 
-        if (oldFileName != null && !oldFileName.isEmpty()) {
+        if (oldFileName != null && !oldFileName.isEmpty() && !oldFileName.equals("https://talktalkcare.s3.ap-southeast-2.amazonaws.com/origin.png")) {
             deleteFile(oldFileName.substring(oldFileName.lastIndexOf('/') + 1));
         }
 
