@@ -64,7 +64,8 @@ Created: 2025년 2월 12일 오후 9:39
 
 ### 📌치매 진단 테스트
 
-![image.png](image%207.png)
+
+![image.png](asset/DementiaTest.png)
 
 ![image.png](image%208.png)
 
