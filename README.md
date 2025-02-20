@@ -38,44 +38,42 @@ Created: 2025년 2월 12일 오후 9:39
 ### 📌회원가입
 
 
-![image.png](f8b5e8ad-b021-465a-92f4-7e020cbd89a9.png)
+![image.png](asset/Signin.png)
 
 ### 📌메인화면
 
-![image.png](image.png)
+![image.png](asset/MainPage.png)
 
 ### 📌화상대화
 
-![image.png](image%201.png)
+![image.png](asset/VideoCall.png)
 
-[https://www.notion.so](https://www.notion.so)
+![image.png](asset/VideoCall2.png)
 
-![image.png](image%202.png)
-
-![image.png](image%203.png)
+![image.png](asset/VideoCall3.png)
 
 ### 📌치매예방게임
 
-![image.png](image%204.png)
+![image.png](asset/GameList.png)
 
-![image.png](image%205.png)
+![image.png](asset/GamePage.png)
 
-![image.png](image%206.png)
+![image.png](asset/GameIng.png)
 
 ### 📌치매 진단 테스트
 
 
 ![image.png](asset/DementiaTest.png)
 
-![image.png](image%208.png)
+![image.png](asset/DementiaTest2.png)
 
-![image.png](image%209.png)
+![image.png](asset/DementiaTest3.png)
 
 ### 📌마이페이지
 
-![image.png](image%2010.png)
+![image.png](asset/MyPage.png)
 
-![image.png](image%2011.png)
+![image.png](asset/MyPage2.png)
 
 ## 4️⃣기술 스택
 
@@ -111,18 +109,18 @@ Created: 2025년 2월 12일 오후 9:39
 
 ### 📌 ERD
 
-![image.png](image%2012.png)
+![image.png](asset/ERD.png)
 
-![image.png](image%2013.png)
+![image.png](asset/ERD2.png)
 
 ### 📌 Flow chart
 
-![image.png](image%2014.png)
+![image.png](asset/FlowChart.png)
 
 ### 📌Figma
 
-![image.png](image%2015.png)
+![image.png](asset/Figma.png)
 
 ### 📌 API 문서
 
-![api_swagger.gif](api_swagger.gif)
+![api_swagger.gif](asset/API_swagger.png)
