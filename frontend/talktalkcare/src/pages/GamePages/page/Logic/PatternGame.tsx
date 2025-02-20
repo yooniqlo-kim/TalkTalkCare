@@ -209,7 +209,7 @@ const PatternGame: React.FC = () => {
       // 🔥 레벨이 5 이상이면 성공 페이지로 이동
       if (level >= 5) {
         // 성공 페이지로 이동
-        navigate('/game/complete'); // '/success'는 실제 성공 페이지의 경로로 변경해야 합니다.
+        navigate('/game/complete');
         return; // 함수 종료
       }
 
