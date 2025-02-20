@@ -114,7 +114,7 @@ Created: 2025년 2월 12일 오후 9:39
 
 ## 5️⃣서비스 아키텍처
 
-![image.png](asset/FLOW_CHART.png)
+![image.png](asset/FLOW CHART.png)
 
 ## 6️⃣프로젝트 산출물
 
