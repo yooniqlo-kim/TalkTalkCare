@@ -1,6 +1,4 @@
-# README.md
-
-Created: 2025년 2월 12일 오후 9:39
+# TalkTalkCare
 
 ## 1️⃣ 서비스 소개
 
