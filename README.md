@@ -103,7 +103,7 @@ Created: 2025년 2월 12일 오후 9:39
 
 ## 5️⃣서비스 아키텍처
 
-![FLOW CHART.png](FLOW_CHART.png)
+![FLOW CHART.png](asset/FLOW_CHART.png)
 
 ## 6️⃣프로젝트 산출물
 
@@ -123,4 +123,4 @@ Created: 2025년 2월 12일 오후 9:39
 
 ### 📌 API 문서
 
-![api_swagger.gif](asset/API_swagger.png)
+![api_swagger.gif](asset/API_swagger.gif)
