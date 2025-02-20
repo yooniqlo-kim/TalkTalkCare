@@ -207,7 +207,7 @@ const ColorWordGame: React.FC = () => {
           }
         });
       }).catch(error => {
-        console.error('Error saving game result:', error);
+        //console.error('Error saving game result:', error);
         navigate('/game/complete', {
           state: {
             isForceQuit: false,

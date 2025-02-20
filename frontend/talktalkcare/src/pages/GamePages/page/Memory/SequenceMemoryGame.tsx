@@ -69,7 +69,7 @@ const SequenceMemoryGame: React.FC = () => {
       timer = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
-            console.log('⏳ 타이머 종료! setGameOver(true) 호출');
+            //console.log('⏳ 타이머 종료! setGameOver(true) 호출');
             setGameOver(true); // 게임 오버 상태 설정
             return 0;
           }
@@ -91,14 +91,14 @@ const SequenceMemoryGame: React.FC = () => {
         try {
           const userId = localStorage.getItem('userId');
           if (!userId) {
-            console.error('사용자 ID를 찾을 수 없습니다.');
+            //console.error('사용자 ID를 찾을 수 없습니다.');
             return;
           }
           await gameService.saveGameResult(Number(userId), GAME_IDS.LOGICAL_GAME, score);
-          console.log('게임 결과 저장 완료 - 점수:', score);
+          //console.log('게임 결과 저장 완료 - 점수:', score);
           setGameStarted(false);
         } catch (error) {
-          console.error('게임 결과 저장 중 오류:', error);
+          //console.error('게임 결과 저장 중 오류:', error);
           setMessage('점수 저장에 실패했습니다.');
         }
       };
@@ -179,7 +179,7 @@ const SequenceMemoryGame: React.FC = () => {
 
   useEffect(() => {
     if (gameStarted && !gameOver && !isPlaying && !showingSequence) {
-      console.log('📌 새로운 시퀀스를 생성합니다.');
+      //console.log('📌 새로운 시퀀스를 생성합니다.');
       const newSeq = createSequence();
       showSequence(newSeq);
     }
