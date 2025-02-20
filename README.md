@@ -42,6 +42,7 @@ Created: 2025년 2월 12일 오후 9:39
 
 ### 📌메인 화면
 
+<img src = "asset/MainPage.png" width="50%" height="50%">
 ![image.png](asset/MainPage.png)
 
 ### 📌화상 통화
@@ -50,6 +51,9 @@ Created: 2025년 2월 12일 오후 9:39
 2. 통화 신청이 왔을 경우 
 3. 화상 통화 중
 
+<img src = "asset/VideoCall.png" width="50%" height="50%">
+<img src = "asset/VideoCall2.png" width="50%" height="50%">
+<img src = "asset/VideoCall3.png" width="50%" height="50%">
 ![image.png](asset/VideoCall.png)
 
 ![image.png](asset/VideoCall2.png)
@@ -61,6 +65,9 @@ Created: 2025년 2월 12일 오후 9:39
 1. 게임 목록
 2. 게임 선택 시
 3. 게임 중
+<img src = "asset/GameList.png" width="50%" height="50%">
+<img src = "asset/GamePage.png" width="50%" height="50%">
+<img src = "asset/GameIng.png" width="50%" height="50%">
 
 ![image.png](asset/GameList.png)
 
@@ -72,6 +79,7 @@ Created: 2025년 2월 12일 오후 9:39
 1. 테스트 목록
 2. 테스트 항목
 3. 테스트 결과 (AI 분석 요청 포함)
+
 ![image.png](asset/DementiaTest.png)
 
 ![image.png](asset/DementiaTest2.png)
