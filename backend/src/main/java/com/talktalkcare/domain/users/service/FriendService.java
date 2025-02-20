@@ -125,13 +125,21 @@ public class FriendService {
     }
 
     public void addFriend(AddFriendReq addFriendReq) {
-        User Friend = userRepository.findByPhone(addFriendReq.getPhone())
+        User friend = userRepository.findByPhone(addFriendReq.getPhone())
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        friendRepository.save(new Friend(
-                addFriendReq.getUserId(),
-                Friend.getUserId(),
-                addFriendReq.getName()));
+        Friend relationship = friendRepository.findFriendByUserIdAndFriendId(addFriendReq.getUserId(), friend.getUserId());
+
+        if(relationship == null) {
+            friendRepository.save(new Friend(
+                    addFriendReq.getUserId(),
+                    friend.getUserId(),
+                    addFriendReq.getName()));
+
+            return;
+        }
+
+        throw new UserException(UserErrorCode.FRIEND_ALREADY_EXIST);
     }
 
     public void removeFriend(DeleteFriendReq deleteFriendReq) {

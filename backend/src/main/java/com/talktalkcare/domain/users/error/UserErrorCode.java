@@ -15,7 +15,8 @@ public enum UserErrorCode implements ErrorCodeInterface {
     USER_TOKEN_INVALID(400,1008,"유효하지 않은 토큰입니다."),
     UPLOAD_IMAGE_FAILED(500,1009,"사진 업로드 실패"),
     TOKEN_NOT_FOUND(400,1010,"토큰이 존재하지 않습니다"),
-    USER_OFFLINE(400, 1011, "사용자가 오프라인입니다.");
+    USER_OFFLINE(400, 1011, "사용자가 오프라인입니다."),
+    FRIEND_ALREADY_EXIST(400, 1012, "이미 친구인 유저 입니다.");
 
     private final Integer httpStatusCode;
     private final Integer errorCode;

@@ -1,7 +1,7 @@
 // AddFriendModal.tsx
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-// import '../styles/components/AddFriendModal.css';
+import CustomModal from '../../components/CustomModal';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -18,6 +18,8 @@ const AddFriendModal: React.FC<AddFriendModalProps> = ({
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalMessage, setModalMessage] = useState<string>('');
 
   const userId = localStorage.getItem('userId');
   
@@ -45,16 +47,15 @@ const AddFriendModal: React.FC<AddFriendModalProps> = ({
       });
 
       const data = await response.json();
-      console.log('Add friend response:', data);
 
-      if (data.result?.msg === 'success') {
+      if (data.result.msg === 'success') {
         onFriendAdded();
         onClose();
       } else {
-        throw new Error(data.result?.msg || '친구 추가에 실패했습니다.');
+        setModalMessage(data.result.msg || '친구 추가에 실패 했습니다.');
+        setIsModalOpen(true);
       }
     } catch (err) {
-      console.error('Friend add error:', err);
       setError(err instanceof Error ? err.message : '친구 추가 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
@@ -124,6 +125,12 @@ const AddFriendModal: React.FC<AddFriendModalProps> = ({
           </div>
         </form>
       </div>
+      <CustomModal
+        title="알림"
+        message={modalMessage}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };

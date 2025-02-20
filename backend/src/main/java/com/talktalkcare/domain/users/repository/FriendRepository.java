@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FriendRepository extends JpaRepository<Friend, Integer> {
@@ -23,5 +24,8 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
 
     @Modifying
     void deleteByUserIdAndFriendId(Integer userId, Integer friendId);
+
+    @Query("select f from Friend f where f.userId = :userId and f.friendId = :friendId")
+    Friend findFriendByUserIdAndFriendId(Integer userId, Integer friendId);
 
 }
