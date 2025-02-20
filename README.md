@@ -14,7 +14,7 @@
 
 ### UCC 📽️
 
-![톡톡케어](https://drive.google.com/file/d/1yswyQNzEGOZRCsFwHLAnHNfp9EJVNIF2/view?usp=drive_link)
+[톡톡케어](https://drive.google.com/file/d/1yswyQNzEGOZRCsFwHLAnHNfp9EJVNIF2/view?usp=drive_link)
 
 ## 2️⃣기획 배경
 
