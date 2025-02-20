@@ -37,7 +37,7 @@ Created: 2025년 2월 12일 오후 9:39
 
 ### 📌회원 가입
 
-<img src = "asset/Signin.png" width="30%" height="30%">
+<img src = "asset/Signin.png" width="50%" height="50%">
 ![image.png](asset/Signin.png)
 
 ### 📌메인 화면
