@@ -61,7 +61,7 @@ public class UserService {
         User user = UserConverter.dtoToEntity(userDto, encryptedPassword);
         UserSecurity userSecurity = UserSecurityConverter.toEntity(user, randomSalt);
 
-        String uploadedFileName = "https://talktalkcare.s3.ap-southeast-2.amazonaws.com/originImg.webp";
+        String uploadedFileName = "https://talktalkcare.s3.ap-southeast-2.amazonaws.com/origin.png";
 
         if(userDto.getS3Filename() != null) {
             try{
