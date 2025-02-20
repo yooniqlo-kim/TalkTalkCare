@@ -126,7 +126,7 @@ Created: 2025년 2월 12일 오후 9:39
 
 ### 📌 Flow chart
 
-![image.png](asset/FlowChart.png)
+![image.png](asset/flowcharrt.png)
 
 ### 📌Figma
 
