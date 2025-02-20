@@ -38,12 +38,10 @@ Created: 2025년 2월 12일 오후 9:39
 ### 📌회원 가입
 
 <img src = "asset/Signin.png" width="50%" height="50%">
-![image.png](asset/Signin.png)
 
 ### 📌메인 화면
 
-<img src = "asset/MainPage.png" width="50%" height="50%">
-![image.png](asset/MainPage.png)
+<img src = "asset/MainPage.png" width="100%" height="100%">
 
 ### 📌화상 통화
 
@@ -51,48 +49,34 @@ Created: 2025년 2월 12일 오후 9:39
 2. 통화 신청이 왔을 경우 
 3. 화상 통화 중
 
-<img src = "asset/VideoCall.png" width="50%" height="50%">
-<img src = "asset/VideoCall2.png" width="50%" height="50%">
-<img src = "asset/VideoCall3.png" width="50%" height="50%">
-![image.png](asset/VideoCall.png)
-
-![image.png](asset/VideoCall2.png)
-
-![image.png](asset/VideoCall3.png)
+<img src = "asset/VideoCall.png" width="100%" height="100%">
+<img src = "asset/VideoCall2.png" width="100%" height="100%">
+<img src = "asset/VideoCall3.png" width="100%" height="100%">
 
 ### 📌치매 예방 게임
 
 1. 게임 목록
 2. 게임 선택 시
 3. 게임 중
-<img src = "asset/GameList.png" width="50%" height="50%">
-<img src = "asset/GamePage.png" width="50%" height="50%">
-<img src = "asset/GameIng.png" width="50%" height="50%">
-
-![image.png](asset/GameList.png)
-
-![image.png](asset/GamePage.png)
-
-![image.png](asset/GameIng.png)
+<img src = "asset/GameList.png" width="100%" height="100%">
+<img src = "asset/GamePage.png" width="100%" height="100%">
+<img src = "asset/GameIng.png" width="100%" height="100%">
 
 ### 📌치매 진단 테스트
 1. 테스트 목록
 2. 테스트 항목
 3. 테스트 결과 (AI 분석 요청 포함)
 
-![image.png](asset/DementiaTest.png)
-
-![image.png](asset/DementiaTest2.png)
-
-![image.png](asset/DementiaTest3.png)
+<img src = "asset/DementiaTest.png" width="100%" height="100%">
+<img src = "asset/DementiaTest2.png" width="100%" height="100%">
+<img src = "asset/DementiaTest3.png" width="100%" height="100%">
 
 ### 📌마이페이지
 1. 게임 결과 분석 
 2. 치매  진단 테스트 결과 분석
 
-![image.png](asset/MyPage.png)
-
-![image.png](asset/MyPage2.png)
+<img src = "asset/MyPage.png" width="100%" height="100%">
+<img src = "asset/MyPage2.png" width="100%" height="100%">
 
 ## 4️⃣기술 스택
 
