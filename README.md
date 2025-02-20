@@ -35,16 +35,20 @@ Created: 2025년 2월 12일 오후 9:39
 
 ## 3️⃣화면 소개
 
-### 📌회원가입
+### 📌회원 가입
 
 
 ![image.png](asset/Signin.png)
 
-### 📌메인화면
+### 📌메인 화면
 
 ![image.png](asset/MainPage.png)
 
-### 📌화상대화
+### 📌화상 통화
+
+1. 화상 통화 화면
+2. 통화 신청이 왔을 경우 
+3. 화상 통화 중
 
 ![image.png](asset/VideoCall.png)
 
@@ -52,7 +56,11 @@ Created: 2025년 2월 12일 오후 9:39
 
 ![image.png](asset/VideoCall3.png)
 
-### 📌치매예방게임
+### 📌치매 예방 게임
+
+1. 게임 목록
+2. 게임 선택 시
+3. 게임 중
 
 ![image.png](asset/GameList.png)
 
@@ -61,8 +69,9 @@ Created: 2025년 2월 12일 오후 9:39
 ![image.png](asset/GameIng.png)
 
 ### 📌치매 진단 테스트
-
-
+1. 테스트 목록
+2. 테스트 항목
+3. 테스트 결과 (AI 분석 요청 포함)
 ![image.png](asset/DementiaTest.png)
 
 ![image.png](asset/DementiaTest2.png)
@@ -70,6 +79,8 @@ Created: 2025년 2월 12일 오후 9:39
 ![image.png](asset/DementiaTest3.png)
 
 ### 📌마이페이지
+1. 게임 결과 분석 
+2. 치매  진단 테스트 결과 분석
 
 ![image.png](asset/MyPage.png)
 
