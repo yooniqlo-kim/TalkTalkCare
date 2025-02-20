@@ -48,7 +48,7 @@ public class TalkTalkService {
     }
 
     public void saveConversation(Integer userId) {
-        String conversationHistory = userConversations.get(userId).getFullHistory();
+        String conversationHistory = userConversations.get(userId).toString();
 
         String prompt = TalkTalkAiRequestType.SUMMARY_CONVERSATION.getPrompt();
         String aiResponse = aiAnalysisService.analyze(prompt, conversationHistory);
