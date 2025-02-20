@@ -81,7 +81,6 @@ const UserInfo: React.FC<UserInfoProps> = ({ userInfo, onEdit }) => {
         setImage(imageUrl);
       } catch (error) {
         console.error('이미지 업로드 실패:', error);
-        // 여기에 사용자에게 에러 메시지를 보여주는 로직을 추가할 수 있습니다.
       }
     }
   };
