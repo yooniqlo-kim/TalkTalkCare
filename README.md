@@ -57,6 +57,7 @@
 ### 📌화상 통화
 - 친구 목록 또는 화상 통화 UI에서 **온라인 상태의 회원에게** 화상 통화를 걸 수 있습니다.
 - 화상 통화 요청은 **웹소켓**을 통해 실시간 전달 됩니다.
+- 화상 통화를 하며 동일한 화면에서 함께 게임을 플레이할 수 있어, 노인분들이 가족이나 보호자의 도움을 받으며 게임을 즐길 수 있도록 구현했습니다.
 <img src = "asset/VideoCall.png" width="100%" height="100%">
 <img src = "asset/VideoCall2.png" width="100%" height="100%">
 <img src = "asset/VideoCall3.png" width="100%" height="100%">
