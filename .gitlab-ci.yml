@@ -137,6 +137,11 @@ deploy-backend:
       VITE_AWS_ACCESS_KEY_ID=${VITE_AWS_ACCESS_KEY_ID}
       VITE_AWS_SECRET_ACCESS_KEY=${VITE_AWS_SECRET_ACCESS_KEY}
       VITE_AWS_REGION=${VITE_AWS_REGION}
+
+      # Kurento Media Server 설정
+      KMS_STUN_IP=${KMS_STUN_IP}
+      KMS_STUN_PORT=${KMS_STUN_PORT}
+      KMS_TURN_URL=${KMS_TURN_URL}
       EOF
 
     - echo "Transferring files to EC2..."
