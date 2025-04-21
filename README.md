@@ -12,6 +12,12 @@
 - 치매가 걱정되는 누구나
 - 50-80대 외로움있는 노인들👳🧓
 
+### 기간
+2025.01.13 - 2025.02.21 (6주)
+
+### 프로젝트 인원
+6명
+
 ### UCC 📽️
 
 [톡톡케어](https://drive.google.com/file/d/1yswyQNzEGOZRCsFwHLAnHNfp9EJVNIF2/view?usp=drive_link)
